@@ -1,0 +1,24 @@
+# 빌드된 JAR 파일 제외 (Dockerfile에서 직접 복사하므로 불필요)
+*.jar
+
+# 컴파일된 클래스 파일 제외
+*.class
+
+# 로그 파일 제외
+*.log
+
+# Node.js 관련 파일 제외 (프론트엔드 빌드 포함된 경우)
+node_modules/
+
+# IDE 관련 파일 제외
+*.iml
+.idea/
+.vscode/
+
+# Git 관련 파일 제외
+.git
+.gitignore
+
+# Docker 자체 캐시 파일 제외
+.dockerignore
+Dockerfile~
