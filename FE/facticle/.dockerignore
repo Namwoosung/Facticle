@@ -1,0 +1,29 @@
+# Node.js 관련
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# 빌드 결과물
+dist
+
+# 환경 변수 파일 (보안 중요!)
+.env
+.env.local
+.env.*.local
+
+# 시스템 파일
+.DS_Store
+Thumbs.db
+
+# Git 관련 파일 제외
+.git
+.gitignore
+
+# IDE 관련 파일 제외
+.vscode/
+.idea/
+
+# Docker 자체 캐시 파일 제외
+.dockerignore
+Dockerfile~
