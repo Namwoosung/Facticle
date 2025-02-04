@@ -1,31 +1,3 @@
 spring:
-  datasource:
-    url: jdbc:mysql://mysql:3306/facticle?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: facticle_user
-    password: Qwer1234!
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        jdbc:
-          time_zone: Asia/Seoul #시간을 KTC로 설정
-        format_sql: true
-        show_sql: true
-
-  sql:
-    init:
-      mode: always
-
-logging:
-  level:
-    root: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework: INFO
-    com.example.facticle: DEBUG
-
-server:
-  port: 8080  # 기본 포트 (필요하면 변경 가능)
+  profiles:
+    active: local  # 기본 실행 프로파일을 'local'로 설정 (필요에 따라 변경 가능)
