@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,10 +37,12 @@ public class User {
 
     @NotBlank(message = "Nickname is required")
     @Size(max = 20, message = "nickname must not exceed 20 characters")
-    @Column(nullable = false)
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣-_]{1,20}$", message = "Nickname can only contain letters, numbers, underscores, and dashes")
+    @Column(nullable = false, unique = true)
     private String nickname;
     @Email(message = "email should be valid")
     @Size(max = 255, message = "email must not exceed 255 characters")
+    @Column(unique = true)
     private String email;
     @Size(max = 1024, message = "profile URL must not exceed 1024 characters")
     private String profileImage;

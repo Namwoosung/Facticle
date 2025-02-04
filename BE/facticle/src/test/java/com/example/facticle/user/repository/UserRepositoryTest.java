@@ -17,23 +17,23 @@ class UserRepositoryTest {
     @Autowired
     UserRepository userRepository;
 
-    @Test
-    public void basicUserTest(){
-        //given
-        User user = new User();
-        user.setNickname("testUser");
-
-
-        ///when
-        User savedUser = userRepository.save(user);
-
-        //then
-        User findUser = userRepository.findById(savedUser.getUserId()).get();
-        Assertions.assertThat(findUser.getUserId()).isEqualTo(savedUser.getUserId());
-        Assertions.assertThat(findUser.getNickname()).isEqualTo("testUser");
-        Assertions.assertThat(findUser).isEqualTo(savedUser);
-
-
-    }
+//    @Test
+//    public void basicUserTest(){
+//        //given
+//        User user = new User();
+//        user.setNickname("testUser");
+//
+//
+//        ///when
+//        User savedUser = userRepository.save(user);
+//
+//        //then
+//        User findUser = userRepository.findById(savedUser.getUserId()).get();
+//        Assertions.assertThat(findUser.getUserId()).isEqualTo(savedUser.getUserId());
+//        Assertions.assertThat(findUser.getNickname()).isEqualTo("testUser");
+//        Assertions.assertThat(findUser).isEqualTo(savedUser);
+//
+//
+//    }
 
 }

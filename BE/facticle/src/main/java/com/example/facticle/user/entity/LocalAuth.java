@@ -16,7 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LocalAuth {
     @Size(max = 50, message = "username must not exceed 50 characters")
-    @Column(length = 50)
+    @Column(length = 50, unique = true)
     private String username;
     @Size(max = 100, message = "hashed password must not exceed 100 characters")
     private String hashedPassword;

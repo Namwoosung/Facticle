@@ -1,24 +1,17 @@
 package com.example.facticle.common.exception;
 
+import java.util.Map;
+
 //DB 확인 후 발생하는 에러를 처리
 public class InvalidInputException extends RuntimeException{
-    public InvalidInputException() {
-        super();
-    }
+    private final Map<String, String> errors;
 
-    public InvalidInputException(String message) {
+    public InvalidInputException(String message, Map<String, String> errors){
         super(message);
+        this.errors = errors;
     }
 
-    public InvalidInputException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidInputException(Throwable cause) {
-        super(cause);
-    }
-
-    protected InvalidInputException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public Map<String, String> getErrors() {
+        return errors;
     }
 }

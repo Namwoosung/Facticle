@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 @Getter @Setter
 public class LocalSignupDto {
@@ -19,7 +20,7 @@ public class LocalSignupDto {
     private String username;
 
     @NotBlank(message = "password is required")
-    @Size(max = 50, message = "password must not exceed 50 characters")
+    @Size(max = 16, message = "password must not exceed 16 characters")
     private String password;
 
     @NotBlank(message = "nickname is required")
