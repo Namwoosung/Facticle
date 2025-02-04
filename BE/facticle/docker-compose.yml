@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:  # MySQL 컨테이너
+    image: mysql:8.0
+    container_name: facticle-mysql-container
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwer1234!
+      MYSQL_DATABASE: facticle
+      MYSQL_USER: facticle_user
+      MYSQL_PASSWORD: Qwer1234!
+    ports:
+      - "3307:3306"
+    networks:
+      - backend-network
+    volumes:
+      - mysql-data:/var/lib/mysql  # MySQL 데이터 저장 (컨테이너 삭제 시 데이터 유지)
+
+  spring:  # Spring Boot 컨테이너
+    build: .
+    image: namws0023/facticle-be:latest
+    container_name: facticle-be-container
+    restart: unless-stopped
+    depends_on:
+      - mysql  # MySQL이 먼저 실행된 후 Spring Boot 실행
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/facticle?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: facticle_user
+      SPRING_DATASOURCE_PASSWORD: Qwer1234!
+    ports:
+      - "8080:8080"
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+
+volumes:
+  mysql-data:
