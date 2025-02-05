@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "UserActivities")
+@Table(name = "user_activities")
 public class UserActivity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

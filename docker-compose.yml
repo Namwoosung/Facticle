@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: facticle-mysql-container
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwer1234!
+      MYSQL_DATABASE: facticle
+      MYSQL_USER: facticle_user
+      MYSQL_PASSWORD: Qwer1234!
+    ports:
+      - "3307:3306"
+    networks:
+      - facticle-network
+
+  backend:
+    build:
+      context: ./BE/facticle
+    image: facticle-be:latest
+    container_name: facticle-be-container
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
+    networks:
+      - facticle-network
+
+  frontend:
+    build:
+      context: ./FE/facticle
+    image: facticle-fe:latest
+    container_name: facticle-fe-container
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - facticle-network
+    environment:
+      - REACT_APP_API_URL=http://backend:8080
+
+networks:
+  facticle-network:
+

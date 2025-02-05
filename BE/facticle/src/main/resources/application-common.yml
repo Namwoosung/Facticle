@@ -1,4 +1,8 @@
 spring:
+  config:
+    activate:
+      on-profile: common
+
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -16,9 +20,9 @@ spring:
 
 logging:
   level:
-    root: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework: INFO
+    root: INFO
+    org.hibernate.SQL: INFO
+    org.springframework: WARN
     com.example.facticle: DEBUG
 
 server:
