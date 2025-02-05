@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "Users",
+@Table(name = "users",
     uniqueConstraints = {
             @UniqueConstraint(columnNames = "nickname"),
             @UniqueConstraint(columnNames = "username"),
