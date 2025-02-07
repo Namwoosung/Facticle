@@ -1,29 +1,34 @@
 package com.example.facticle.user.dto;
 
 
-import com.example.facticle.user.entity.LocalAuth;
-import jakarta.persistence.Embedded;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Filter;
+import lombok.NoArgsConstructor;
 
-@Getter @Setter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class LocalSignupDto {
-
-    //Validation을 위한 애노테이션 추후 추가
-
-    @NotBlank(message = "username is required")
-    @Size(max = 50, message = "username must not exceed 50 characters")
+    @NotBlank(message = "Username is required")
+    @Size(min = 4, max = 50, message = "Username must be between 4 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
     private String username;
 
-    @NotBlank(message = "password is required")
-    @Size(max = 16, message = "password must not exceed 16 characters")
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, max = 16, message = "Password must be between 8 and 16 characters")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+            message = "Password must contain at least one letter, one number, and one special character, and can only include letters, numbers, and special characters."
+    )
     private String password;
 
-    @NotBlank(message = "nickname is required")
-    @Size(max = 20, message = "nickname must not exceed 20 characters")
+    @NotBlank(message = "Nickname is required")
+    @Size(min = 2, max = 20, message = "Nickname must be between 2 and 20 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣-_]+$", message = "Nickname can only contain Korean, English letters, numbers, underscores, and dashes")
     private String nickname;
+
 }
