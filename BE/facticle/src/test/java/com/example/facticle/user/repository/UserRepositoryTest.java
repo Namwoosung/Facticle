@@ -24,7 +24,13 @@ class UserRepositoryTest {
     public void basicUserTest(){
         //given
         LocalAuth localAuth = new LocalAuth("user1", "testpassword");
-        User user = new User(localAuth, "nick1", UserRole.USER, SignupType.LOCAL);
+        User user = User.builder()
+                .localAuth(localAuth)
+                .nickname("nick1")
+                .role(UserRole.USER)
+                .signupType(SignupType.LOCAL)
+                .build();
+
 
         ///when
         User savedUser = userRepository.save(user);
@@ -39,8 +45,21 @@ class UserRepositoryTest {
     @Test
     public void basicCRUDTest(){
         //given
-        User user1 = new User(new LocalAuth("user1", "1234"), "nick1", UserRole.USER, SignupType.LOCAL);
-        User user2 = new User(new SocialAuth("google", "abcd@gmail.com"), "nick2", UserRole.ADMIN, SignupType.SOCIAL);
+        User user1 = User.builder()
+                .localAuth(new LocalAuth("user1", "1234"))
+                .nickname("nick1")
+                .role(UserRole.USER)
+                .signupType(SignupType.LOCAL)
+                .build();
+
+        User user2 = User.builder()
+                .socialAuth(new SocialAuth("google", "abcd@email.com"))
+                .nickname("nick2")
+                .role(UserRole.ADMIN)
+                .signupType(SignupType.SOCIAL)
+                .build();
+
+
         userRepository.save(user1);
         userRepository.save(user2);
 

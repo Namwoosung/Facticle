@@ -1,15 +1,15 @@
 package com.example.facticle.user.controller;
 
+import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.dto.BaseResponse;
-import com.example.facticle.common.exception.InvalidInputException;
-import com.example.facticle.user.dto.LocalSignupDto;
+import com.example.facticle.user.dto.LocalLoginRequestDto;
+import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.dto.NicknameCheckDto;
 import com.example.facticle.user.dto.UsernameCheckDto;
 import com.example.facticle.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +29,8 @@ public class UserController {
      */
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse localSingUp(@RequestBody @Valid LocalSignupDto localSignupDto){
-        Long savedUserId = userService.saveUser(localSignupDto);
+    public BaseResponse localSingUp(@RequestBody @Valid LocalSignupRequestDto localSignupRequestDto){
+        Long savedUserId = userService.saveUser(localSignupRequestDto);
 
         Map<String, Object> data = new HashMap<>();
         data.put("code", 201);
@@ -52,6 +52,9 @@ public class UserController {
         }
     }
 
+    /**
+     * 넥네임 중복체크
+     */
     @PostMapping("/check-nickname")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse checkNicknameDuplicate(@RequestBody @Valid NicknameCheckDto nicknameCheckDto) {
@@ -62,4 +65,14 @@ public class UserController {
         }
     }
 
+
+    /**
+     * 로컬 로그인
+     */
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse localLogin(@RequestBody @Valid LocalLoginRequestDto localLoginRequestDto){
+        TokenInfo tokenInfo =  userService.localLogin(localLoginRequestDto);
+        return BaseResponse.success(Map.of("code", 200, "grant_type", tokenInfo.getGrantType(), "access_token", tokenInfo.getAccessToken(), "refresh_token", tokenInfo.getRefreshToken()), "Login successful.");
+    }
 }

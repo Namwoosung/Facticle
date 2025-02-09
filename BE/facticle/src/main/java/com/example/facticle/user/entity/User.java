@@ -84,18 +84,4 @@ public class User {
         userActivity.setUser(this);
     }
     */
-
-    public User(LocalAuth localAuth, String nickname, UserRole role, SignupType signupType) {
-        this.localAuth = localAuth;
-        this.nickname = nickname;
-        this.role = role;
-        this.signupType = signupType;
-    }
-
-    public User(SocialAuth socialAuth, String nickname, UserRole role, SignupType signupType) {
-        this.socialAuth = socialAuth;
-        this.nickname = nickname;
-        this.role = role;
-        this.signupType = signupType;
-    }
 }

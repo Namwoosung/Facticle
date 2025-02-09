@@ -1,7 +1,7 @@
 package com.example.facticle.user.service;
 
 import com.example.facticle.common.exception.InvalidInputException;
-import com.example.facticle.user.dto.LocalSignupDto;
+import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.entity.SignupType;
 import com.example.facticle.user.entity.User;
 import com.example.facticle.user.entity.UserRole;
@@ -14,8 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Profile("local")
@@ -32,16 +30,16 @@ class UserServiceTest {
     @Test
     void saveUserTest() {
         //given
-        LocalSignupDto localSignupDto = new LocalSignupDto("testUser", "qwerqwer1!", "테스트");
+        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("testUser", "qwerqwer1!", "테스트");
 
         //when
-        Long userId = userService.saveUser(localSignupDto);
+        Long userId = userService.saveUser(localSignupRequestDto);
 
         //then
         User findUser = userRepository.findById(userId).get();
-        Assertions.assertThat(findUser.getLocalAuth().getUsername()).isEqualTo(localSignupDto.getUsername());
-        Assertions.assertThat(passwordEncoder.matches(localSignupDto.getPassword(), findUser.getLocalAuth().getHashedPassword())).isTrue();
-        Assertions.assertThat(findUser.getNickname()).isEqualTo(localSignupDto.getNickname());
+        Assertions.assertThat(findUser.getLocalAuth().getUsername()).isEqualTo(localSignupRequestDto.getUsername());
+        Assertions.assertThat(passwordEncoder.matches(localSignupRequestDto.getPassword(), findUser.getLocalAuth().getHashedPassword())).isTrue();
+        Assertions.assertThat(findUser.getNickname()).isEqualTo(localSignupRequestDto.getNickname());
         Assertions.assertThat(findUser.getRole()).isEqualTo(UserRole.USER);
         Assertions.assertThat(findUser.getSignupType()).isEqualTo(SignupType.LOCAL);
     }
@@ -50,11 +48,11 @@ class UserServiceTest {
     @DisplayName("회원가입 실패 - 중복 데이터")
     void saveUserFailTest(){
 
-        LocalSignupDto localSignupDto = new LocalSignupDto("testUser", "qwerqwer1!", "테스트");
+        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("testUser", "qwerqwer1!", "테스트");
 
-        userService.saveUser(localSignupDto);
+        userService.saveUser(localSignupRequestDto);
 
-        Assertions.assertThatThrownBy(() -> userService.saveUser(localSignupDto))
+        Assertions.assertThatThrownBy(() -> userService.saveUser(localSignupRequestDto))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Invalid input")
                 .satisfies(ex -> {
@@ -69,7 +67,7 @@ class UserServiceTest {
     void checkUsernameTest(){
         Assertions.assertThat(userService.checkUsername("test_user")).isTrue();
 
-        userService.saveUser(new LocalSignupDto("test_user", "Qwer1234!", "test_nick"));
+        userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_nick"));
         Assertions.assertThat(userService.checkUsername("test_user")).isFalse();
     }
 }

@@ -1,6 +1,6 @@
 package com.example.facticle.user.controller;
 
-import com.example.facticle.user.dto.LocalSignupDto;
+import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.dto.NicknameCheckDto;
 import com.example.facticle.user.dto.UsernameCheckDto;
 import com.example.facticle.user.service.UserService;
@@ -34,12 +34,12 @@ class UserControllerTest {
     @DisplayName("로컬회원가입 - 성공")
     void localSingUpTest() throws Exception {
         //given
-        LocalSignupDto localSignupDto = new LocalSignupDto("test1", "testtest1!", "nick");
+        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("test1", "testtest1!", "nick");
 
 
         mockMvc.perform(post("/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(localSignupDto)))
+                .content(objectMapper.writeValueAsString(localSignupRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message").value("Signup successful."));
     }
@@ -48,7 +48,7 @@ class UserControllerTest {
     @DisplayName("회원가입 실패 - 빈 데이터")
     void localSignupValidationFailTestEmpty() throws Exception {
         // Given: 빈 데이터
-        LocalSignupDto emptyDto = new LocalSignupDto("", "", "");
+        LocalSignupRequestDto emptyDto = new LocalSignupRequestDto("", "", "");
 
         // When & Then
         mockMvc.perform(post("/users/signup")
@@ -64,7 +64,7 @@ class UserControllerTest {
     @DisplayName("회원가입 실패 - 규칙 불만족 데이터")
     void localSignupValidationFailTestInvalid() throws Exception {
         // Given
-        LocalSignupDto lengthDto = new LocalSignupDto("a", "a1!", "a");
+        LocalSignupRequestDto lengthDto = new LocalSignupRequestDto("a", "a1!", "a");
 
         // When & Then
         mockMvc.perform(post("/users/signup")
@@ -75,7 +75,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.code").value(400)); // 응답 코드 검증
 
         // Given
-        LocalSignupDto invalidDto = new LocalSignupDto("aaaaa!", "aaaaaaaaa", "aaaa!");
+        LocalSignupRequestDto invalidDto = new LocalSignupRequestDto("aaaaa!", "aaaaaaaaa", "aaaa!");
 
         // When & Then
         mockMvc.perform(post("/users/signup")
@@ -102,7 +102,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.is_available").value(true));
 
         //검증 2. 중복이 있는 경우
-        userService.saveUser(new LocalSignupDto("test_user", "Qwer1234!", "test_nick"));
+        userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_nick"));
 
         mockMvc.perform(post("/users/check-username")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -137,7 +137,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.is_available").value(true));
 
         //검증 2. 중복이 있는 경우
-        userService.saveUser(new LocalSignupDto("test_user", "Qwer1234!", "test_user"));
+        userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_user"));
 
         mockMvc.perform(post("/users/check-nickname")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -14,8 +14,6 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
-
-    //추후 검증 후 개선
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -54,7 +52,7 @@ public class CustomExceptionHandler {
         errors.put("error", ex.getMessage());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("code", 400);
+        data.put("code", 500);
         data.put("errors", errors);
 
         return BaseResponse.failure(data, "Unprocessed error");
