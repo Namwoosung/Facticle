@@ -1,6 +1,7 @@
 package com.example.facticle.common.exception;
 
 import com.example.facticle.common.dto.BaseResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,10 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
-
-    //추후 검증 후 개선
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -33,6 +33,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(InvalidInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse invalidInputException(InvalidInputException ex){
+        log.warn("Invalid input error: {}", ex.getErrors());
 
         Map<String, Object> data = new HashMap<>();
         data.put("code", 400);
@@ -40,5 +41,20 @@ public class CustomExceptionHandler {
 
         return BaseResponse.failure(data, ex.getMessage());
 
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public BaseResponse defaultException(Exception ex){
+        log.error("Unhandled error: ", ex);
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 500);
+        data.put("errors", errors);
+
+        return BaseResponse.failure(data, "Unprocessed error");
     }
 }

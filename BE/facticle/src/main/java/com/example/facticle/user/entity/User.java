@@ -6,10 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,10 +17,14 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@ToString(of = {"userId", "localAuth", "nickname", "email", "role", "signupType", "socialAuth"})
 @Table(name = "users",
     uniqueConstraints = {
             @UniqueConstraint(columnNames = "nickname"),
             @UniqueConstraint(columnNames = "username"),
+            @UniqueConstraint(columnNames = "email"),
             @UniqueConstraint(columnNames = {"socialProvider", "socialId"})
     }
 )
@@ -31,21 +32,21 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     @Embedded
     private LocalAuth localAuth;
-
-    @NotBlank(message = "Nickname is required")
-    @Size(max = 20, message = "nickname must not exceed 20 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9가-힣-_]{1,20}$", message = "Nickname can only contain letters, numbers, underscores, and dashes")
+    @Embedded
+    private SocialAuth socialAuth;
     @Column(nullable = false, unique = true)
     private String nickname;
+
     @Email(message = "email should be valid")
     @Size(max = 255, message = "email must not exceed 255 characters")
     @Column(unique = true)
     private String email;
+
     @Size(max = 1024, message = "profile URL must not exceed 1024 characters")
-    private String profileImage;
+    @Builder.Default
+    private String profileImage = "/profile/default.png";
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private UserRole role = UserRole.USER;
@@ -56,19 +57,14 @@ public class User {
     @CreationTimestamp //엔티티가 처음 생성될 때의 시간을 자동 저장
     @Column(updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;
+
     @UpdateTimestamp //Insert나 Update 시 마다 해당 시간을 저장
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
+
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime lastLogin;
 
-    @Embedded
-    private SocialAuth socialAuth;
-
-    public User(LocalAuth localAuth, String nickname) {
-        this.localAuth = localAuth;
-        this.nickname = nickname;
-    }
 
     /*
     //일단 역방향 참조는 구현 x, 현재 요구사항 대로면 userActivity의 경우에는 마이페이지 조회 시에만 필요하므로 굳이 크게 중요한 필드는 아닐 것
@@ -88,5 +84,4 @@ public class User {
         userActivity.setUser(this);
     }
     */
-
 }
