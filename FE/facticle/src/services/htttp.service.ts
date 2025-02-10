@@ -1,0 +1,56 @@
+import Axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL;
+Axios.defaults.baseURL = API_URL;
+
+export class HttpService {
+    _axios = Axios.create(); // Axios 인스턴스 생성
+
+    // 요청 인터셉터 추가 (인터셉트 )
+    addRequestInterceptor(onFulfilled: any, onRejected: any) { 
+        this._axios.interceptors.request.use(onFulfilled, onRejected);
+    };
+
+    // 응답 인터셉터 추가
+    addResponseInterceptor(onFulfilled: any, onRejected: any) {
+        this._axios.interceptors.response.use(onFulfilled, onRejected);
+    };
+
+    // 요청 옵션 설정
+    getOptionsConfig = (method: string, url: string, data: any) => {
+        return {
+            method,
+            url,
+            data,
+            header: {
+                'Content-Type': 'application/json',
+            }
+        };
+    };
+
+    request(options: any) {
+        return new Promise((resolve, reject) => {
+            this._axios
+                .request(options)
+                .then((response) => resolve(response))
+                .catch((error) => reject(error));
+        });
+    }
+
+    // GET 요청
+    get = async (url: string) => await this.request(this.getOptionsConfig('GET', url, null));
+
+    // POST 요청
+    post = async (url: string, data: any) => await this.request(this.getOptionsConfig('POST', url, data));
+
+    // PUT 요청
+    put = async (url: string, data: any) => await this.request(this.getOptionsConfig('PUT', url, data));
+
+    // PATCH 요청
+    patch = async (url: string, data: any) => await this.request(this.getOptionsConfig('PATCH', url, data));
+
+    // DELETE 요청
+    delete = async (url: string) => await this.request(this.getOptionsConfig('DELETE', url, null));
+}
+
+export default new HttpService();
