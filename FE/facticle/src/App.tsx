@@ -1,34 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import styled from 'styled-components'
+import Home from './pages/home';
+import Login from './pages/auth/login';
+import Register from './pages/auth/register';
+import { Routes, Route } from 'react-router-dom';
+
+
+const RootElement = styled.div`
+  @font-face {
+    font-family: 'Nanum';
+    src: url('/assets/fonts/NanumBarunGothic.ttf');
+  }
+
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 ;
+  text-align: center;
+  font-family: 'Nanum';
+
+  button {
+    cursor: pointer;
+
+    &:hover {
+      outline: none;
+    }
+    &:focus {
+      outline: none;
+    }
+    &:active {
+      outline: none;
+    }
+  }
+
+  a {
+    text-decoration: none;
+  }
+`;
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <RootElement>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </RootElement>
   )
 }
 
