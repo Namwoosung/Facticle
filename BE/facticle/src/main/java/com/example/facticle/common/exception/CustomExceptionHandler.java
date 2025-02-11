@@ -3,6 +3,8 @@ package com.example.facticle.common.exception;
 import com.example.facticle.common.dto.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,6 +16,7 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class CustomExceptionHandler {
+    //validation failed
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -30,6 +33,7 @@ public class CustomExceptionHandler {
         return BaseResponse.failure(data, "Validation failed.");
     }
 
+    //DB 조회 결과 잘못된 입력인 경우
     @ExceptionHandler(InvalidInputException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse invalidInputException(InvalidInputException ex){
@@ -41,6 +45,32 @@ public class CustomExceptionHandler {
 
         return BaseResponse.failure(data, ex.getMessage());
 
+    }
+
+    //인증 과정에서 실패한 경우
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse badCredentialsException(BadCredentialsException ex){
+        log.warn("Authentication Failed: {}", ex.getMessage());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 401);
+        data.put("error", "username or password invalid");
+
+        return BaseResponse.failure(data, "Authentication failed. Please check your credentials.");
+    }
+
+    //인증 및 인가 과정에 대한 일반적인 에러의 경우
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse authenticationException(AuthenticationException ex) {
+        log.warn("Authentication Failed (General): {}", ex.getMessage());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 401);
+        data.put("error", ex.getMessage());
+
+        return BaseResponse.failure(data, "Authentication failed. Please try again.");
     }
 
     @ExceptionHandler(Exception.class)

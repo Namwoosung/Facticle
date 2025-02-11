@@ -47,11 +47,15 @@ public class User {
     @Size(max = 1024, message = "profile URL must not exceed 1024 characters")
     @Builder.Default
     private String profileImage = "/profile/default.png";
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
+    @Builder.Default
     private UserRole role = UserRole.USER;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
+    @Builder.Default
     private SignupType signupType = SignupType.LOCAL;
 
     @CreationTimestamp //엔티티가 처음 생성될 때의 시간을 자동 저장
@@ -66,10 +70,11 @@ public class User {
     private LocalDateTime lastLogin;
 
 
-    /*
-    //일단 역방향 참조는 구현 x, 현재 요구사항 대로면 userActivity의 경우에는 마이페이지 조회 시에만 필요하므로 굳이 크게 중요한 필드는 아닐 것
+
+    //일단 역방향 참조는 구현할지 미정, 현재 요구사항 대로면 userActivity의 경우에는 마이페이지 조회 시에만 필요하므로 굳이 크게 중요한 필드는 아닐 것
     //추후 비즈니스 요구사항이 변경되어서 필요하면 역방향 연관관계까지 추가 설정
     @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     //UserActivity 클래스의 user 필드와 매핑
     //cascadeType.ALl로 모든 상태변화에 대해 전파 -> 즉 user를 persist하면 당시 user내에 있는 userActivities들도 persist됨
@@ -83,5 +88,20 @@ public class User {
         userActivities.add(userActivity);
         userActivity.setUser(this);
     }
-    */
+
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens = new ArrayList<>();
+
+    //연관관계 편의 메서드
+    public void addRefreshToken(RefreshToken refreshToken){
+        refreshTokens.add(refreshToken);
+        refreshToken.setUser(this);
+    }
+
+    public void updateLastLogin(LocalDateTime time){
+        this.lastLogin = time;
+    }
 }

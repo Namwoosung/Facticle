@@ -2,7 +2,10 @@ package com.example.facticle.config;
 
 import com.example.facticle.common.authority.JwtAuthenticationFilter;
 import com.example.facticle.common.authority.JwtTokenProvider;
+import com.example.facticle.common.dto.BaseResponse;
 import com.example.facticle.common.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +18,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * security config 관련 내용은 노션에 정리함
@@ -29,6 +35,7 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     //비밀번호 해시에 사용
     @Bean
@@ -53,7 +60,9 @@ public class SecurityConfig {
                             "/users/signup",
                             "/users/signup/social",
                             "/users/check-username",
-                            "/users/check-nickname"
+                            "/users/check-nickname",
+                            "/static/**",
+                            "/favicon.ico"
                     ).permitAll()
                     .requestMatchers( // 🔹 인증 필요 api
                             "/users/logout",
@@ -61,18 +70,67 @@ public class SecurityConfig {
                             "/users/profile-image",
                             "/users/mypage"
                     ).authenticated()
-                    .requestMatchers("/admin/**").hasRole("ADMIN") //어드민 api 요청은 ADMIN 역할만 접근 가능
+                    .requestMatchers("/users/admin/**").hasRole("ADMIN") //어드민 api 요청은 ADMIN 역할만 접근 가능
                     .anyRequest().authenticated() //그 외 요청은 모두 인증 필요
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+
+            //filter에서 발생하는 예외를 처리
+            //우리는 CustomExceptionHandler에서 대부분의 예외를 받아서 처리 => @RestControllerAdvice가 붙어있으면 Controller 수준까지 넘어온 예외를 받아서 처리 가능
+            //그러나 filter의 경우 DispatcherServlet에 도달하기 전의 과정이기에 CustomExceptionHandler에서 처리할 수가 없음 => 따로 예외 handling을 해줘야 함
+            .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint(authenticationEntryPoint())
+                    .accessDeniedHandler(accessDeniedHandler())
+            );
 
         return http.build();
     }
 
 
+    /**
+     * 401 Unauthorized 예외 처리
+     * - JWT 인증 실패, 토큰 없음, 토큰 만료 등의 상황
+     */
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            BaseResponse errorResponse = BaseResponse.failure(
+                    Map.of("code", 401),
+                    "Authentication failed. Please provide a valid token."
+            );
+
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        };
+    }
+
+    /**
+     * 403 Forbidden 예외 처리
+     * - 인증은 되었지만, 권한이 부족한 경우 (예: 일반 사용자가 ADMIN API 접근)
+     */
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            BaseResponse errorResponse = BaseResponse.failure(
+                    Map.of("code", 403),
+                    "Access denied. You do not have permission to access this resource."
+            );
+
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        };
+    }
+
+
     //추후 CORS 설정 추가
     //Exception Handling 추가
-    //rateLimitFilter 추가(login이나 signup에서 브루트 포스 공격을 방지하기 위한 방어 기법)
+
 
 
     /**

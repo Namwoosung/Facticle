@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(of = {"activityId", "activityType"})
+@AllArgsConstructor
+@Builder
+@ToString(of = {"activityId", "activityType", "createdAt"})
 @Table(name = "user_activities")
 public class UserActivity {
     @Id
@@ -29,4 +31,9 @@ public class UserActivity {
     @CreationTimestamp
     @Column(updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;
+
+    //protected로 설정해서 외부에서는 호출하지 못하도록 함
+    protected void setUser(User user) {
+        this.user = user;
+    }
 }

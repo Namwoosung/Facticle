@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -46,18 +49,11 @@ public class JwtTokenProvider {
     }
 
 
-    public String createAccessToken(Authentication authentication){
-        return createToken(authentication, accessTokenValidTime);
-    }
-
-    public String createRefreshToken(Authentication authentication){
-        return createToken(authentication, refreshTokenValidTime);
-    }
-
     /**
      * 토큰 생성
      */
-    private String createToken(Authentication authentication, Long tokenValidTime){
+    //access token은 api 요청 시 인가 처리를 하기 위함이므로 권한에 관한 정보를 추가로 담음
+    public String createAccessToken(Authentication authentication){
         //authentication에 있는 권한 정보들을 모두 가져와 ,로 나눠 하나의 string으로 생성
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -70,15 +66,40 @@ public class JwtTokenProvider {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
 
-        //현재 시간 및 만료 시간 저장
+        //현재 시간 및 만료 시간 저장, jwt라이브러리는 date타입을 요구하므로 date 타입으로 설정
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + tokenValidTime);
+        Date expiration = new Date(now.getTime() + accessTokenValidTime);
 
         //JWT 발급
         return Jwts.builder()
                 .setSubject(userDetails.getUsername()) //username을 제목으로 활용
                 .claim("auth", authorities)
-                .claim("userId", userId) //claim에도 userId를 입력
+                .claim("userId", userId) //claim에 userId를 입력
+                .claim("tokenType", "ACCESS") //tokentype 추가
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    //refresh token은 단순히 access token 재발급 용도이므로 userID와 username의 정보만 담음
+    public String createRefreshToken(Authentication authentication){
+        //authentication에 저장된 principal로 userId 획득
+        if (!(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            throw new IllegalArgumentException("Authentication principal is not an instance of CustomUserDetails");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getUserId();
+
+        //현재 시간 및 만료 시간 저장
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + refreshTokenValidTime);
+
+        //JWT 발급
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername()) //username을 제목으로 활용
+                .claim("userId", userId) //claim에 userId를 입력
+                .claim("tokenType", "REFRESH") //tokentype 추가
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -107,6 +128,9 @@ public class JwtTokenProvider {
     }
 
 
+    /**
+     * 토큰 정보 조회 메서드들
+     */
     public Claims getClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -125,12 +149,41 @@ public class JwtTokenProvider {
         return claims.get("userId", Long.class);
     }
 
+    public String getTokenType(String token){
+        Claims claims = getClaims(token);
+        return claims.get("tokenType", String.class);
+    }
+
     public List<GrantedAuthority> getAuthorities(String token){
         Claims claims = getClaims(token);
         String auth = claims.get("auth", String.class);
         return Arrays.stream(auth.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+    }
+
+    // 토큰의 발급 시간(issuedAt) 조회
+    public LocalDateTime getIssuedAt(String token) {
+        Date issuedAt = getClaims(token).getIssuedAt();
+        return convertToLocalDateTime(issuedAt);
+    }
+
+    // JWT 만료 시간 조회
+    public LocalDateTime getExpiresAt(String token) {
+        Date expiresAt = getClaims(token).getExpiration();
+        return convertToLocalDateTime(expiresAt);
+    }
+
+
+    //jwt에서는 Date 타입을 사용하지만, 애플리케이션 내에서는 LocalDateTime을 사용하도록 변경
+    private LocalDateTime convertToLocalDateTime(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    public Long getRefreshTokenValidTime(){
+        return refreshTokenValidTime;
     }
 
     //토큰 정보 추출 -> 토큰 검증이 완료된 후 SecurityContextHolder에 저장할 Authentication 객체 생성을 위함

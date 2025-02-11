@@ -1,14 +1,13 @@
 package com.example.facticle.user.service;
 
 import com.example.facticle.common.authority.JwtTokenProvider;
+import com.example.facticle.common.dto.CustomUserDetails;
 import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
-import com.example.facticle.user.entity.LocalAuth;
-import com.example.facticle.user.entity.SignupType;
-import com.example.facticle.user.entity.User;
-import com.example.facticle.user.entity.UserRole;
+import com.example.facticle.user.entity.*;
+import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +18,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    @Transactional
     public Long saveUser(LocalSignupRequestDto localSignupRequestDto){
         checkLocalSignupDto(localSignupRequestDto);
 
@@ -49,6 +50,7 @@ public class UserService {
         return user.getUserId();
     }
 
+    @Transactional(readOnly = true)
     private void checkLocalSignupDto(LocalSignupRequestDto localSignupRequestDto) {
         Map<String, String> errors = new HashMap<>();
 
@@ -66,10 +68,12 @@ public class UserService {
         }
     }
 
+    @Transactional(readOnly = true)
     public boolean checkUsername(String username) {
         return !userRepository.existsByLocalAuthUsername(username);
     }
 
+    @Transactional(readOnly = true)
     public boolean checkNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
@@ -87,9 +91,33 @@ public class UserService {
         Authentication authenticate = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
         //인증받은 Authentication을 통해 token을 발급 받음
-        String accessToken = jwtTokenProvider.createAccessToken(authenticate);
-        String refreshToken = jwtTokenProvider.createRefreshToken(authenticate);
+        String newAccessToken = jwtTokenProvider.createAccessToken(authenticate);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(authenticate);
 
-        return new TokenInfo("Bearer", accessToken, refreshToken);
+        //authenticate를 기반으로 실제 User 획득
+        CustomUserDetails userDetails = (CustomUserDetails)authenticate.getPrincipal();
+        User user = userRepository.findById(userDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        //새로 refresh token을 발급받았으니 기존의 refresh token 중 유효한 token은 모두 revoke
+        refreshTokenRepository.revokeAllByUser(user);
+
+        //새로 발급한 refresh token 생성
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(user)
+                .hashedRefreshToken(passwordEncoder.encode(newRefreshToken))
+                .isRevoked(false)
+                .issuedAt(jwtTokenProvider.getIssuedAt(newRefreshToken))
+                .expiresAt(jwtTokenProvider.getExpiresAt(newRefreshToken))
+                .build();
+
+        //refresh token 저장
+        user.addRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshToken);
+
+        //user의 lastLogin 필드 update
+        user.updateLastLogin(LocalDateTime.now());
+
+        return new TokenInfo("Bearer", newAccessToken, newRefreshToken);
     }
 }

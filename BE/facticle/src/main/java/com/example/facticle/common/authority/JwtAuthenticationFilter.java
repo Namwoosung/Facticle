@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -24,12 +25,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    //만약 refresh token으로 api 요청 시 auth가 없다고 NullPointerException이 발생
+    //refresh token으로는 api 요청을 하면 안 되는게 맞지만, 현재 처럼 auth가 없어서 NPE가 뜨는게 좋은 상황인지는 고려해봐야 할 듯
+    //access token과 refresh token을 명확히 구분하는 필드를 추가? 고민?
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
 
         //token이 존재하고, 유효한 경우
         if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)){
+
+            if(!jwtTokenProvider.getTokenType(token).equals("ACCESS")){ //access token이 아닌경우
+                log.warn("Invalid Token Type: Only Access Token is allowed");
+                throw new InsufficientAuthenticationException("Invalid Token Type: Only Access Token is allowed");
+            }
+
             //토큰의 정보를 기반으로 Authentication 생성
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
 
