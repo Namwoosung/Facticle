@@ -86,7 +86,7 @@ public class UserController {
                 .secure(true)
                 .path("/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
-                .sameSite("strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
@@ -94,8 +94,26 @@ public class UserController {
     }
 
     /**
-     * access token 재발급 api
+     * token 재발급 api
      */
+    @PostMapping("/token/refresh")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse reCreateToken(@CookieValue(name = "refresh_token", required = true) String refreshToken, HttpServletResponse response){
+        TokenInfo tokenInfo = userService.reCreateToken(refreshToken);
+
+
+        // refresh token은 http only secure 쿠키에 저장
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/users") //유저관련 api에 한정하여 전송
+                .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
+                .sameSite("None")
+                .build();
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+        return BaseResponse.success(Map.of("code", 200, "grant_type", tokenInfo.getGrantType(), "access_token", tokenInfo.getAccessToken()), "Token refreshed successfully.");
+    }
 
 
     /**

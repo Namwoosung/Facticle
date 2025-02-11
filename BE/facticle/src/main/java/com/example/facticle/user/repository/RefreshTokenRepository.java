@@ -15,7 +15,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     //현재는 비즈니스 요구사항에 맞게 다음과 같이 메서드 설계
     //추후 성능적인 요소를 고려하여 리팩토링
-    //(조회 및 update 성능 향상, 너무 많은 refresh token이 쌓이지 않도록 기간이 만료된 refresh token 주기적으로 삭제, ...)
+    //(조회 및 update 성능 향상, user기반 CRUD가 많으므로 Index 추가, 너무 많은 refresh token이 쌓이지 않도록 기간이 만료된 refresh token 주기적으로 삭제, ...)
     /**
      * 특정 사용자의 모든 Refresh Token을 무효화 (RTR 적용)
      */
@@ -23,12 +23,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Transactional
     @Query("UPDATE RefreshToken rt SET rt.isRevoked = true WHERE rt.user = :user")
     void revokeAllByUser(User user); //벌크 연산 찾아보고 필요 시 도입
-
-    /**
-     * 해시된 Refresh Token을 기반으로 토큰 찾기
-     */
-    Optional<RefreshToken> findByHashedRefreshToken(String hashedRefreshToken);
-
 
     /**
      * 특정 사용자의 가장 최근에 발급된 유효한 Refresh Token 찾기

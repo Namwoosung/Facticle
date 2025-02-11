@@ -25,31 +25,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    //만약 refresh token으로 api 요청 시 auth가 없다고 NullPointerException이 발생
-    //refresh token으로는 api 요청을 하면 안 되는게 맞지만, 현재 처럼 auth가 없어서 NPE가 뜨는게 좋은 상황인지는 고려해봐야 할 듯
-    //access token과 refresh token을 명확히 구분하는 필드를 추가? 고민?
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
 
         //token이 존재하고, 유효한 경우
-        if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)){
+        if(StringUtils.hasText(token)){
+            TokenValidationResult tokenValidationResult = jwtTokenProvider.validateToken(token); //검사 결과를 가져옴
 
-            if(!jwtTokenProvider.getTokenType(token).equals("ACCESS")){ //access token이 아닌경우
-                log.warn("Invalid Token Type: Only Access Token is allowed");
-                throw new InsufficientAuthenticationException("Invalid Token Type: Only Access Token is allowed");
+            if(tokenValidationResult == TokenValidationResult.VALID){ //유효하다면 Authentication 저장
+                if(!jwtTokenProvider.getTokenType(token).equals("ACCESS")){ //access token이 아닌경우
+                    log.warn("Invalid Token Type: Only Access Token is allowed");
+                    throw new InsufficientAuthenticationException("Invalid Token Type: Only Access Token is allowed"); //filter 내부에서 발생한 인증오류 이므로 AuthenticationEntryPoint를 호출하게 됨
+                }
+
+                //토큰의 정보를 기반으로 Authentication 생성
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+
+                //SecurityContextHolder에 Authentication 정보 저장
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else if (tokenValidationResult == TokenValidationResult.EXPIRED) { //만료라면
+                request.setAttribute("expired_token", true); //request를 활용해 만료 여부 저장
+            }else{ //이외의 다른 이유라면
+                request.setAttribute("expired_token", false); //request를 활용해 만료 여부 저장
             }
-
-            //토큰의 정보를 기반으로 Authentication 생성
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-
-            //SecurityContextHolder에 Authentication 정보 저장
-            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-
-        filterChain.doFilter(request, response);
-
-
+        filterChain.doFilter(request, response); //만약 토큰이 유효하지 않아 SecurityContextHolder에 저장된 인증정보가 없으면 spring security가 내부적으로 인증 오류로 판단해 AuthenticationEntryPoint를 호출하게 됨
     }
 
     //request의 header에서 JWT 토큰을 획득

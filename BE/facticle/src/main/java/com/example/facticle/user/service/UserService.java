@@ -1,9 +1,12 @@
 package com.example.facticle.user.service;
 
 import com.example.facticle.common.authority.JwtTokenProvider;
-import com.example.facticle.common.dto.CustomUserDetails;
-import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.authority.TokenInfo;
+import com.example.facticle.common.authority.TokenValidationResult;
+import com.example.facticle.common.dto.CustomUserDetails;
+import com.example.facticle.common.exception.ExpiredTokenException;
+import com.example.facticle.common.exception.InvalidInputException;
+import com.example.facticle.common.exception.InvalidTokenException;
 import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.entity.*;
@@ -14,12 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -117,6 +122,71 @@ public class UserService {
 
         //user의 lastLogin 필드 update
         user.updateLastLogin(LocalDateTime.now());
+
+        return new TokenInfo("Bearer", newAccessToken, newRefreshToken);
+    }
+
+    /**
+     * 리프레시 토큰 검증 후 문제 없을 시 토큰 재발급(RTR 적용)
+     */
+    public TokenInfo reCreateToken(String passedRefreshToken) {
+        //토큰 유효성 검증
+        TokenValidationResult tokenValidationResult = jwtTokenProvider.validateToken(passedRefreshToken);
+        if(tokenValidationResult == TokenValidationResult.EXPIRED){
+            throw new ExpiredTokenException("Refresh token has expired. Please login again.");
+        }else if(tokenValidationResult == TokenValidationResult.INVALID){
+            throw new InvalidTokenException("Invalid refresh token.");
+        }
+        //refresh token이 아닌 경우
+        if(!jwtTokenProvider.getTokenType(passedRefreshToken).equals("REFRESH")){
+            throw new InvalidTokenException("Invalid refresh token.");
+        }
+
+        //적합한 refresh token이라면 user를 찾고 해당 user의 유효한 토큰을 조회
+        Long userId = jwtTokenProvider.getUserId(passedRefreshToken);
+        User user = userRepository.findById(userId).orElseThrow(() -> new InvalidTokenException("user not found by refresh token"));
+
+
+        RefreshToken storedRefreshToken = refreshTokenRepository.findValidTokenByUser(user)
+                .orElseThrow(() -> { //해당 user의 유효한 토큰이 없는 경우. 비정상적인 접근이라 판단, 모든 유효한 토큰을 중지
+                    refreshTokenRepository.revokeAllByUser(user); //모든 Refresh Token 무효화
+                    return new InvalidTokenException("No valid refresh token found.");
+                });
+
+        //요청온 refresh token과 저장되어 있는 유효한 refresh token이 다르면 비정상적인 접근으로 판단
+        if(!passwordEncoder.matches(passedRefreshToken, storedRefreshToken.getHashedRefreshToken())){
+            refreshTokenRepository.revokeAllByUser(user);
+            throw new InvalidTokenException("Refresh token is invalid or revoked.");
+        }
+
+        //토큰 생성 및 반환
+        CustomUserDetails userDetails = new CustomUserDetails(
+                user.getUserId(),
+                user.getLocalAuth().getUsername(),
+                user.getLocalAuth().getHashedPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(authentication);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication);
+
+        //새로 refresh token을 발급받았으니 기존의 refresh token 중 유효한 token은 모두 revoke
+        refreshTokenRepository.revokeAllByUser(user);
+
+        //새로 발급한 refresh token 생성
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(user)
+                .hashedRefreshToken(passwordEncoder.encode(newRefreshToken))
+                .isRevoked(false)
+                .issuedAt(jwtTokenProvider.getIssuedAt(newRefreshToken))
+                .expiresAt(jwtTokenProvider.getExpiresAt(newRefreshToken))
+                .build();
+
+        //refresh token 저장
+        user.addRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshToken);
 
         return new TokenInfo("Bearer", newAccessToken, newRefreshToken);
     }

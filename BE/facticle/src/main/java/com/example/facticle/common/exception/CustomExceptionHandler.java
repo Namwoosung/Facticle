@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -71,6 +72,42 @@ public class CustomExceptionHandler {
         data.put("error", ex.getMessage());
 
         return BaseResponse.failure(data, "Authentication failed. Please try again.");
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public BaseResponse missingCookieException(MissingRequestCookieException ex){
+        log.warn("Missing required cookie: {}", ex.getCookieName());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 400);
+        data.put("error", ex.getCookieName() + " is required");
+
+        return BaseResponse.failure(data, "Missing required cookie");
+    }
+
+    @ExceptionHandler(ExpiredTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse expiredTokenException(ExpiredTokenException ex){
+        log.warn("expired refresh token");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 401);
+        data.put("is_expired", true);
+
+        return BaseResponse.failure(data, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse invalidTokenException(InvalidTokenException ex){
+        log.warn("invalid refresh token");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 401);
+        data.put("is_expired", false);
+
+        return BaseResponse.failure(data, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

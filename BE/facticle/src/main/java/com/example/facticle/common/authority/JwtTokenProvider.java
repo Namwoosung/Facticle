@@ -109,12 +109,13 @@ public class JwtTokenProvider {
     /**
      * 토큰 검증
      */
-    public boolean validateToken(String token) {
+    public TokenValidationResult validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token); //서명 검증 및 클레임 파싱
-            return true;
+            return TokenValidationResult.VALID;
         } catch (ExpiredJwtException e) { //토큰이 만료된 경우
             log.warn("Expired JWT Token: {}", e.getMessage());
+            return TokenValidationResult.EXPIRED;
         } catch (UnsupportedJwtException e) { //토큰의 형식이나 구조가 이상한 경우
             log.warn("Unsupported JWT Token: {}", e.getMessage());
         } catch (MalformedJwtException e) { //토큰이 유효하지 않은 경우
@@ -124,7 +125,7 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) { //토큰이 비어있거나 null인 경우
             log.warn("JWT Claims string is empty: {}", e.getMessage());
         }
-        return false;
+        return TokenValidationResult.INVALID;
     }
 
 

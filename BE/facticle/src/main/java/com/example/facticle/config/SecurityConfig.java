@@ -22,6 +22,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) //CSRF 비활성화
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) //CORS 활성화
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //세션 비활성화
             .formLogin(form -> form.disable()) //JWT 기반 인증 사용 -> form 로그인 비활성화
             .httpBasic(AbstractHttpConfigurer::disable) //JWT 기반 인증 사용 -> basicHttp 비활성화
@@ -61,6 +65,7 @@ public class SecurityConfig {
                             "/users/signup/social",
                             "/users/check-username",
                             "/users/check-nickname",
+                            "/users/token/refresh",
                             "/static/**",
                             "/favicon.ico"
                     ).permitAll()
@@ -86,6 +91,26 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * CORS 설정(Cross-Origin Resource Sharing)
+     * 웹 브라우저에서 보안 정책을 적용하는 방식, 기본적으로 다른 출처(Origin)에서 보내는 api 요청은 거부
+     *  => 프론트 -> 백으로 보내는 요청도 거부됨(ex) localhost:3000 -> localhost:8080)
+     * 즉 cross origin에서 어느 도메인으로 부터오는 어느 요청들을 허용할 것인지에 관한 설정
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true); // 쿠키를 포함한 요청 허용
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://frontend:3000")); // 허용할 프론트엔드 도메인
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // 허용할 메서드
+        configuration.setAllowedHeaders(List.of("*")); //프론트엔드에서 요청을 보낼 때 포함할 수 있는 헤더
+        configuration.setExposedHeaders(List.of("Authorization")); // 프론트에서 응답에서 조회할 수 있는 헤더
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 CORS 설정을 사용
+        return source;
+    }
+
 
     /**
      * 401 Unauthorized 예외 처리
@@ -98,10 +123,20 @@ public class SecurityConfig {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
 
-            BaseResponse errorResponse = BaseResponse.failure(
-                    Map.of("code", 401),
-                    "Authentication failed. Please provide a valid token."
-            );
+            boolean isExpired = Boolean.TRUE.equals(request.getAttribute("expired_token")); // request에 저장해놓은 만료 여부 확인
+
+            BaseResponse errorResponse;
+            if (isExpired) {
+                errorResponse = BaseResponse.failure(
+                        Map.of("code", 401, "is_expired", true),
+                        "Access token has expired. Please refresh your token."
+                );
+            } else {
+                errorResponse = BaseResponse.failure(
+                        Map.of("code", 401, "is_expired", false),
+                        "Authentication failed. Please provide a valid token."
+                );
+            }
 
             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         };
