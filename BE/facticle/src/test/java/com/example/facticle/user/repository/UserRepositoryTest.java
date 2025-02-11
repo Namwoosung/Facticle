@@ -14,7 +14,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Profile("local")
 @Transactional
 class UserRepositoryTest {
     @Autowired

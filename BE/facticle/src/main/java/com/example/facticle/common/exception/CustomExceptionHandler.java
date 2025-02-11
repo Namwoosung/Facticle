@@ -49,6 +49,7 @@ public class CustomExceptionHandler {
     }
 
     //인증 과정에서 실패한 경우
+    //주로 spring security 내부에서 authenticationManager.authenticate()과정 중에서 username이나 password가 잘못된 경우 발생
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public BaseResponse badCredentialsException(BadCredentialsException ex){
@@ -83,7 +84,7 @@ public class CustomExceptionHandler {
         data.put("code", 400);
         data.put("error", ex.getCookieName() + " is required");
 
-        return BaseResponse.failure(data, "Missing required cookie");
+        return BaseResponse.failure(data, "Missing required cookie.");
     }
 
     @ExceptionHandler(ExpiredTokenException.class)

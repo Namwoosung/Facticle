@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @ToString(of = {"tokenId", "hashedRefreshToken", "isRevoked", "issuedAt", "expiresAt"})
 @Table(name = "refresh_tokens")
 public class RefreshToken {
+    //추후 hashedRefreshToken에 따른 성능을 측정해보고 문제가 된다면, 토큰의 UUID 값을 활용하도록 리팩토링 고려
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

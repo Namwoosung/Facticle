@@ -33,5 +33,5 @@ jwt:
   #보안 상 노출되지 않는 것이 좋음 -> 추후 환경변수 등으로 관리
   #secret key는 쉘에서 openssl rand -base64 32 커맨드로 생성함, 서명화 알고리즘에서 성능이 빠른 HS256을 사용할 예정이므로 256 bit의 key를 생성
   secret: oRf96S6l4scYOnZpl747wPckC7FmrGbEPOvbVYZj8Lw=
-  access-token-valid-time: 10000   # 30분, 10초
-  refresh-token-valid-time: 30000 # 1일, 30초
+  access-token-valid-time: 20000   # 30분 -> 20초
+  refresh-token-valid-time: 60000 # 1일 -> 60초

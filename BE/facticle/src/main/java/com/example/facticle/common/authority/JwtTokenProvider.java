@@ -17,10 +17,7 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,21 +47,25 @@ public class JwtTokenProvider {
 
 
     /**
-     * 토큰 생성
+     * access token 생성
      */
     //access token은 api 요청 시 인가 처리를 하기 위함이므로 권한에 관한 정보를 추가로 담음
     public String createAccessToken(Authentication authentication){
-        //authentication에 있는 권한 정보들을 모두 가져와 ,로 나눠 하나의 string으로 생성
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
         //authentication에 저장된 principal로 userId 획득
         if (!(authentication.getPrincipal() instanceof CustomUserDetails)) {
             throw new IllegalArgumentException("Authentication principal is not an instance of CustomUserDetails");
         }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
+        String username = userDetails.getUsername();
+
+
+        //authentication에 있는 권한 정보들을 모두 가져와 ,로 나눠 하나의 string으로 생성
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        UUID tokenId = UUID.randomUUID(); //token의 subject는 UUID를 활용
 
         //현재 시간 및 만료 시간 저장, jwt라이브러리는 date타입을 요구하므로 date 타입으로 설정
         Date now = new Date();
@@ -72,16 +73,20 @@ public class JwtTokenProvider {
 
         //JWT 발급
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) //username을 제목으로 활용
+                .setSubject(tokenId.toString())
                 .claim("auth", authorities)
-                .claim("userId", userId) //claim에 userId를 입력
-                .claim("tokenType", "ACCESS") //tokentype 추가
+                .claim("username", username)
+                .claim("userId", userId)
+                .claim("tokenType", "ACCESS")
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    /**
+     * refresh token 생성
+     */
     //refresh token은 단순히 access token 재발급 용도이므로 userID와 username의 정보만 담음
     public String createRefreshToken(Authentication authentication){
         //authentication에 저장된 principal로 userId 획득
@@ -90,6 +95,9 @@ public class JwtTokenProvider {
         }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
+        String username = userDetails.getUsername();
+
+        UUID tokenId = UUID.randomUUID();
 
         //현재 시간 및 만료 시간 저장
         Date now = new Date();
@@ -97,9 +105,10 @@ public class JwtTokenProvider {
 
         //JWT 발급
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) //username을 제목으로 활용
-                .claim("userId", userId) //claim에 userId를 입력
-                .claim("tokenType", "REFRESH") //tokentype 추가
+                .setSubject(tokenId.toString())
+                .claim("userId", userId)
+                .claim("username", username)
+                .claim("tokenType", "REFRESH")
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -140,24 +149,28 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
+    public String getSubject(String token){
+        return getClaims(token).getSubject();
+    }
+
     public String getUsername(String token){
-        Claims claims = getClaims(token);
-        return claims.getSubject();
+        return getClaims(token).get("username", String.class);
     }
 
     public Long getUserId(String token){
-        Claims claims = getClaims(token);
-        return claims.get("userId", Long.class);
+        return getClaims(token).get("userId", Long.class);
     }
 
     public String getTokenType(String token){
-        Claims claims = getClaims(token);
-        return claims.get("tokenType", String.class);
+        return getClaims(token).get("tokenType", String.class);
     }
 
     public List<GrantedAuthority> getAuthorities(String token){
         Claims claims = getClaims(token);
         String auth = claims.get("auth", String.class);
+        if(auth == null || auth.isEmpty()){
+            return Collections.emptyList();
+        }
         return Arrays.stream(auth.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
@@ -165,14 +178,12 @@ public class JwtTokenProvider {
 
     // 토큰의 발급 시간(issuedAt) 조회
     public LocalDateTime getIssuedAt(String token) {
-        Date issuedAt = getClaims(token).getIssuedAt();
-        return convertToLocalDateTime(issuedAt);
+        return convertToLocalDateTime(getClaims(token).getIssuedAt());
     }
 
     // JWT 만료 시간 조회
     public LocalDateTime getExpiresAt(String token) {
-        Date expiresAt = getClaims(token).getExpiration();
-        return convertToLocalDateTime(expiresAt);
+        return convertToLocalDateTime(getClaims(token).getExpiration());
     }
 
 
@@ -190,14 +201,15 @@ public class JwtTokenProvider {
     //토큰 정보 추출 -> 토큰 검증이 완료된 후 SecurityContextHolder에 저장할 Authentication 객체 생성을 위함
     public Authentication getAuthentication(String token){
         Claims claims = getClaims(token);
-
+        Long userId = claims.get("userId", Long.class);
+        String username = claims.get("username", String.class);
         String auth = claims.get("auth", String.class);
         List<GrantedAuthority> authorities = Arrays.stream(auth.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
         //인증이 완료된 객체는 일반적으로 비밀번호를 공백으로 설정
-        UserDetails principal = new CustomUserDetails(claims.get("userId", Long.class), claims.getSubject(), "", authorities);
+        UserDetails principal = new CustomUserDetails(userId, username, "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }

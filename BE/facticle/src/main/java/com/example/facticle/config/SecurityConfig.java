@@ -162,12 +162,6 @@ public class SecurityConfig {
         };
     }
 
-
-    //추후 CORS 설정 추가
-    //Exception Handling 추가
-
-
-
     /**
      * 우리가 작성한 customUserDetailsService와 passwordEncoder를 활용하는 authenticationProvider를 생성
      * 이후 ProviderManager에 authenticationProvider을 등록

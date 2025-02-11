@@ -153,7 +153,7 @@ public class UserService {
                     return new InvalidTokenException("No valid refresh token found.");
                 });
 
-        //요청온 refresh token과 저장되어 있는 유효한 refresh token이 다르면 비정상적인 접근으로 판단
+        //요청으로 온 refresh token과 저장되어 있는 유효한 refresh token이 다르면 비정상적인 접근으로 판단
         if(!passwordEncoder.matches(passedRefreshToken, storedRefreshToken.getHashedRefreshToken())){
             refreshTokenRepository.revokeAllByUser(user);
             throw new InvalidTokenException("Refresh token is invalid or revoked.");
@@ -163,7 +163,7 @@ public class UserService {
         CustomUserDetails userDetails = new CustomUserDetails(
                 user.getUserId(),
                 user.getLocalAuth().getUsername(),
-                user.getLocalAuth().getHashedPassword(),
+                "",
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
 

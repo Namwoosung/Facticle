@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         //Local Singup 유저가 아니라면, 예외 발생
         //현재는 Local Signup만 구현한 상황이므로 추후 social Signup구현 후 코드 변경
         if(user.getLocalAuth() == null) {
-            throw new UsernameNotFoundException("LocalAuth not found for user: " + username);
+            throw new UsernameNotFoundException("LocalAuth not found for user");
         }
 
         //현재는 user의 role이 1개. 단순히 1개만 authorities에 추가

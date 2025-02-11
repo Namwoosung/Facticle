@@ -1,22 +1,29 @@
 package com.example.facticle.user.controller;
 
+import com.example.facticle.common.authority.TokenInfo;
+import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.dto.NicknameCheckDto;
 import com.example.facticle.user.dto.UsernameCheckDto;
+import com.example.facticle.user.entity.User;
+import com.example.facticle.user.repository.UserRepository;
 import com.example.facticle.user.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -29,6 +36,14 @@ class UserControllerTest {
 
     @Autowired
     UserService userService;
+    @Autowired
+    UserRepository userRepository;
+
+    @BeforeEach
+    void setUp(){
+        Long userId1 = userService.saveUser(new LocalSignupRequestDto("user1", "userPassword1!", "nick1"));
+        Long userId2 = userService.saveUser(new LocalSignupRequestDto("user2", "userPassword2!", "nick2"));
+    }
 
     @Test
     @DisplayName("로컬회원가입 - 성공")
@@ -155,6 +170,77 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed."))
                 .andExpect(jsonPath("$.data.code").value(400));
+    }
+
+    @Test
+    @DisplayName("로컬 로그인 테스트 - 성공")
+    void localLoginSuccessTest() throws Exception {
+        LocalLoginRequestDto localLoginRequestDto = new LocalLoginRequestDto("user1", "userPassword1!");
+
+        mockMvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(localLoginRequestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Login successful."))
+                .andExpect(jsonPath("$.data.code").value(200))
+                .andExpect(jsonPath("$.data.access_token").exists())
+                .andExpect(jsonPath("$.data.grant_type").value("Bearer"))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
+    }
+
+    @Test
+    @DisplayName("로컬 로그인 테스트 - 실패")
+    void localLoginFailTest() throws Exception {
+        LocalLoginRequestDto failedlocalLoginRequestDto = new LocalLoginRequestDto("faileduser", "userPassword1!");
+
+        mockMvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(failedlocalLoginRequestDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Authentication failed. Please check your credentials."))
+                .andExpect(jsonPath("$.data.code").value(401));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 성공")
+    void reCreateTokenSuccessTest() throws Exception {
+        TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
+
+        mockMvc.perform(post("/users/token/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("refresh_token", tokenInfo.getRefreshToken())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Token refreshed successfully."))
+                .andExpect(jsonPath("$.data.code").value(200))
+                .andExpect(jsonPath("$.data.access_token").exists())
+                .andExpect(jsonPath("$.data.grant_type").value("Bearer"))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 실패")
+    void reCreateTokenFailTest() throws Exception {
+        //쿠키가 없는 경우
+        mockMvc.perform(post("/users/token/refresh")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Missing required cookie."))
+                .andExpect(jsonPath("$.data.code").value(400));
+
+        //토큰이 잘못된 경우
+        mockMvc.perform(post("/users/token/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("refresh_token", "Invalid token")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Invalid refresh token."))
+                .andExpect(jsonPath("$.data.code").value(401))
+                .andExpect(jsonPath("$.data.is_expired").value(false));
+
+
     }
 
 
