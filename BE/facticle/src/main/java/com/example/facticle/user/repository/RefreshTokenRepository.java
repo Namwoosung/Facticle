@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,6 +17,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     //현재는 비즈니스 요구사항에 맞게 다음과 같이 메서드 설계
     //추후 성능적인 요소를 고려하여 리팩토링
     //(조회 및 update 성능 향상, user기반 CRUD가 많으므로 Index 추가, 너무 많은 refresh token이 쌓이지 않도록 기간이 만료된 refresh token 주기적으로 삭제, ...)
+
+    List<RefreshToken> findByUser(User user);
+
     /**
      * 특정 사용자의 모든 Refresh Token을 무효화 (RTR 적용)
      */

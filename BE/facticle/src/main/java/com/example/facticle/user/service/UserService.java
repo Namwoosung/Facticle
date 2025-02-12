@@ -190,4 +190,20 @@ public class UserService {
 
         return new TokenInfo("Bearer", newAccessToken, newRefreshToken);
     }
+
+    /**
+     * 로그아웃
+     */
+    public void logout(String refreshToken) {
+        //로그 아웃의 경우 해당 토큰에서 userId만 획득가능하면 해당 유저의 모든 refresh token을 revoke하도록 구현
+        //만료나 유효성 검사를 하지 않는 이유는 통과하든 안하든 모든 refresh token을 revoke해야 하는 건 똑같기 때문
+        try{
+            Long userId = jwtTokenProvider.getUserId(refreshToken);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new InvalidTokenException("User not found."));
+            refreshTokenRepository.revokeAllByUser(user);
+        }catch (Exception e){
+            throw new InvalidTokenException("Failed to extract user from token");
+        }
+    }
 }

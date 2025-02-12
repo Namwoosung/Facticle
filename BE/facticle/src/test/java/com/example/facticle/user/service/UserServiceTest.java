@@ -11,6 +11,7 @@ import com.example.facticle.user.dto.LocalSignupRequestDto;
 import com.example.facticle.user.entity.*;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +44,8 @@ class UserServiceTest {
     PasswordEncoder passwordEncoder;
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    EntityManager entityManager;
 
     private User user1;
     private User user2;
@@ -202,5 +205,45 @@ class UserServiceTest {
                 .isInstanceOf(InvalidTokenException.class);
         Assertions.assertThatThrownBy(() -> userService.reCreateToken(refreshToken1Revoke))
                 .isInstanceOf(InvalidTokenException.class);
+    }
+
+    @Test
+    @DisplayName("로그아웃 - 성공")
+    void logoutSuccessTest(){
+        RefreshToken refreshToken = refreshTokenRepository.findValidTokenByUser(user1).get();
+        Assertions.assertThat(passwordEncoder.matches(refreshToken1Valid, refreshToken.getHashedRefreshToken())).isTrue();
+
+        userService.logout(refreshToken1Valid);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<RefreshToken> validTokenByUser = refreshTokenRepository.findValidTokenByUser(user1);
+        Assertions.assertThat(validTokenByUser).isEmpty();
+        List<RefreshToken> revokedTokens = refreshTokenRepository.findByUser(user1);
+        Assertions.assertThat(revokedTokens).allMatch(RefreshToken::isRevoked);
+
+    }
+
+    @Test
+    @DisplayName("로그아웃 - 실패")
+    void logoutFailTest(){
+        //잘못된 토큰
+        Assertions.assertThatThrownBy(() -> userService.logout("Invalid Token"))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Failed to extract user from token");
+
+        //만료된 토큰 혹은 revoke된 토큰으로 조회 시에도 동일하게 해당 user의 모든 refresh token을 revoke(공격 방지)
+        RefreshToken refreshToken = refreshTokenRepository.findValidTokenByUser(user1).get();
+        Assertions.assertThat(passwordEncoder.matches(refreshToken1Valid, refreshToken.getHashedRefreshToken())).isTrue(); //처음엔 조회 성공
+
+        userService.logout(refreshToken1Expire);
+        entityManager.flush();
+        entityManager.clear(); //테스트 환경에서 트랜잭션 전파 발생 -> DB 변경 후에 DB와 영속성 컨텍스트가 불일치 할 수 있기에, 영속성 컨텍스트를 수동으로 clear
+
+        Optional<RefreshToken> validTokenByUser = refreshTokenRepository.findValidTokenByUser(user1);
+        Assertions.assertThat(validTokenByUser).isEmpty(); //조회 실패
+        List<RefreshToken> revokedTokens = refreshTokenRepository.findByUser(user1);
+        Assertions.assertThat(revokedTokens).allMatch(RefreshToken::isRevoked);
     }
 }

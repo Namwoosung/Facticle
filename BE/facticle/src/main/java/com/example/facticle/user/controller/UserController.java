@@ -117,6 +117,27 @@ public class UserController {
 
 
     /**
+     * 로그 아웃
+     */
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse logout(@CookieValue(name = "refresh_token", required = true) String refreshToken, HttpServletResponse response){
+        userService.logout(refreshToken);
+
+        ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/users")
+                .maxAge(0) // 쿠키 삭제
+                .sameSite("None")
+                .build();
+        response.addHeader("Set-Cookie", deleteCookie.toString());
+
+        return BaseResponse.success(Map.of("code", 200), "Logout successful.");
+    }
+
+
+    /**
      * 마이 페이지 조회(지금은 wjt 인증 테스트를 위해 임시 생성)
      */
     @GetMapping("/mypage")

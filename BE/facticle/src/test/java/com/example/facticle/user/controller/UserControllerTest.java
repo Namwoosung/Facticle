@@ -239,9 +239,50 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid refresh token."))
                 .andExpect(jsonPath("$.data.code").value(401))
                 .andExpect(jsonPath("$.data.is_expired").value(false));
+    }
 
+    @Test
+    @DisplayName("로그아웃 - 성공")
+    void logoutSuccessTest() throws Exception {
+        TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
+
+        mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("refresh_token", tokenInfo.getRefreshToken()))
+                        .header("Authorization", "Bearer " + tokenInfo.getAccessToken())
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logout successful."))
+                .andExpect(jsonPath("$.data.code").value(200))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
 
     }
 
+    @Test
+    @DisplayName("로그아웃 - 실패")
+    void logoutFailTest() throws Exception {
+        TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
 
+        mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + tokenInfo.getAccessToken())
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Missing required cookie."))
+                .andExpect(jsonPath("$.data.code").value(400))
+                .andExpect(jsonPath("$.data.error").value("refresh_token is required"));
+
+        mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("refresh_token", "Invalid Token"))
+                        .header("Authorization", "Bearer " + tokenInfo.getAccessToken())
+                )
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Failed to extract user from token"))
+                .andExpect(jsonPath("$.data.code").value(401))
+                .andExpect(jsonPath("$.data.is_expired").value(false));
+    }
 }
