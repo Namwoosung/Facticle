@@ -25,6 +25,10 @@ services:
       - mysql
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
     ports:
       - "8080:8080"
     networks:

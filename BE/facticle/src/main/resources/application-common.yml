@@ -34,8 +34,8 @@ jwt:
   #보안 상 노출되지 않는 것이 좋음 -> 추후 환경변수 등으로 관리
   #secret key는 쉘에서 openssl rand -base64 32 커맨드로 생성함, 서명화 알고리즘에서 성능이 빠른 HS256을 사용할 예정이므로 256 bit의 key를 생성
   secret: oRf96S6l4scYOnZpl747wPckC7FmrGbEPOvbVYZj8Lw=
-  access-token-valid-time: 40000   # 30분 -> 40초
-  refresh-token-valid-time: 80000 # 1일 -> 80초
+  access-token-valid-time: 600000   # 30분 -> 10분
+  refresh-token-valid-time: 3600000 # 1일 -> 1시간
 
 cloud: #S3 설정 -> key의 경우 노출되지 않는 것이 중요 -> 베포 전 환경변수 등으로 관리
   aws:
