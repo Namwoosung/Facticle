@@ -1,5 +1,6 @@
 package com.example.facticle.user.service;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.example.facticle.common.authority.JwtTokenProvider;
 import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.authority.TokenValidationResult;
@@ -16,22 +17,32 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
 class UserServiceTest {
     @Autowired
@@ -52,6 +63,10 @@ class UserServiceTest {
     String refreshToken1Expire;
     String refreshToken1Revoke;
     String refreshToken1Valid;
+
+    private final String BUCKET_NAME = "facticle-profile-images";
+    private final String FOLDER_NAME = "profile-images/";
+    private final String DEFAULT_PROFILE_IMAGE_URL = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png";
 
 
     @BeforeEach
@@ -245,5 +260,40 @@ class UserServiceTest {
         Assertions.assertThat(validTokenByUser).isEmpty(); //조회 실패
         List<RefreshToken> revokedTokens = refreshTokenRepository.findByUser(user1);
         Assertions.assertThat(revokedTokens).allMatch(RefreshToken::isRevoked);
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 - 생성, 조회, 삭제")
+    void uploadProfileImageSuccessTest() throws Exception {
+        //given
+        TokenInfo tokenInfo1 = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
+        User user = userRepository.findByLocalAuthUsername("user1").get();
+        MultipartFile file = new MockMultipartFile(
+                "profileImage",
+                "test1.png",
+                "image/png",
+                Files.readAllBytes(Path.of(System.getProperty("user.dir") + "/profileImages/" + "test1.png"))
+        );
+
+        //when
+        Assertions.assertThat(user.getProfileImage()).isEqualTo(DEFAULT_PROFILE_IMAGE_URL);
+        String storedFilePath = userService.uploadProfileImage(user.getUserId(), file);
+        entityManager.flush();
+        entityManager.clear();
+
+        //then
+        Assertions.assertThat(storedFilePath).startsWith("https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/");
+        User findUser1 = userRepository.findById(user.getUserId()).get();
+
+        Assertions.assertThat(findUser1.getProfileImage()).isEqualTo(storedFilePath);
+
+        userService.deleteProfileImage(user.getUserId());
+        entityManager.flush();
+        entityManager.clear();
+        User findUser2 = userRepository.findById(user.getUserId()).get();
+        Assertions.assertThat(findUser2.getProfileImage()).isEqualTo(DEFAULT_PROFILE_IMAGE_URL);
+
+
+
     }
 }

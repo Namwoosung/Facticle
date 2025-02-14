@@ -1,4 +1,4 @@
-package com.example.facticle.config;
+package com.example.facticle.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

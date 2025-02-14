@@ -1,4 +1,4 @@
-package com.example.facticle.config;
+package com.example.facticle.common.config;
 
 import com.example.facticle.common.authority.JwtAuthenticationFilter;
 import com.example.facticle.common.authority.JwtTokenProvider;
@@ -59,23 +59,23 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable) //JWT 기반 인증 사용 -> basicHttp 비활성화
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers( //인증 없이 접근 가능 api
-                            "/users/login",
-                            "/users/login/social",
-                            "/users/signup",
-                            "/users/signup/social",
-                            "/users/check-username",
-                            "/users/check-nickname",
-                            "/users/token/refresh",
+                            "/api/users/login",
+                            "/api/users/login/social",
+                            "/api/users/signup",
+                            "/api/users/signup/social",
+                            "/api/users/check-username",
+                            "/api/users/check-nickname",
+                            "/api/users/token/refresh",
                             "/static/**",
                             "/favicon.ico"
                     ).permitAll()
                     .requestMatchers( // 🔹 인증 필요 api
-                            "/users/logout",
-                            "/users/profile",
-                            "/users/profile-image",
-                            "/users/mypage"
+                            "/api/users/logout",
+                            "/api/users/profile",
+                            "/api/users/profile-image",
+                            "/api/users/mypage"
                     ).authenticated()
-                    .requestMatchers("/users/admin/**").hasRole("ADMIN") //어드민 api 요청은 ADMIN 역할만 접근 가능
+                    .requestMatchers("/api/users/admin/**").hasRole("ADMIN") //어드민 api 요청은 ADMIN 역할만 접근 가능
                     .anyRequest().authenticated() //그 외 요청은 모두 인증 필요
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)

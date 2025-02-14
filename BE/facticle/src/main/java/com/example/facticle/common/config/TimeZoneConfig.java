@@ -1,4 +1,4 @@
-package com.example.facticle.config;
+package com.example.facticle.common.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

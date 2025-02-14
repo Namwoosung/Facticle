@@ -1,5 +1,6 @@
 spring:
   config:
+    import: optional:file:.env[.properties] # `.env` 파일을 가져옴
     activate:
       on-profile: common
 
@@ -35,3 +36,15 @@ jwt:
   secret: oRf96S6l4scYOnZpl747wPckC7FmrGbEPOvbVYZj8Lw=
   access-token-valid-time: 40000   # 30분 -> 40초
   refresh-token-valid-time: 80000 # 1일 -> 80초
+
+cloud: #S3 설정 -> key의 경우 노출되지 않는 것이 중요 -> 베포 전 환경변수 등으로 관리
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    stack:
+      auto: false
+    s3:
+      bucket: ${AWS_BUCKET_NAME}

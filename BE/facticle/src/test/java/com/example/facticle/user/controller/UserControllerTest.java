@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Transactional
 @AutoConfigureMockMvc //@Valid와 같은 검증은 스프링 MVC 요청 바인딩 과정에서 발생 => MockMVC를 사용해 HTTP 요청을 보내야 함
 class UserControllerTest {
@@ -52,7 +54,7 @@ class UserControllerTest {
         LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("test1", "testtest1!", "nick");
 
 
-        mockMvc.perform(post("/users/signup")
+        mockMvc.perform(post("/api/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(localSignupRequestDto)))
                 .andExpect(status().isCreated())
@@ -66,7 +68,7 @@ class UserControllerTest {
         LocalSignupRequestDto emptyDto = new LocalSignupRequestDto("", "", "");
 
         // When & Then
-        mockMvc.perform(post("/users/signup")
+        mockMvc.perform(post("/api/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emptyDto)))
                 .andExpect(status().isBadRequest()) // HTTP 400 응답을 기대
@@ -82,7 +84,7 @@ class UserControllerTest {
         LocalSignupRequestDto lengthDto = new LocalSignupRequestDto("a", "a1!", "a");
 
         // When & Then
-        mockMvc.perform(post("/users/signup")
+        mockMvc.perform(post("/api/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(lengthDto)))
                 .andExpect(status().isBadRequest()) // HTTP 400 응답을 기대
@@ -93,7 +95,7 @@ class UserControllerTest {
         LocalSignupRequestDto invalidDto = new LocalSignupRequestDto("aaaaa!", "aaaaaaaaa", "aaaa!");
 
         // When & Then
-        mockMvc.perform(post("/users/signup")
+        mockMvc.perform(post("/api/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest()) // HTTP 400 응답을 기대
@@ -108,7 +110,7 @@ class UserControllerTest {
         //검증 1. 중복 x
         UsernameCheckDto usernameCheckDto = new UsernameCheckDto("test_user");
 
-        mockMvc.perform(post("/users/check-username")
+        mockMvc.perform(post("/api/users/check-username")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(usernameCheckDto)))
                 .andExpect(status().isOk())
@@ -119,7 +121,7 @@ class UserControllerTest {
         //검증 2. 중복이 있는 경우
         userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_nick"));
 
-        mockMvc.perform(post("/users/check-username")
+        mockMvc.perform(post("/api/users/check-username")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(usernameCheckDto)))
                 .andExpect(status().isOk())
@@ -129,7 +131,7 @@ class UserControllerTest {
 
         UsernameCheckDto invalidDto = new UsernameCheckDto("!");
 
-        mockMvc.perform(post("/users/check-username")
+        mockMvc.perform(post("/api/users/check-username")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest())
@@ -143,7 +145,7 @@ class UserControllerTest {
         //검증 1. 중복 x
         NicknameCheckDto nicknameCheckDto = new NicknameCheckDto("test_user");
 
-        mockMvc.perform(post("/users/check-nickname")
+        mockMvc.perform(post("/api/users/check-nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nicknameCheckDto)))
                 .andExpect(status().isOk())
@@ -154,7 +156,7 @@ class UserControllerTest {
         //검증 2. 중복이 있는 경우
         userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_user"));
 
-        mockMvc.perform(post("/users/check-nickname")
+        mockMvc.perform(post("/api/users/check-nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nicknameCheckDto)))
                 .andExpect(status().isOk())
@@ -164,7 +166,7 @@ class UserControllerTest {
 
         NicknameCheckDto invalidDto = new NicknameCheckDto("!");
 
-        mockMvc.perform(post("/users/check-nickname")
+        mockMvc.perform(post("/api/users/check-nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest())
@@ -177,7 +179,7 @@ class UserControllerTest {
     void localLoginSuccessTest() throws Exception {
         LocalLoginRequestDto localLoginRequestDto = new LocalLoginRequestDto("user1", "userPassword1!");
 
-        mockMvc.perform(post("/users/login")
+        mockMvc.perform(post("/api/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(localLoginRequestDto)))
                 .andExpect(status().isOk())
@@ -195,7 +197,7 @@ class UserControllerTest {
     void localLoginFailTest() throws Exception {
         LocalLoginRequestDto failedlocalLoginRequestDto = new LocalLoginRequestDto("faileduser", "userPassword1!");
 
-        mockMvc.perform(post("/users/login")
+        mockMvc.perform(post("/api/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(failedlocalLoginRequestDto)))
                 .andExpect(status().isUnauthorized())
@@ -208,7 +210,7 @@ class UserControllerTest {
     void reCreateTokenSuccessTest() throws Exception {
         TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
 
-        mockMvc.perform(post("/users/token/refresh")
+        mockMvc.perform(post("/api/users/token/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("refresh_token", tokenInfo.getRefreshToken())))
                 .andExpect(status().isOk())
@@ -225,14 +227,14 @@ class UserControllerTest {
     @DisplayName("토큰 재발급 - 실패")
     void reCreateTokenFailTest() throws Exception {
         //쿠키가 없는 경우
-        mockMvc.perform(post("/users/token/refresh")
+        mockMvc.perform(post("/api/users/token/refresh")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Missing required cookie."))
                 .andExpect(jsonPath("$.data.code").value(400));
 
         //토큰이 잘못된 경우
-        mockMvc.perform(post("/users/token/refresh")
+        mockMvc.perform(post("/api/users/token/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("refresh_token", "Invalid token")))
                 .andExpect(status().isUnauthorized())
@@ -246,7 +248,7 @@ class UserControllerTest {
     void logoutSuccessTest() throws Exception {
         TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
 
-        mockMvc.perform(post("/users/logout")
+        mockMvc.perform(post("/api/users/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("refresh_token", tokenInfo.getRefreshToken()))
                         .header("Authorization", "Bearer " + tokenInfo.getAccessToken())
@@ -266,7 +268,7 @@ class UserControllerTest {
     void logoutFailTest() throws Exception {
         TokenInfo tokenInfo = userService.localLogin(new LocalLoginRequestDto("user1", "userPassword1!"));
 
-        mockMvc.perform(post("/users/logout")
+        mockMvc.perform(post("/api/users/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + tokenInfo.getAccessToken())
                 )
@@ -275,7 +277,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.code").value(400))
                 .andExpect(jsonPath("$.data.error").value("refresh_token is required"));
 
-        mockMvc.perform(post("/users/logout")
+        mockMvc.perform(post("/api/users/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("refresh_token", "Invalid Token"))
                         .header("Authorization", "Bearer " + tokenInfo.getAccessToken())

@@ -3,10 +3,8 @@ package com.example.facticle.user.controller;
 import com.example.facticle.common.authority.JwtTokenProvider;
 import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.dto.BaseResponse;
-import com.example.facticle.user.dto.LocalLoginRequestDto;
-import com.example.facticle.user.dto.LocalSignupRequestDto;
-import com.example.facticle.user.dto.NicknameCheckDto;
-import com.example.facticle.user.dto.UsernameCheckDto;
+import com.example.facticle.common.dto.CustomUserDetails;
+import com.example.facticle.user.dto.*;
 import com.example.facticle.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -14,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -135,6 +135,43 @@ public class UserController {
 
         return BaseResponse.success(Map.of("code", 200), "Logout successful.");
     }
+
+    /**
+     * 프로필 사진 업로드
+     */
+    @PostMapping("/profile-image")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse uploadProfileImage(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails, //filter에서 access token 검증이 완료된 경우, 현재 로그인한 사용자의 정보를 SecurityContextHolder에 저장된 user의 Principal을 반환해줌
+            @RequestParam("profileImage") MultipartFile profileImage){
+
+        String imageUrl =  userService.uploadProfileImage(customUserDetails.getUserId(), profileImage);
+
+        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image uploaded successfully.");
+    }
+
+    /**
+     * 프로필 사진 조회
+     */
+    @GetMapping("/profile-image")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse getProfileImage(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        String imageUrl =  userService.getProfileImage(customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image retrieved successfully.");
+    }
+
+    /**
+     * 프로필 사진 삭제
+     */
+    @DeleteMapping("/profile-image")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse deleteProfileImage(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        String imageUrl =  userService.deleteProfileImage(customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image deleted successfully.");
+    }
+
 
 
     /**

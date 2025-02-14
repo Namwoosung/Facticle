@@ -44,7 +44,7 @@ public class CustomExceptionHandler {
         data.put("code", 400);
         data.put("errors", ex.getErrors());
 
-        return BaseResponse.failure(data, ex.getMessage());
+        return BaseResponse.failure(data, "Invalid input");
 
     }
 

@@ -4,3 +4,4 @@ spring:
     group:
       local: common
       docker: common
+      test: common

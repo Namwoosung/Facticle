@@ -44,9 +44,8 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @Size(max = 1024, message = "profile URL must not exceed 1024 characters")
     @Builder.Default
-    private String profileImage = "/profile/default.png";
+    private String profileImage = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png"; //S3 기본 이미지
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
@@ -103,5 +102,8 @@ public class User {
 
     public void updateLastLogin(LocalDateTime time){
         this.lastLogin = time;
+    }
+    public void updateProfileImage(String filepath){
+        this.profileImage = filepath;
     }
 }
