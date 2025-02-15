@@ -5,6 +5,8 @@ import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.dto.BaseResponse;
 import com.example.facticle.common.dto.CustomUserDetails;
 import com.example.facticle.user.dto.*;
+import com.example.facticle.user.entity.SignupType;
+import com.example.facticle.user.entity.User;
 import com.example.facticle.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -147,7 +149,7 @@ public class UserController {
 
         String imageUrl =  userService.uploadProfileImage(customUserDetails.getUserId(), profileImage);
 
-        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image uploaded successfully.");
+        return BaseResponse.success(Map.of("code", 200, "image_url", imageUrl), "Profile image uploaded successfully.");
     }
 
     /**
@@ -158,7 +160,7 @@ public class UserController {
     public BaseResponse getProfileImage(@AuthenticationPrincipal CustomUserDetails customUserDetails){
         String imageUrl =  userService.getProfileImage(customUserDetails.getUserId());
 
-        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image retrieved successfully.");
+        return BaseResponse.success(Map.of("code", 200, "image_url", imageUrl), "Profile image retrieved successfully.");
     }
 
     /**
@@ -169,9 +171,61 @@ public class UserController {
     public BaseResponse deleteProfileImage(@AuthenticationPrincipal CustomUserDetails customUserDetails){
         String imageUrl =  userService.deleteProfileImage(customUserDetails.getUserId());
 
-        return BaseResponse.success(Map.of("data", 200, "image_url", imageUrl), "Profile image deleted successfully.");
+        return BaseResponse.success(Map.of("code", 200, "image_url", imageUrl), "Profile image deleted successfully.");
     }
 
+    /**
+     * 회원 정보 조회
+     */
+    @GetMapping("/profile")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse getUserProfile(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        User user = userService.getUserById(customUserDetails.getUserId());
+
+        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .username(user.getSignupType() == SignupType.LOCAL ? user.getLocalAuth().getUsername() : null)
+                .socialId(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialId() : null)
+                .socialProvider(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialProvider() : null)
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .role(user.getRole())
+                .signupType(user.getSignupType())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .lastLogin(user.getLastLogin())
+                .build();
+
+        return BaseResponse.success(Map.of("code", 200, "User", getProfileResponseDto), "User profile retrieved successfully.");
+    }
+
+    /**
+     * 유저 정보 수정
+     */
+    @PatchMapping("/profile")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse updateUserProfile(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                          @RequestBody @Valid UpdateProfileRequestDto updateProfileRequestDto){
+        User user = userService.updateUserProfile(customUserDetails.getUserId(), updateProfileRequestDto);
+
+        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .username(user.getSignupType() == SignupType.LOCAL ? user.getLocalAuth().getUsername() : null)
+                .socialId(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialId() : null)
+                .socialProvider(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialProvider() : null)
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .role(user.getRole())
+                .signupType(user.getSignupType())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .lastLogin(user.getLastLogin())
+                .build();
+
+        return BaseResponse.success(Map.of("code", 200, "User", getProfileResponseDto), "User profile updated successfully.");
+    }
 
 
     /**
