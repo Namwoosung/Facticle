@@ -44,6 +44,7 @@ public class DataInitializer {
                         .nickname("testUser1")
                         .localAuth(new LocalAuth("user1", passwordEncoder.encode("password1!")))
                         .role(UserRole.USER)
+                        .email("testUser1@gmail.com")
                         .signupType(SignupType.LOCAL)
                         .build();
 
@@ -51,6 +52,7 @@ public class DataInitializer {
                         .nickname("testUser2")
                         .localAuth(new LocalAuth("user2", passwordEncoder.encode("password2!")))
                         .role(UserRole.USER)
+                        .email("testUser2@naver.com")
                         .signupType(SignupType.LOCAL)
                         .build();
 

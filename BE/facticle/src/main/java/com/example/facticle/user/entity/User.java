@@ -39,8 +39,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Email(message = "email should be valid")
-    @Size(max = 255, message = "email must not exceed 255 characters")
     @Column(unique = true)
     private String email;
 
@@ -105,5 +103,11 @@ public class User {
     }
     public void updateProfileImage(String filepath){
         this.profileImage = filepath;
+    }
+    public void updateNickname(String nickname){
+        this.nickname = nickname;
+    }
+    public void updateEmail(String email){
+        this.email = email;
     }
 }

@@ -14,6 +14,7 @@ import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.exception.InvalidTokenException;
 import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
+import com.example.facticle.user.dto.UpdateProfileRequestDto;
 import com.example.facticle.user.entity.*;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
@@ -318,5 +319,37 @@ public class UserService {
         user.updateProfileImage(DEFAULT_PROFILE_IMAGE_URL);
 
         return user.getProfileImage();
+    }
+
+    /**
+     * 회원 정보 조회
+     */
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    }
+
+    /**
+     * 회원 정보 수정
+     */
+    public User updateUserProfile(Long userId, UpdateProfileRequestDto updateProfileRequestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if(updateProfileRequestDto.getNickname() != null){
+            if (userRepository.existsByNickname(updateProfileRequestDto.getNickname())) {
+                throw new InvalidInputException("Invalid input", Map.of("nickname", "nickname already exist."));
+            }
+            user.updateNickname(updateProfileRequestDto.getNickname());
+        }
+
+        if(updateProfileRequestDto.getEmail() != null){
+            if(userRepository.existsByEmail(updateProfileRequestDto.getEmail())){
+                throw new InvalidInputException("Invalid input", Map.of("email", "Email already exists."));
+            }
+            user.updateEmail(updateProfileRequestDto.getEmail());
+        }
+
+        return user;
     }
 }

@@ -9,6 +9,7 @@ import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.exception.InvalidTokenException;
 import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
+import com.example.facticle.user.dto.UpdateProfileRequestDto;
 import com.example.facticle.user.entity.*;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
@@ -76,6 +77,7 @@ class UserServiceTest {
                 .localAuth(new LocalAuth("user1", passwordEncoder.encode("userPassword1!")))
                 .role(UserRole.USER)
                 .signupType(SignupType.LOCAL)
+                .email("user1@naver.com")
                 .build();
 
         user2 = User.builder()
@@ -83,6 +85,7 @@ class UserServiceTest {
                 .localAuth(new LocalAuth("user2", passwordEncoder.encode("userPassword2!")))
                 .role(UserRole.USER)
                 .signupType(SignupType.LOCAL)
+                .email("user2@gmail.com")
                 .build();
 
         userRepository.save(user1);
@@ -292,8 +295,43 @@ class UserServiceTest {
         entityManager.clear();
         User findUser2 = userRepository.findById(user.getUserId()).get();
         Assertions.assertThat(findUser2.getProfileImage()).isEqualTo(DEFAULT_PROFILE_IMAGE_URL);
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정 - 성공")
+    void updateUserProfileSuccessTest(){
+        User user = userRepository.findById(1L).get();
 
 
+        userService.updateUserProfile(user.getUserId(), new UpdateProfileRequestDto("updatedNickname", "newEmail@naver.com"));
+        entityManager.flush();
+        entityManager.clear();
+        User newUser = userRepository.findById(1L).get();
 
+
+        Assertions.assertThat(newUser.getNickname()).isEqualTo("updatedNickname");
+        Assertions.assertThat(newUser.getEmail()).isEqualTo("newEmail@naver.com");
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정 - 실패")
+    void updateUserProfileFailTest(){
+        User user = userRepository.findById(1L).get();
+
+        //닉네임 중복
+        Assertions.assertThatThrownBy(() -> userService.updateUserProfile(user.getUserId(), new UpdateProfileRequestDto(user.getNickname(), "newEmail@naver.com")))
+                .isInstanceOf(InvalidInputException.class)
+                .satisfies(ex -> {
+                    InvalidInputException e = (InvalidInputException) ex;
+                    Assertions.assertThat(e.getErrors()).containsKey("nickname");
+                });
+
+        //이메일 중복
+        Assertions.assertThatThrownBy(() -> userService.updateUserProfile(user.getUserId(), new UpdateProfileRequestDto("newNickname", user.getEmail())))
+                .isInstanceOf(InvalidInputException.class)
+                .satisfies(ex -> {
+                    InvalidInputException e = (InvalidInputException) ex;
+                    Assertions.assertThat(e.getErrors()).containsKey("email");
+                });
     }
 }
