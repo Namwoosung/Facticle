@@ -2,14 +2,24 @@ import Axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 Axios.defaults.baseURL = API_URL;
+Axios.defaults.withCredentials = true;
 
 export class HttpService {
     _axios = Axios.create(); // Axios 인스턴스 생성
 
+   
+    addJWTToken(token: string) {
+        this._axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
+    removeJWTToken() {
+        delete this._axios.defaults.headers.common['Authorization'];
+    }
+    // }
     // 요청 인터셉터 추가 (인터셉트 )
-    addRequestInterceptor(onFulfilled: any, onRejected: any) { 
+    addRequestInterceptor(onFulfilled: any, onRejected: any) {
         this._axios.interceptors.request.use(onFulfilled, onRejected);
-    };
+    }
 
     // 응답 인터셉터 추가
     addResponseInterceptor(onFulfilled: any, onRejected: any) {
@@ -18,13 +28,14 @@ export class HttpService {
 
     // 요청 옵션 설정
     getOptionsConfig = (method: string, url: string, data: any) => {
+        url = '/api' + url;
         return {
             method,
             url,
             data,
             header: {
                 'Content-Type': 'application/json',
-            }
+            },
         };
     };
 
@@ -32,7 +43,7 @@ export class HttpService {
         return new Promise((resolve, reject) => {
             this._axios
                 .request(options)
-                .then((response) => resolve(response))
+                .then((response) => resolve(response.data))
                 .catch((error) => reject(error));
         });
     }

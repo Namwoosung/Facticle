@@ -5,10 +5,11 @@ export const RegisterWrapper = styled.div`
     width: 400px;
     margin: 0 auto;
     display: flex;
+    height: 100vh;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    margin-top: 40px;
-    margin-bottom:40px
+    margin-bottom: 40px
 `;
 
 export const InputWrapper = styled.div`

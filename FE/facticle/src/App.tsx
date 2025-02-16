@@ -3,7 +3,8 @@ import Home from './pages/home';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register';
 import { Routes, Route } from 'react-router-dom';
-
+import Redirection from './pages/auth/redirection';
+import RegisterOauth from './pages/auth/register-oauth';
 
 const RootElement = styled.div`
   @font-face {
@@ -44,6 +45,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register-oauth" element={<RegisterOauth />} />
+        <Route path='/oauth/callback/*' element={<Redirection />} />
       </Routes>
     </RootElement>
   )

@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Input from "../../../components/input";
-import { FcGoogle } from "react-icons/fc";
-import { SiNaver } from "react-icons/si";
-import { RiKakaoTalkFill } from "react-icons/ri";
+import { showSnackbar } from "../../../components/snackbar/util";
 import {
     LoginWrapper,
     HomeButton,
@@ -12,12 +10,17 @@ import {
     EasyLoginContainer,
     EasyLoginLine,
     EasyLoginText,
-    SNSContainer,
-    SNSButton,
 } from "./login.styles";
 import authService from "../../../services/auth/auth.service";
+import { AuthProvider, useAuth } from "../../../context";
+import { useNavigate } from "react-router-dom";
+import SNSLogin from "./snslogin";
+import userService from "../../../services/user/user.service";
+import HttpService from "../../../services/htttp.service";
 
 function Login() {
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "", 
         password: "",
@@ -34,7 +37,35 @@ function Login() {
             setErrorCredentials("아이디와 비밀번호를 입력해주세요.");
             return;
         }
-        
+
+        try {
+            const response: any = await authService.login(formData);
+    
+            if (response?.data?.code === 200) {
+                login(response.data.access_token);
+                showSnackbar("로그인이 완료되었습니다.");
+                setErrorCredentials("");
+    
+                userService.getUserProfile()
+                    .then((response: any) => {
+                        console.log(response);
+                    });
+    
+                // navigate("/");
+            }
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                setErrorCredentials("아이디 또는 비밀번호가 일치하지 않습니다.");
+            } else {
+                setErrorCredentials("서버 오류가 발생했습니다.");
+            }
+        }
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+            handleLogin();
+        }
     };
 
     return (
@@ -56,6 +87,7 @@ function Login() {
                     handleChange("password", event.target.value);
                 }}
                 placeholder="비밀번호"
+                onKeyDown={handleKeyDown}
                 tabIndex={2}
             />
 
@@ -73,17 +105,7 @@ function Login() {
                 <EasyLoginText>간편로그인</EasyLoginText>
             </EasyLoginContainer>
 
-            <SNSContainer>
-                <SNSButton bgColor="#FEE500" tabIndex={5}>
-                    <RiKakaoTalkFill color="#3E2723" size={30} />
-                </SNSButton>
-                <SNSButton bgColor="#03C75A" tabIndex={6}>
-                    <SiNaver  size={20}/>
-                </SNSButton>
-                <SNSButton bgColor="#d9d9d9" tabIndex={7}>
-                    <FcGoogle size={30}/>
-                </SNSButton>
-            </SNSContainer>
+            <SNSLogin />
         </LoginWrapper>
     );
 }

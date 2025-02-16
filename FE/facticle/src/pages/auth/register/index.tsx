@@ -2,9 +2,14 @@ import { useState } from "react";
 import { HomeButton, RegisterWrapper, RegisterButton, InputWrapper, CheckButton } from "./register.styles";
 import Avatar from "../../../components/avatar";
 import Input from "../../../components/input";
+import authService from "../../../services/auth/auth.service";
+import { showSnackbar } from "../../../components/snackbar/util";
+import { FaCheckCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 
 function Register() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "",
         password: "",
@@ -74,15 +79,56 @@ function Register() {
     };
 
     // ID 중복 확인 함수
-    const handleCheck = (key: "username" | "nickname") => {
-        setCheckFlags((prev) => ({ ...prev, [key]: true }));
-        if (errors[key].error) {
-            setErrors((prev) => ({ ...prev, [key]: { error: false, message: "" } }));
+    const handleCheck = async (key: "username" | "nickname") => {
+        switch (key) {
+            case "username":
+                // ID 중복 확인 요청
+                try{
+                    const response: any = await authService.idcheck({ username: formData.username });
+                    if(response?.data?.code === 200){
+                        if(response.data.is_available){
+                            setErrors((prev) => ({ ...prev, [key]: { error: false, message: "" } }));
+                            setCheckFlags((prev) => ({ ...prev, [key]: true }));
+                        } else {
+                            setErrors((prev) => ({ ...prev, [key]: { error: true, message: "이미 사용중인 아이디입니다." } }));
+                        }
+                    }
+                } catch (error: any) {
+                   if (error.response?.status === 400) {
+                        setErrors((prev) => ({ ...prev, [key]: { error: true, message: "문자, 숫자 및 밑줄(_)만 사용할 수 있습니다." } }));
+                    } else {
+                        setErrors((prev) => ({ ...prev, [key]: { error: true, message: "서버 오류가 발생했습니다." } }));
+                    }
+                }
+                
+                break;
+            case "nickname":
+                // 닉네임 중복 확인 요청
+                try {
+                    const response: any = await authService.nicknamecheck({ nickname: formData.nickname });
+                    if (response?.data?.code === 200) {
+                        if (response.data.is_available) {
+                            setErrors((prev) => ({ ...prev, [key]: { error: false, message: "" } }));
+                            setCheckFlags((prev) => ({ ...prev, [key]: true }));
+                        } else {
+                            setErrors((prev) => ({ ...prev, [key]: { error: true, message: "이미 사용중인 닉네임입니다." } }));
+                        }
+                    }
+                } catch (error: any) {
+                    if (error.response?.status === 400) {
+                        setErrors((prev) => ({ ...prev, [key]: { error: true, message: "2글자 이상 20글자 이하로 입력해주세요." } }));
+                    } else {
+                        setErrors((prev) => ({ ...prev, [key]: { error: true, message: "서버 오류가 발생했습니다." } }));
+                    }
+                }
+                break;
+            default:
+                break;
         }
     };
 
     // 회원가입 함수
-    const handleRegister = () => {
+    const handleRegister = async () => {
         const newErrors = { ...errors };
 
         // ID 유효성 검사
@@ -122,6 +168,21 @@ function Register() {
         setErrors(newErrors);
 
         // 에러가 없을 경우 회원가입 요청
+        const registerData = {
+            username: formData.username,
+            password: formData.password,
+            nickname: formData.nickname,
+        };
+
+        try {
+            const response: any = await authService.register(registerData);
+            if (response?.data?.code === 201) {
+                showSnackbar("회원가입이 완료되었습니다.", <FaCheckCircle size={20} color="green"/>);
+                navigate("/login");
+            }
+
+        } catch (error: any) {
+        }
     };
 
     return (
