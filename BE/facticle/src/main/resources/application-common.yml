@@ -50,6 +50,6 @@ cloud: #S3 설정 -> key의 경우 노출되지 않는 것이 중요 -> 베포 �
       bucket: ${AWS_BUCKET_NAME}
 
 naver:
-  api:
-    client-id: ${NAVER_API_CLIENT_ID}
-    client-secret: ${NAVER_API_CLIENT_SECRET}
+  news:
+    client-id: ${NAVER_SEARCH_CLIENT_ID}
+    client-secret: ${NAVER_SEARCH_CLIENT_SECRET}
