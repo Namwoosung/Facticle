@@ -1,33 +1,42 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useState } from "react";
 import HttpService from "../services/htttp.service";
 
 interface AuthContextType {
+    isAuthenticated: boolean | false;
+    nickname: string | null;
+    profileImage: string | null;
     login: (token: string) => void;
     logout: () => void;
+    getUserProfile: (nickname: string, profileImage: string) => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [nickname, setNickname] = useState<string | null>(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+
     const login = (token: string) => {
         HttpService.addJWTToken(token);
+        setIsAuthenticated(true);
     };
 
     const logout = () => {
         HttpService.removeJWTToken();
+        setIsAuthenticated(false);
     };
 
+    const getUserProfile = (nickname: string, profileImage: string) => {
+        setNickname(nickname);
+        setProfileImage(profileImage);
+    }
+
     return (
-        <AuthContext.Provider value={{ login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, nickname, profileImage, login, logout, getUserProfile }}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
-};
+

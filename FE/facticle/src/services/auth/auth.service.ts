@@ -6,7 +6,7 @@ class AuthService {
         return await HttpService.post(loginEndpoint, payload);
     }
 
-    loginSocial = async (payload: { provider: string, token: string }) => {
+    loginSocial = async (payload: { provider: string, code: string }) => {
         const loginOauthEndpoint = '/users/login/social';
         return await HttpService.post(loginOauthEndpoint, payload);
     }

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../../context";
+import { useAuth } from "../../../hooks/useAuth";
 import authService from "../../../services/auth/auth.service";
 
 function Redirection() {
@@ -13,11 +13,11 @@ function Redirection() {
         const params = new URLSearchParams(location.search);
         const pathSegments = location.pathname.split('/'); // 경로를 '/'로 분리
         const platform = pathSegments[pathSegments.length - 1];
-        const token = params.get("code");
+        const code = params.get("code");
 
-        if (!token) return;
+        if (!code) return;
 
-        authService.loginSocial({ provider: platform, token })
+        authService.loginSocial({ provider: platform, code })
             .then((response: any) => {
                 if (response?.data?.code === 200) {
                     login(response.data.accessToken);

@@ -12,14 +12,13 @@ import {
     EasyLoginText,
 } from "./login.styles";
 import authService from "../../../services/auth/auth.service";
-import { AuthProvider, useAuth } from "../../../context";
+import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import SNSLogin from "./snslogin";
 import userService from "../../../services/user/user.service";
-import HttpService from "../../../services/htttp.service";
 
 function Login() {
-    const { login } = useAuth();
+    const { login, getUserProfile, nickname,profileImage } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "", 
@@ -43,15 +42,15 @@ function Login() {
     
             if (response?.data?.code === 200) {
                 login(response.data.access_token);
-                showSnackbar("로그인이 완료되었습니다.");
                 setErrorCredentials("");
     
                 userService.getUserProfile()
-                    .then((response: any) => {
-                        console.log(response);
+                    .then((res: any) => {
+                        getUserProfile(res.data.User.nickname, res.data.User.profileImage);
+                        showSnackbar("로그인이 완료되었습니다.");
+                        navigate("/");
+                        // navigate("/");
                     });
-    
-                // navigate("/");
             }
         } catch (error: any) {
             if (error.response?.status === 401) {
