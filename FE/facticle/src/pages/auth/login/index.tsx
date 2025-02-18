@@ -48,7 +48,6 @@ function Login() {
                     .then((res: any) => {
                         getUserProfile(res.data.User.nickname, res.data.User.profileImage);
                         showSnackbar("로그인이 완료되었습니다.");
-                        navigate("/");
                         // navigate("/");
                     });
             }
