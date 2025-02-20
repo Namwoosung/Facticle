@@ -7,9 +7,10 @@ interface AvatarProps {
   src?: string;
   alt?: string;
   size?: number;
+  control?: boolean;
 }
 
-function Avatar({ src = Profile , alt = '', size = 40 }: AvatarProps) {
+function Avatar({ src = Profile , alt = '', size = 40, control = false }: AvatarProps) {
     const [image, setImage] = useState<string>(src);
     const fileInputRef = useRef<HTMLInputElement | null>(null); // 파일 업로드 input 요소 참조
 
@@ -29,7 +30,7 @@ function Avatar({ src = Profile , alt = '', size = 40 }: AvatarProps) {
     };
 
   return (
-      <div style={{ height: size+30, paddingTop: 10 }}>
+      <div>
           <AvatarContainer size={size}>
               <img src={image} alt={alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               <input
@@ -40,9 +41,11 @@ function Avatar({ src = Profile , alt = '', size = 40 }: AvatarProps) {
                   accept="image/*"
               />
           </AvatarContainer>
-          <CameraContainer onClick={handleButtonClick}>
-              <FaCamera size={20} color="white" />
-          </CameraContainer>
+          {control && (
+                <CameraContainer onClick={handleButtonClick}>
+                    <FaCamera size={20} color="white" />
+                </CameraContainer>
+            )}
       </div>
   );
 };

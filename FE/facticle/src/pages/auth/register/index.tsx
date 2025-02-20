@@ -188,7 +188,7 @@ function Register() {
     return (
         <RegisterWrapper>
             <HomeButton to="/">FACTICLE</HomeButton>
-            <Avatar size={150} />
+            <Avatar size={150} control={true}/>
 
             <InputWrapper>
                 <Input
