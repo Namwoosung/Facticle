@@ -1,6 +1,17 @@
-import { HomeButton, NavButton, LoginButton, RegisterButton, HeaderWrapper } from "./header.styles";
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import Avatar from "../avatar";
+import Profile from "../../assets/images/profile.png";
+import { HeaderWrapper, ProfileContainer, HomeButton, NavButton, LoginButton, RegisterButton } from "./header.styles";
 
 function Header() {
+    const { isAuthenticated, nickname, profileImage, logout } = useAuth();
+    const [imageSrc, setImageSrc] = useState(profileImage || Profile);
+
+    const handleLogout = () => {
+        logout();
+    };
+
     return (
         <HeaderWrapper>
             <div>
@@ -11,10 +22,20 @@ function Header() {
                 <NavButton to="/search">검색</NavButton>
             </div>
 
-            <div>
-                <LoginButton to="/login">로그인</LoginButton>
-                <RegisterButton to="/register">회원가입</RegisterButton>
-            </div>     
+            {isAuthenticated ? (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                    <ProfileContainer>
+                        <Avatar src={imageSrc} />
+                        <NavButton to="/mypage">{nickname} 님</NavButton>
+                    </ProfileContainer>
+                    <RegisterButton to="/login" onClick={handleLogout}>로그아웃</RegisterButton>
+                </div>
+            ) : (
+                <div>
+                    <LoginButton to="/login">로그인</LoginButton>
+                    <RegisterButton to="/register">회원가입</RegisterButton>
+                </div>
+            )}
         </HeaderWrapper>
     );
 }

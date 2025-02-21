@@ -15,7 +15,7 @@ export class HttpService {
     removeJWTToken() {
         delete this._axios.defaults.headers.common['Authorization'];
     }
-    // }
+
     // 요청 인터셉터 추가 (인터셉트 )
     addRequestInterceptor(onFulfilled: any, onRejected: any) {
         this._axios.interceptors.request.use(onFulfilled, onRejected);
@@ -52,7 +52,7 @@ export class HttpService {
     get = async (url: string) => await this.request(this.getOptionsConfig('GET', url, null));
 
     // POST 요청
-    post = async (url: string, data: any) => await this.request(this.getOptionsConfig('POST', url, data));
+    post = async (url: string, data: any = null) => await this.request(this.getOptionsConfig('POST', url, data));
 
     // PUT 요청
     put = async (url: string, data: any) => await this.request(this.getOptionsConfig('PUT', url, data));

@@ -30,6 +30,11 @@ class AuthService {
         const registerOauthEndpoint = '/users/signup/social';
         return await HttpService.post(registerOauthEndpoint, payload);
     }
+
+    renewToken = async () => {
+        const renewTokenEndpoint = '/users/token/refresh';
+        return await HttpService.post(renewTokenEndpoint);
+    }
 }
 
 export default new AuthService();

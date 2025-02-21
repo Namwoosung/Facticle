@@ -4,9 +4,14 @@ import { Link } from "react-router-dom";
 export const HeaderWrapper = styled.div`
   width: 1280px;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+`;
+
+export const ProfileContainer = styled.div`
+  display: flex;
   align-items: center;
 `;
 
@@ -45,8 +50,6 @@ export const RegisterButton = styled(Link)`
   border-style: none;
   border-radius: 7px;
   outline: none;
-  width: 130px;
-  height: 60px;
   padding: 0.6em 0.8em;
 
   &:hover {
