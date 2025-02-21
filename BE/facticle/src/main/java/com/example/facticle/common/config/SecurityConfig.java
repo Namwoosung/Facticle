@@ -96,6 +96,7 @@ public class SecurityConfig {
      * 웹 브라우저에서 보안 정책을 적용하는 방식, 기본적으로 다른 출처(Origin)에서 보내는 api 요청은 거부
      *  => 프론트 -> 백으로 보내는 요청도 거부됨(ex) localhost:3000 -> localhost:8080)
      * 즉 cross origin에서 어느 도메인으로 부터오는 어느 요청들을 허용할 것인지에 관한 설정
+     * 이 CORS는 철저히 브라우저의 기준, 브라우저의 localhost:3000에서 localhost:8080으로 보내니 다른 도메인으로 인식
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
