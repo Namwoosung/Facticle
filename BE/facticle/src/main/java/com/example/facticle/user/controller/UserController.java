@@ -227,6 +227,34 @@ public class UserController {
         return BaseResponse.success(Map.of("code", 200, "User", getProfileResponseDto), "User profile updated successfully.");
     }
 
+    /**
+     * 소셜 로그인
+     */
+    @PostMapping("/login/social")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse socialLogin(@RequestBody @Valid SocialLoginRequestDto socialLoginRequestDto, HttpServletResponse response){
+        //로그인 수행
+        SocialLoginResponseDto socialLoginResponseDto = userService.socialLogin(socialLoginRequestDto);
+
+        TokenInfo tokenInfo = socialLoginResponseDto.getTokenInfo();
+
+        // refresh token은 http only secure 쿠키에 저장
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/users") //유저관련 api에 한정하여 전송
+                .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
+                .sameSite("None")
+                .build();
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+        return BaseResponse.success(Map.of(
+                "code", 200,
+                "grant_type", tokenInfo.getGrantType(),
+                "access_token", tokenInfo.getAccessToken(),
+                "is_new", socialLoginResponseDto.isNew()),
+                "Login successful.");
+    }
 
     /**
      * 마이 페이지 조회(지금은 wjt 인증 테스트를 위해 임시 생성)

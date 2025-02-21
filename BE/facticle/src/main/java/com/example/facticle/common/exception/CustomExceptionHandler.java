@@ -111,6 +111,18 @@ public class CustomExceptionHandler {
         return BaseResponse.failure(data, ex.getMessage());
     }
 
+    @ExceptionHandler(OAuthException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse oAuthException(OAuthException ex){
+        log.warn("OAuth error: {}", ex.getMessage());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", 401);
+        data.put("error", ex.getMessage());
+
+        return BaseResponse.failure(data, "OAuth authentication failed");
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public BaseResponse defaultException(Exception ex){

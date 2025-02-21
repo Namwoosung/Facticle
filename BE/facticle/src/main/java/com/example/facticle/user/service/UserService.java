@@ -1,7 +1,6 @@
 package com.example.facticle.user.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -12,10 +11,10 @@ import com.example.facticle.common.dto.CustomUserDetails;
 import com.example.facticle.common.exception.ExpiredTokenException;
 import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.exception.InvalidTokenException;
-import com.example.facticle.user.dto.LocalLoginRequestDto;
-import com.example.facticle.user.dto.LocalSignupRequestDto;
-import com.example.facticle.user.dto.UpdateProfileRequestDto;
+import com.example.facticle.user.dto.*;
 import com.example.facticle.user.entity.*;
+import com.example.facticle.user.oauth.SocialAuthProvider;
+import com.example.facticle.user.oauth.SocialAuthProviderFactory;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +47,7 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final SocialAuthProviderFactory socialAuthProviderFactory;
 
     //S3 설정 및 사진 규격
     private final AmazonS3 amazonS3;
@@ -181,10 +179,16 @@ public class UserService {
             throw new InvalidTokenException("Refresh token is invalid or revoked.");
         }
 
-        //토큰 생성 및 반환
+        //토큰 생성 및 반환(local인 경우와 social인 경우 username이 다르므로 구분하여 생성)
+        String username = user.getLocalAuth().getUsername();
+        //social user인 경우
+        if(user.getSignupType() == SignupType.SOCIAL){
+            username = user.getSocialAuth().getSocialProvider() + "_" + user.getSocialAuth().getSocialId();
+        }
+
         CustomUserDetails userDetails = new CustomUserDetails(
                 user.getUserId(),
-                user.getLocalAuth().getUsername(),
+                username,
                 "",
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
@@ -351,5 +355,68 @@ public class UserService {
         }
 
         return user;
+    }
+
+
+    /**
+     * 소셜 로그인
+     */
+    public SocialLoginResponseDto socialLogin(SocialLoginRequestDto socialLoginRequestDto) {
+        //authorization code와 provider를 기반으로 user 정보 획득
+        SocialAuthProvider authProvider = socialAuthProviderFactory.getAuthProvider(socialLoginRequestDto.getProvider());
+        SocialUserInfo userInfo = authProvider.getUserInfo(socialLoginRequestDto.getCode());
+        log.debug("userInfo: {}", userInfo);
+
+        //유저 조회
+        User user = userRepository.findBySocialAuthSocialIdAndSocialAuthSocialProvider(
+                userInfo.getSocialId(), userInfo.getProvider()
+        ).orElse(null);
+        boolean isNew = false;
+
+        //기존 유저가 아니라면 DB 저장 진행
+        if(user == null){
+            isNew = true;
+            user = userRepository.save(User.builder()
+                    .nickname(UUID.randomUUID().toString()) //random 값으로 설정, 이후 프론트엔드에서 isNew = true라면 닉네임 설정 화면으로 넘어가도록 합의
+                    .socialAuth(new SocialAuth(userInfo.getProvider(), userInfo.getSocialId()))
+                    .email(userInfo.getEmail())
+                    .role(UserRole.USER)
+                    .signupType(SignupType.SOCIAL)
+                    .build());
+        }
+
+        //access token 및 refresh token 발급
+        CustomUserDetails userDetails = new CustomUserDetails(
+                user.getUserId(),
+                user.getSocialAuth().getSocialProvider() + "_" + user.getSocialAuth().getSocialId(), //social 유저의 경우 provider와 socialId의 조합을 username으로 활용
+                "",
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(authentication);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication);
+
+        //새로 refresh token을 발급받았으니 기존의 refresh token 중 유효한 token은 모두 revoke
+        refreshTokenRepository.revokeAllByUser(user);
+
+        //새로 발급한 refresh token 생성
+        RefreshToken refreshToken = RefreshToken.builder()
+                .user(user)
+                .hashedRefreshToken(passwordEncoder.encode(newRefreshToken))
+                .isRevoked(false)
+                .issuedAt(jwtTokenProvider.getIssuedAt(newRefreshToken))
+                .expiresAt(jwtTokenProvider.getExpiresAt(newRefreshToken))
+                .build();
+
+        //refresh token 저장
+        user.addRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshToken);
+
+        //user의 lastLogin 필드 update
+        user.updateLastLogin(LocalDateTime.now());
+
+        return new SocialLoginResponseDto(new TokenInfo("Bearer", newAccessToken, newRefreshToken), isNew);
     }
 }

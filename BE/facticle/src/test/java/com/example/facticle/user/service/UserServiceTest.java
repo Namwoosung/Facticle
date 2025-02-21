@@ -9,8 +9,10 @@ import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.common.exception.InvalidTokenException;
 import com.example.facticle.user.dto.LocalLoginRequestDto;
 import com.example.facticle.user.dto.LocalSignupRequestDto;
+import com.example.facticle.user.dto.SocialLoginRequestDto;
 import com.example.facticle.user.dto.UpdateProfileRequestDto;
 import com.example.facticle.user.entity.*;
+import com.example.facticle.user.oauth.SocialAuthProviderFactory;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -22,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -68,7 +71,6 @@ class UserServiceTest {
     private final String BUCKET_NAME = "facticle-profile-images";
     private final String FOLDER_NAME = "profile-images/";
     private final String DEFAULT_PROFILE_IMAGE_URL = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png";
-
 
     @BeforeEach
     void setUp() throws InterruptedException {
@@ -300,13 +302,13 @@ class UserServiceTest {
     @Test
     @DisplayName("회원 정보 수정 - 성공")
     void updateUserProfileSuccessTest(){
-        User user = userRepository.findById(1L).get();
+        User user = userRepository.findByLocalAuthUsername("user1").get();
 
 
         userService.updateUserProfile(user.getUserId(), new UpdateProfileRequestDto("updatedNickname", "newEmail@naver.com"));
         entityManager.flush();
         entityManager.clear();
-        User newUser = userRepository.findById(1L).get();
+        User newUser = userRepository.findByLocalAuthUsername("user1").get();
 
 
         Assertions.assertThat(newUser.getNickname()).isEqualTo("updatedNickname");
@@ -316,7 +318,7 @@ class UserServiceTest {
     @Test
     @DisplayName("회원 정보 수정 - 실패")
     void updateUserProfileFailTest(){
-        User user = userRepository.findById(1L).get();
+        User user = userRepository.findByLocalAuthUsername("user1").get();
 
         //닉네임 중복
         Assertions.assertThatThrownBy(() -> userService.updateUserProfile(user.getUserId(), new UpdateProfileRequestDto(user.getNickname(), "newEmail@naver.com")))

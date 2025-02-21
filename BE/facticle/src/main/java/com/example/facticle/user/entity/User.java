@@ -24,7 +24,6 @@ import java.util.List;
     uniqueConstraints = {
             @UniqueConstraint(columnNames = "nickname"),
             @UniqueConstraint(columnNames = "username"),
-            @UniqueConstraint(columnNames = "email"),
             @UniqueConstraint(columnNames = {"socialProvider", "socialId"})
     }
 )
