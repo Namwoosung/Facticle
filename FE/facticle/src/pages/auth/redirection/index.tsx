@@ -21,7 +21,7 @@ function Redirection() {
             .then((response: any) => {
                 if (response?.data?.code === 200) {
                     login(response.data.accessToken);
-                    if (response?.data?.nickname === null) {
+                    if (response?.data?.is_new) {
                         navigate("/register-oauth", { replace: true });
                     } else {
                         navigate("/", { replace: true });
