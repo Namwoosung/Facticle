@@ -86,7 +86,7 @@ public class UserController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/users") //유저관련 api에 한정하여 전송
+                .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")
                 .build();
@@ -108,7 +108,7 @@ public class UserController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/users") //유저관련 api에 한정하여 전송
+                .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")
                 .build();
@@ -129,7 +129,7 @@ public class UserController {
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/users")
+                .path("/api/users")
                 .maxAge(0) // 쿠키 삭제
                 .sameSite("None")
                 .build();
@@ -242,7 +242,7 @@ public class UserController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/users") //유저관련 api에 한정하여 전송
+                .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")
                 .build();
