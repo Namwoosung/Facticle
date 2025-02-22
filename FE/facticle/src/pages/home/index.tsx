@@ -9,7 +9,6 @@ const PageWrapper = styled.div`
 function Home() {
     return (
         <PageWrapper>
-            <Header />
             <h1>Home</h1>
             <h1>Home</h1>
         </PageWrapper>
