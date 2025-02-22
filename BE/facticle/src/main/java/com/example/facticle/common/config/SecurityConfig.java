@@ -40,7 +40,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //비밀번호 해시에 사용
+    //해시에 사용할 Encoder 지정, 일반적으로 많이 사용하는 BCryptPasswordEncoder를 사용
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
