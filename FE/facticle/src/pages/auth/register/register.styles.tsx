@@ -5,17 +5,12 @@ export const RegisterWrapper = styled.div`
     width: 400px;
     margin: 0 auto;
     display: flex;
-    height: 100vh;
+    height: 100%;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-top: 40px;
     margin-bottom: 40px
-`;
-
-export const InputWrapper = styled.div`
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
 `;
 
 export const HomeButton = styled(Link)`
@@ -49,7 +44,7 @@ export const CheckButton = styled.button`
 
 export const RegisterButton = styled.button`
     width: 70%;
-    height: 60px;
+    height: 50px;
     margin-top: 20px;
     border: none;
     border-radius: 10px;
@@ -60,9 +55,6 @@ export const RegisterButton = styled.button`
     cursor: pointer;
 
     &:hover {
-        opacity: 0.8;
-    }
-    &:focus {
         opacity: 0.8;
     }
 `;
