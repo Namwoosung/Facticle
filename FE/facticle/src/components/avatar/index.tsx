@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { FaCamera } from "react-icons/fa";
 import Profile from '../../assets/images/profile.png';
-import { AvatarContainer, CameraContainer } from './avatar.styles';
+import { AvatarContainer, AvatarImage, CameraContainer } from './avatar.styles';
 
 interface AvatarProps {
   src?: string;
@@ -31,8 +31,8 @@ function Avatar({ src = Profile , alt = '', size = 40, control = false }: Avatar
 
   return (
       <div>
-          <AvatarContainer size={size}>
-              <img src={image} alt={alt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <AvatarContainer size={size} borderStyle={control ? 'dotted' : 'none'}>
+              <AvatarImage size={control ? size : size + 5} src={image} alt={alt} />
               <input
                   type="file"
                   ref={fileInputRef}

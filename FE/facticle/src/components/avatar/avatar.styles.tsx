@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const AvatarContainer = styled.div<{ size: number }>`
+export const AvatarContainer = styled.div<{ size: number, borderStyle: string }>`
   width: ${({ size }) => size}px;
   height: ${({ size }) => size}px;
   border-radius: 50%; /* borderRadius -> border-radius로 수정 */
@@ -10,8 +10,15 @@ export const AvatarContainer = styled.div<{ size: number }>`
   align-items: center;
   background-color: #f0f0f0;
   font-size: ${({ size }) => size / 3}px;
-  border: 1px solid #f0f0f0;
+  border: 1px ${({ borderStyle }) => borderStyle} black;
   color: #fff;
+`;
+
+export const AvatarImage = styled.img<{ size: number }>`
+  width: ${({ size }) => size - 5}px;
+  height: ${({ size }) => size - 5}px;
+  border-radius: 50%;
+  object-fit: cover;
 `;
 
 export const CameraContainer = styled.div`
