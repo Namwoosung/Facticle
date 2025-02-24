@@ -180,9 +180,12 @@ public class UserService {
         }
 
         //토큰 생성 및 반환(local인 경우와 social인 경우 username이 다르므로 구분하여 생성)
-        String username = user.getLocalAuth().getUsername();
-        //social user인 경우
-        if(user.getSignupType() == SignupType.SOCIAL){
+        String username = "";
+
+        if(user.getSignupType() == SignupType.LOCAL){
+            username = user.getLocalAuth().getUsername();
+        }
+        else if(user.getSignupType() == SignupType.SOCIAL){ //social user인 경우라면 username을 아래와 같이 사용
             username = user.getSocialAuth().getSocialProvider() + "_" + user.getSocialAuth().getSocialId();
         }
 
