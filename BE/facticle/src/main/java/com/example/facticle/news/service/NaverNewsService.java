@@ -24,15 +24,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class NaverNewsService {
-    private final NewsRepository newsRepository;
 
-    @Value("${naver.news.client-id}")
-    private String clientId;
-
-    @Value("${naver.news.client-secret}")
-    private String clientSecret;
-
-    private static final String NAVER_NEWS_API_URL = "https://openapi.naver.com/v1/search/news.json";
 
     // 테스트할 검색어 리스트 (필요 시 추가)
     private static final List<String> TEST_KEYWORDS = Arrays.asList(
