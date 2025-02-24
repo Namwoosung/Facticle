@@ -20,7 +20,7 @@ function Redirection() {
         authService.loginSocial({ provider: platform, code })
             .then((response: any) => {
                 if (response?.data?.code === 200) {
-                    login(response.data.accessToken);
+                    login(response.data.access_token);
                     if (response?.data?.is_new) {
                         navigate("/register-oauth", { replace: true });
                     } else {
@@ -29,11 +29,7 @@ function Redirection() {
                 }
             })
             .catch((error: any) => {
-                if (error.response?.status === 400) {
-                    console.error("Unauthorized");
-                } else {
-                    console.error("Server Error");
-                }
+                // 에러 처리
             });
     
         navigate("/", { replace: true });

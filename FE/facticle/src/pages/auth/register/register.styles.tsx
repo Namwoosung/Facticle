@@ -20,6 +20,7 @@ export const HomeButton = styled(Link)`
     color: #080E4B;
     border-style: none;
     outline: none;
+    margin-bottom: 30px;
 `;
 
 //중복 확인 버튼

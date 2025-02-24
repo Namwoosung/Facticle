@@ -1,129 +1,120 @@
 import { useState } from "react";
-import { HomeButton, RegisterWrapper, RegisterButton, InputWrapper, CheckButton } from "./register.styles";
-import Avatar from "../../../components/avatar";
+import { HomeButton, RegisterWrapper, RegisterButton } from "./register.styles";
 import Input from "../../../components/input";
 import authService from "../../../services/auth/auth.service";
 import { showSnackbar } from "../../../components/snackbar/util";
 import { FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import userService from "../../../services/user/user.service";
 
 
 function RegisterOauth() {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        nickname: "",
-    });
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    nickname: "",
+    email: "",
+  });
 
-    const [errors, setErrors] = useState({
-        nickname: { error: false, message: "" },
-    });
+  const [errors, setErrors] = useState({
+    nickname: { error: false, message: "" },
+    email: { error: false, message: "" },
+  });
 
-    const [checkFlags, setCheckFlags] = useState({
-        nickname: false,
-    });
+  // 입력 값 변경 함수
+  const handleChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
-    // 입력 값 변경 함수
-    const handleChange = (key: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [key]: value }));
-    };
-
-    // Blur 이벤트 핸들러
-    const handleBlur = () => {
+  // Blur 이벤트 핸들러
+  const handleBlur = async (key: string) => {
+    switch (key) {
+      case "nickname":
         if (!formData.nickname) {
-            setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임을 입력해주세요." } }));
-        } else if (!checkFlags.nickname) {
-            setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임 중복 확인을 해주세요." } }));
+          setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임을 입력해주세요." } }));
+        } else if (!/^[a-zA-Z0-9가-힣-_]{2,20}$/.test(formData.nickname)) {
+          setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임은 2~20자 사이, 한글, 영어, 숫자, _,-만 사용할 수 있습니다." } }));
         } else {
-            setErrors((prev) => ({ ...prev, nickname: { error: false, message: "" } }));
-        }
-    };
-
-    // ID 중복 확인 함수
-    const handleCheck = async (key: string) => {
-        try {
+          try {
             const response: any = await authService.nicknamecheck({ nickname: formData.nickname });
-            if (response?.data?.code === 200) {
-                if (response.data.is_available) {
-                    setErrors((prev) => ({ ...prev, [key]: { error: false, message: "" } }));
-                    setCheckFlags((prev) => ({ ...prev, [key]: true }));
-                } else {
-                    setErrors((prev) => ({ ...prev, [key]: { error: true, message: "이미 사용중인 닉네임입니다." } }));
-                }
-            }
-        } catch (error: any) {
-            if (error.response?.status === 400) {
-                setErrors((prev) => ({ ...prev, [key]: { error: true, message: "2글자 이상 20글자 이하로 입력해주세요." } }));
+            if (response?.data?.code === 200 && response.data.is_available) {
+              setErrors((prev) => ({ ...prev, nickname: { error: false, message: "" } }));
             } else {
-                setErrors((prev) => ({ ...prev, [key]: { error: true, message: "서버 오류가 발생했습니다." } }));
+              setErrors((prev) => ({ ...prev, nickname: { error: true, message: "이미 사용중인 닉네임입니다." } }));
             }
+          } catch (error) {
+            setErrors((prev) => ({ ...prev, nickname: { error: true, message: "서버 오류가 발생했습니다." } }));
+          }
         }
-    };
-
-    // 회원가입 함수
-    const handleRegister = async () => {
-        const newErrors = { ...errors };
-
-        // 닉네임 유효성 검사
-        if (!formData.nickname) {
-            newErrors.nickname = { error: true, message: "닉네임을 입력해주세요." };
-        } else if (!checkFlags.nickname) {
-            newErrors.nickname = { error: true, message: "닉네임 중복 확인을 해주세요." };
+        break;
+      case "email":
+        if (formData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
+          setErrors((prev) => ({ ...prev, email: { error: true, message: "이메일 형식이 올바르지 않습니다." } }));
         } else {
-            newErrors.nickname = { error: false, message: "" };
+          setErrors((prev) => ({ ...prev, email: { error: false, message: "" } }));
         }
+        break;
+      default:
+        break;
+    }
+  };
 
-        setErrors(newErrors);
+  // 회원가입 함수
+  const handleRegister = async () => {
+    if (Object.values(errors).some((field) => field.error)) return;
 
-        // 에러가 없을 경우 회원가입 요청
-        const registerData = {
-            nickname: formData.nickname,
-        };
-
-        try {
-            const response: any = await authService.registerSocial(registerData);
-            if (response?.data?.code === 201) {
-                showSnackbar("회원가입이 완료되었습니다.", <FaCheckCircle size={20} color="green"/>);
-                navigate("/login");
-            }
-
-        } catch (error: any) {
-        }
+    // 에러가 없을 경우 회원가입 요청
+    const registerData = {
+      nickname: formData.nickname,
+      email: formData.email.trim() === "" ? null : formData.email,
     };
 
-    return (
-        <RegisterWrapper>
-            <HomeButton to="/">FACTICLE</HomeButton>
-            <Avatar size={150} />
+    try {
+      const response: any = await userService.updateUserProfile(registerData);
+      if (response?.data?.code === 201) {
+        showSnackbar("회원가입이 완료되었습니다.", <FaCheckCircle size={20} color="green" />);
+        navigate("/login");
+      }
 
-            <InputWrapper>
-                <Input
-                    type="text"
-                    value={formData.nickname}
-                    placeholder="닉네임"
-                    error={errors.nickname.error}
-                    errorMessage={errors.nickname.message}
-                    tabIndex={5}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        handleChange("nickname", event.target.value);
-                    }}
-                    onBlur={() => handleBlur()}
-                    disabled={checkFlags.nickname}
-                />
-                <CheckButton
-                    onClick={() => handleCheck("nickname")}
-                    tabIndex={6}
-                    disabled={checkFlags.nickname}>
-                    중복 확인
-                </CheckButton>
-            </InputWrapper>
+    } catch (error: any) {
+    }
+  };
 
-            <RegisterButton
-                onClick={handleRegister}
-                tabIndex={7}>
-                회원가입
-            </RegisterButton>
-        </RegisterWrapper>
-    );
+  return (
+    <RegisterWrapper>
+      <HomeButton to="/">FACTICLE</HomeButton>
+
+      <Input
+        type="text"
+        value={formData.nickname}
+        placeholder="닉네임"
+        error={errors.nickname.error}
+        errorMessage={errors.nickname.message}
+        tabIndex={5}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          handleChange("nickname", event.target.value);
+        }}
+        onBlur={() => handleBlur("nickname")}
+      />
+      <Input
+        type="email"
+        value={formData.email}
+        placeholder="이메일 (선택사항)"
+        error={errors.email.error}
+        errorMessage={errors.email.message}
+        tabIndex={6}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          handleChange("email", event.target.value);
+        }}
+        onBlur={() => handleBlur("email")}
+      />
+
+      <RegisterButton
+        onClick={handleRegister}
+        tabIndex={7}>
+        회원가입
+      </RegisterButton>
+    </RegisterWrapper>
+  );
 }
 
 export default RegisterOauth;

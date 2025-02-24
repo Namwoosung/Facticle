@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { HomeButton, RegisterWrapper, RegisterButton } from "./register.styles";
-import Avatar from "../../../components/avatar";
 import Input from "../../../components/input";
 import authService from "../../../services/auth/auth.service";
 import { showSnackbar } from "../../../components/snackbar/util";
@@ -88,9 +87,7 @@ function Register() {
         }
         break;
       case "email":
-        if (!formData.email) {
-          setErrors((prev) => ({ ...prev, email: { error: true, message: "이메일을 입력해주세요." } }));
-        } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
+        if (formData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
           setErrors((prev) => ({ ...prev, email: { error: true, message: "이메일 형식이 올바르지 않습니다." } }));
         } else {
           setErrors((prev) => ({ ...prev, email: { error: false, message: "" } }));
@@ -104,17 +101,14 @@ function Register() {
 
   // 회원가입 함수
   const handleRegister = async () => {
-
     if (Object.values(formData).some((value) => !value)) return;
 
     if (Object.values(errors).some((field) => field.error)) return;
 
     // 에러가 없을 경우 회원가입 요청
     const registerData = {
-      username: formData.username,
-      password: formData.password,
-      nickname: formData.nickname,
-      email: formData.email,
+      ...formData,
+      email: formData.email.trim() === "" ? null : formData.email,
     };
 
     try {
@@ -131,7 +125,6 @@ function Register() {
   return (
     <RegisterWrapper>
       <HomeButton to="/">FACTICLE</HomeButton>
-      <Avatar size={150} control={true} />
       <Input
         type="text"
         value={formData.username}
@@ -175,7 +168,7 @@ function Register() {
       <Input
         type="text"
         value={formData.email}
-        placeholder="이메일"
+        placeholder="이메일 (선택사항)"
         error={errors.email.error}
         errorMessage={errors.email.message}
         tabIndex={5}

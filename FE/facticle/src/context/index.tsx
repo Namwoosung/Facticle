@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import HttpService from "../services/htttp.service";
 import { setupAxiosInterceptors } from "../services/interceptors";
 
@@ -15,7 +14,6 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [nickname, setNickname] = useState<string | null>(null);
     const [profileImage, setProfileImage] = useState<string | null>(null);

@@ -11,12 +11,6 @@ export const RegisterWrapper = styled.div`
     align-items: center;
 `;
 
-export const InputWrapper = styled.div`
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-`;
-
 export const HomeButton = styled(Link)`
     font-size: 50px;
     font-weight: 900;
@@ -24,27 +18,9 @@ export const HomeButton = styled(Link)`
     color: #080E4B;
     border-style: none;
     outline: none;
+    margin-bottom: 30px;
 `;
 
-//중복 확인 버튼
-export const CheckButton = styled.button`
-    width: 100px;
-    height: 50px;
-    border: 1px solid #d5d5d5;
-    border-radius: 10px;
-    background-color: #fff;
-    color: black;
-    font-size: 14px;
-    margin-left: 10px;
-    cursor: pointer;
-
-    &:hover {
-        opacity: 0.8;
-    }
-    &:focus {
-        opacity: 0.8;
-    }
-`;
 
 export const RegisterButton = styled.button`
     width: 70%;
