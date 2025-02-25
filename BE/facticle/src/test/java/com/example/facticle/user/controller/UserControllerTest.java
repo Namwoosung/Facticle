@@ -8,6 +8,7 @@ import com.example.facticle.user.dto.UsernameCheckDto;
 import com.example.facticle.user.repository.UserRepository;
 import com.example.facticle.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,15 +41,31 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp(){
-        Long userId1 = userService.saveUser(new LocalSignupRequestDto("user1", "userPassword1!", "nick1"));
-        Long userId2 = userService.saveUser(new LocalSignupRequestDto("user2", "userPassword2!", "nick2"));
+        LocalSignupRequestDto localSignupRequestDto1 = LocalSignupRequestDto.builder()
+                .username("user1")
+                .password("userPassword1!")
+                .nickname("nick1")
+                .build();
+
+        LocalSignupRequestDto localSignupRequestDto2 = LocalSignupRequestDto.builder()
+                .username("user2")
+                .password("userPassword2!")
+                .nickname("nick2")
+                .build();
+        Long userId1 = userService.saveUser(localSignupRequestDto1);
+        Long userId2 = userService.saveUser(localSignupRequestDto2);
     }
 
     @Test
     @DisplayName("로컬회원가입 - 성공")
     void localSingUpTest() throws Exception {
         //given
-        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("test1", "testtest1!", "nick");
+        LocalSignupRequestDto localSignupRequestDto = LocalSignupRequestDto.builder()
+                .username("test1")
+                .password("testtest1!")
+                .nickname("nick")
+                .build();
+
 
 
         mockMvc.perform(post("/api/users/signup")
@@ -62,7 +79,12 @@ class UserControllerTest {
     @DisplayName("회원가입 실패 - 빈 데이터")
     void localSignupValidationFailTestEmpty() throws Exception {
         // Given: 빈 데이터
-        LocalSignupRequestDto emptyDto = new LocalSignupRequestDto("", "", "");
+        LocalSignupRequestDto emptyDto = LocalSignupRequestDto.builder()
+                .username("")
+                .password("")
+                .nickname("")
+                .build();
+
 
         // When & Then
         mockMvc.perform(post("/api/users/signup")
@@ -78,7 +100,11 @@ class UserControllerTest {
     @DisplayName("회원가입 실패 - 규칙 불만족 데이터")
     void localSignupValidationFailTestInvalid() throws Exception {
         // Given
-        LocalSignupRequestDto lengthDto = new LocalSignupRequestDto("a", "a1!", "a");
+        LocalSignupRequestDto lengthDto = LocalSignupRequestDto.builder()
+                .username("a")
+                .password("a1!")
+                .nickname("a")
+                .build();
 
         // When & Then
         mockMvc.perform(post("/api/users/signup")
@@ -89,7 +115,12 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.code").value(400)); // 응답 코드 검증
 
         // Given
-        LocalSignupRequestDto invalidDto = new LocalSignupRequestDto("aaaaa!", "aaaaaaaaa", "aaaa!");
+        LocalSignupRequestDto invalidDto = LocalSignupRequestDto.builder()
+                .username("aaaaa!")
+                .password("aaaaaaaaa")
+                .nickname("aaaa!")
+                .build();
+
 
         // When & Then
         mockMvc.perform(post("/api/users/signup")
@@ -116,7 +147,11 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.is_available").value(true));
 
         //검증 2. 중복이 있는 경우
-        userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_nick"));
+        userService.saveUser(LocalSignupRequestDto.builder()
+                .username("test_user")
+                .password("Qwer1234!")
+                .nickname("test_nick")
+                .build());
 
         mockMvc.perform(post("/api/users/check-username")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +186,13 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.is_available").value(true));
 
         //검증 2. 중복이 있는 경우
-        userService.saveUser(new LocalSignupRequestDto("test_user", "Qwer1234!", "test_user"));
+        LocalSignupRequestDto localSignupRequestDto = LocalSignupRequestDto.builder()
+                .username("test_user")
+                .password("Qwer1234!")
+                .nickname("test_user")
+                .build();
+
+        userService.saveUser(localSignupRequestDto);
 
         mockMvc.perform(post("/api/users/check-nickname")
                         .contentType(MediaType.APPLICATION_JSON)

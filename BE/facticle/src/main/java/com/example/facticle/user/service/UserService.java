@@ -17,6 +17,7 @@ import com.example.facticle.user.oauth.SocialAuthProvider;
 import com.example.facticle.user.oauth.SocialAuthProviderFactory;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,14 +62,22 @@ public class UserService {
     public Long saveUser(LocalSignupRequestDto localSignupRequestDto){
         checkLocalSignupDto(localSignupRequestDto);
 
+
         String hashedPassword = passwordEncoder.encode(localSignupRequestDto.getPassword());
         LocalAuth localAuth = new LocalAuth(localSignupRequestDto.getUsername(), hashedPassword);
-        User user = User.builder()
+
+
+        User.UserBuilder userBuilder = User.builder()
                 .localAuth(localAuth)
                 .nickname(localSignupRequestDto.getNickname())
                 .role(UserRole.USER)
-                .signupType(SignupType.LOCAL)
-                .build();
+                .signupType(SignupType.LOCAL);
+
+        if (StringUtils.isNotBlank(localSignupRequestDto.getEmail())) {
+            userBuilder.email(localSignupRequestDto.getEmail());
+        }
+
+        User user = userBuilder.build();
 
         userRepository.save(user);
 

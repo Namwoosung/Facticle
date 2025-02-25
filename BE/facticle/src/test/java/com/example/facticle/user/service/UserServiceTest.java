@@ -126,7 +126,11 @@ class UserServiceTest {
     @Test
     void saveUserTest() {
         //given
-        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("testUser", "qwerqwer1!", "테스트");
+        LocalSignupRequestDto localSignupRequestDto = LocalSignupRequestDto.builder()
+                .username("testUser")
+                .password("qwerqwer1!")
+                .nickname("테스트")
+                .build();
 
         //when
         Long userId = userService.saveUser(localSignupRequestDto);
@@ -144,8 +148,11 @@ class UserServiceTest {
     @DisplayName("회원가입 실패 - 중복 데이터")
     void saveUserFailTest(){
 
-        LocalSignupRequestDto localSignupRequestDto = new LocalSignupRequestDto("user1", "qwerqwer1!", "nick1");
-
+        LocalSignupRequestDto localSignupRequestDto = LocalSignupRequestDto.builder()
+                .username("user1")
+                .password("qwerqwer1!")
+                .nickname("nick1")
+                .build();
 
         Assertions.assertThatThrownBy(() -> userService.saveUser(localSignupRequestDto))
                 .isInstanceOf(InvalidInputException.class)
