@@ -30,78 +30,119 @@ function Register() {
   };
 
   // Blur 이벤트 핸들러
-  const handleBlur = async (key: string) => {
+  const handleBlur = async (key: string): Promise<boolean> => {
     switch (key) {
       case "username":
         if (!formData.username) {
           setErrors((prev) => ({ ...prev, username: { error: true, message: "아이디를 입력해주세요." } }));
-        } else if (!/^[a-zA-Z0-9_]{4,50}$/.test(formData.username)) {
-          setErrors((prev) => ({ ...prev, username: { error: true, message: "아이디는 4~50자 사이, 영어, 숫자, _만 사용할 수 있습니다." } }));
-        } else {
-          try {
-            const response: any = await authService.idcheck({ username: formData.username });
-            if (response?.data?.code === 200 && response.data.is_available) {
-              setErrors((prev) => ({ ...prev, username: { error: false, message: "" } }));
-            } else {
-              setErrors((prev) => ({ ...prev, username: { error: true, message: "이미 사용중인 아이디입니다." } }));
-            }
-          } catch (error) {
-            setErrors((prev) => ({ ...prev, username: { error: true, message: "서버 오류가 발생했습니다." } }));
-          }
+          return false;
         }
-        break;
+  
+        if (!/^[a-zA-Z0-9_]{4,50}$/.test(formData.username)) {
+          setErrors((prev) => ({ ...prev, username: { error: true, message: "아이디는 4~50자 사이, 영어, 숫자, _만 사용할 수 있습니다." } }));
+          return false;
+        }
+  
+        try {
+          const response: any = await authService.idcheck({ username: formData.username });
+          const isAvailable = response?.data?.code === 200 && response.data.is_available;
+  
+          setErrors((prev) => ({
+            ...prev,
+            username: { error: !isAvailable, message: isAvailable ? "" : "이미 사용중인 아이디입니다." }
+          }));
+  
+          return isAvailable;
+        } catch (error) {
+          setErrors((prev) => ({ ...prev, username: { error: true, message: "서버 오류가 발생했습니다." } }));
+          return false;
+        }
+  
       case "password":
         if (!formData.password) {
           setErrors((prev) => ({ ...prev, password: { error: true, message: "비밀번호를 입력해주세요." } }));
-        } else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%*?&]{8,16}$/.test(formData.password)) {
-          setErrors((prev) => ({ ...prev, password: { error: true, message: "비밀번호는 8~16자의 영문 대소문자, 숫자, 특수문자를 사용해야 합니다." } }));
-        } else {
-          setErrors((prev) => ({ ...prev, password: { error: false, message: "" } }));
+          return false;
         }
-        break;
+  
+        if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%*?&]{8,16}$/.test(formData.password)) {
+          setErrors((prev) => ({ ...prev, password: { error: true, message: "비밀번호는 8~16자의 영문 대소문자, 숫자, 특수문자를 사용해야 합니다." } }));
+          return false;
+        }
+  
+        setErrors((prev) => ({ ...prev, password: { error: false, message: "" } }));
+        return true;
+  
       case "passwordCheck":
         if (!formData.passwordCheck) {
           setErrors((prev) => ({ ...prev, passwordCheck: { error: true, message: "비밀번호 확인을 입력해주세요." } }));
-        } else if (formData.password !== formData.passwordCheck) {
-          setErrors((prev) => ({ ...prev, passwordCheck: { error: true, message: "비밀번호가 일치하지 않습니다." } }));
-        } else {
-          setErrors((prev) => ({ ...prev, passwordCheck: { error: false, message: "" } }));
+          return false;
         }
-        break;
+  
+        if (formData.password !== formData.passwordCheck) {
+          setErrors((prev) => ({ ...prev, passwordCheck: { error: true, message: "비밀번호가 일치하지 않습니다." } }));
+          return false;
+        }
+  
+        setErrors((prev) => ({ ...prev, passwordCheck: { error: false, message: "" } }));
+        return true;
+  
       case "nickname":
         if (!formData.nickname) {
           setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임을 입력해주세요." } }));
-        } else if (!/^[a-zA-Z0-9가-힣-_]{2,20}$/.test(formData.nickname)) {
+          return false;
+        }
+  
+        if (!/^[a-zA-Z0-9가-힣-_]{2,20}$/.test(formData.nickname)) {
           setErrors((prev) => ({ ...prev, nickname: { error: true, message: "닉네임은 2~20자 사이, 한글, 영어, 숫자, _,-만 사용할 수 있습니다." } }));
-        } else {
-          try {
-            const response: any = await authService.nicknamecheck({ nickname: formData.nickname });
-            if (response?.data?.code === 200 && response.data.is_available) {
-              setErrors((prev) => ({ ...prev, nickname: { error: false, message: "" } }));
-            } else {
-              setErrors((prev) => ({ ...prev, nickname: { error: true, message: "이미 사용중인 닉네임입니다." } }));
-            }
-          } catch (error) {
-            setErrors((prev) => ({ ...prev, nickname: { error: true, message: "서버 오류가 발생했습니다." } }));
-          }
+          return false;
         }
-        break;
+  
+        try {
+          const response: any = await authService.nicknamecheck({ nickname: formData.nickname });
+          const isAvailable = response?.data?.code === 200 && response.data.is_available;
+  
+          setErrors((prev) => ({
+            ...prev,
+            nickname: { error: !isAvailable, message: isAvailable ? "" : "이미 사용중인 닉네임입니다." }
+          }));
+  
+          return isAvailable;
+        } catch (error) {
+          setErrors((prev) => ({ ...prev, nickname: { error: true, message: "서버 오류가 발생했습니다." } }));
+          return false;
+        }
+  
       case "email":
-        if (formData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
-          setErrors((prev) => ({ ...prev, email: { error: true, message: "이메일 형식이 올바르지 않습니다." } }));
-        } else {
+        if (!formData.email?.trim()) {
+          // 이메일이 없으면 검증할 필요 없음 (null 또는 빈 문자열 허용)
           setErrors((prev) => ({ ...prev, email: { error: false, message: "" } }));
+          return true;
         }
-        break;
+        
+        const isValidEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email);
+        setErrors((prev) => ({
+          ...prev,
+          email: { error: !isValidEmail, message: isValidEmail ? "" : "이메일 형식이 올바르지 않습니다." }
+        }));
+  
+        return isValidEmail;
+  
       default:
-        break;
+        return false;
     }
   };
 
-
   // 회원가입 함수
   const handleRegister = async () => {
-    if (Object.values(formData).some((value) => !value)) return;
+    const isUsernameValid = await handleBlur("username");
+    const isPasswordValid = await handleBlur("password");
+    const isPasswordCheckValid = await handleBlur("passwordCheck");
+    const isNicknameValid = await handleBlur("nickname");
+    const isEmailValid = await handleBlur("email");
+
+    if (!(isUsernameValid && isPasswordValid && isPasswordCheckValid && isNicknameValid && isEmailValid)) {
+      return;
+    }
 
     if (Object.values(errors).some((field) => field.error)) return;
 

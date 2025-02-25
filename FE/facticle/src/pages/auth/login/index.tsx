@@ -18,7 +18,7 @@ import SNSLogin from "./snslogin";
 import userService from "../../../services/user/user.service";
 
 function Login() {
-    const { login, getUserProfile, nickname,profileImage } = useAuth();
+    const { login, getUserProfile } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "", 

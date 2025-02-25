@@ -2,11 +2,13 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import authService from "../../../services/auth/auth.service";
+import userService from "../../../services/user/user.service";
+import { showSnackbar } from "../../../components/snackbar/util";
 
 function Redirection() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useAuth();
+    const { login, getUserProfile } = useAuth();
 
     useEffect(() => {
         // 현재 URL에서 쿼리 스트링 읽기
@@ -25,11 +27,18 @@ function Redirection() {
                         navigate("/register-oauth", { replace: true });
                     } else {
                         navigate("/", { replace: true });
+                        userService.getUserProfile()
+                          .then((res: any) => {
+                              getUserProfile(res.data.User.nickname, res.data.User.profileImage);
+                              showSnackbar("로그인이 완료되었습니다.");
+                              navigate("/");
+                          });
                     }
                 }
             })
             .catch((error: any) => {
                 // 에러 처리
+                navigate("/login", { replace: true });
             });
     
         navigate("/", { replace: true });
