@@ -19,7 +19,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.Map;
 
 @Slf4j
