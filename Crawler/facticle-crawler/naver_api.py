@@ -53,7 +53,7 @@ def fetch_news_links():
 
                 # 최신 뉴스부터 검색
                 for item in items:
-                    url = item["originallink"] if item["originallink"] else item["link"]
+                    url = item["link"] if item["link"] else item["originallink"]
                     pubDate_str = item.get("pubDate")
 
                     # pubDate를 datetime 객체로 변환
@@ -77,6 +77,7 @@ def fetch_news_links():
         except Exception as e:
             print(f"error [검색어: '{query}'] - 뉴스 API 호출 중 오류 발생: {e}")
 
+    print(unique_links)
     return list(unique_links)  # 중복 제거된 리스트 반환
 
 

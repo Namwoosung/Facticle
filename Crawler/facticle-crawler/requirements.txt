@@ -10,3 +10,4 @@ requests
 #뉴스 크롤링 라이브러리
 newspaper4k
 lxml_html_clean
+nltk==3.8.1
