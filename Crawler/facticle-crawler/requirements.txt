@@ -7,3 +7,6 @@ cryptography
 python-dotenv
 # 외부 api 호출을 위해 사용
 requests
+#뉴스 크롤링 라이브러리
+newspaper4k
+lxml_html_clean

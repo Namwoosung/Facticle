@@ -1,0 +1,28 @@
+# Python bytecode files
+__pycache__/
+
+# Environment files
+.env
+
+# Logs and database files
+*.log
+*.sqlite3
+*.db
+
+#For Test file
+crawled_news.json
+
+# System files (macOS, Windows, etc.)
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+venv/
+.env/
+
+# IDE settings (e.g., VSCode, PyCharm)
+.vscode/
+.idea/
+
+# Temporary files
+*.swp
