@@ -8,7 +8,7 @@ import { showSnackbar } from "../../../components/snackbar/util";
 function Redirection() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login, getUserProfile } = useAuth();
+    const { login, updateProfile } = useAuth();
 
     useEffect(() => {
         // 현재 URL에서 쿼리 스트링 읽기
@@ -24,14 +24,13 @@ function Redirection() {
                 if (response?.data?.code === 200) {
                     login(response.data.access_token);
                     if (response?.data?.is_new) {
-                        navigate("/register-oauth", { replace: true });
+                      navigate("/register-oauth", { replace: true });
                     } else {
-                        navigate("/", { replace: true });
-                        userService.getUserProfile()
+                      userService.getUserProfile()
                           .then((res: any) => {
-                              getUserProfile(res.data.User.nickname, res.data.User.profileImage);
+                              updateProfile(res.data.User.nickname, res.data.User.profileImage);
                               showSnackbar("로그인이 완료되었습니다.");
-                              navigate("/");
+                              navigate("/", { replace: true });
                           });
                     }
                 }
@@ -40,8 +39,6 @@ function Redirection() {
                 // 에러 처리
                 navigate("/login", { replace: true });
             });
-    
-        navigate("/", { replace: true });
     }, [location, navigate]);
 
     return <></>;

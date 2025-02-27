@@ -18,7 +18,7 @@ import SNSLogin from "./snslogin";
 import userService from "../../../services/user/user.service";
 
 function Login() {
-    const { login, getUserProfile } = useAuth();
+    const { login, updateProfile } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "", 
@@ -46,7 +46,7 @@ function Login() {
     
                 userService.getUserProfile()
                     .then((res: any) => {
-                        getUserProfile(res.data.User.nickname, res.data.User.profileImage);
+                        updateProfile(res.data.User.nickname, res.data.User.profileImage);
                         showSnackbar("로그인이 완료되었습니다.");
                         navigate("/");
                     });

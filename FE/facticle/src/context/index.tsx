@@ -9,8 +9,7 @@ interface AuthContextType {
     profileImage: string | null;
     login: (token: string) => void;
     logout: () => void;
-    getUserProfile: (nickname: string, profileImage: string) => void;
-    updateProfile: (nickname: string, profileImage: string | null) => void;
+    updateProfile: (nickname: string | null, profileImage: string | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,25 +30,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(false);
     };
 
-    const updateProfile = async (nickname: string, profileImage: string | null) => {
+    const updateProfile = async (nickname: string | null, profileImage: string | null) => {
         setNickname(nickname);
         setProfileImage(profileImage);
     };
 
-    const getUserProfile = (nickname: string, profileImage: string) => {
-        setNickname(nickname);
-        setProfileImage(profileImage);
-    }
-
     useEffect(() => {
         setupAxiosInterceptors(() => {
-            logout();
-            //navigate('/login');
-        });
+          logout();
+          navigate('/login');
+        },
+        () => {
+          setIsAuthenticated(true); // token은 인터셉터에서 처리하므로 여기서는 isAuthenticated만 true로 변경
+          navigate('/');
+        }
+      );
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, nickname, profileImage, login, logout, getUserProfile, updateProfile }}>
+        <AuthContext.Provider value={{ isAuthenticated, nickname, profileImage, login, logout, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

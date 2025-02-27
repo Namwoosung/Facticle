@@ -1,12 +1,9 @@
-import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import Avatar from "../avatar";
-import Profile from "../../assets/images/profile.png";
 import { HeaderWrapper, ProfileContainer, HomeButton, NavButton, LoginButton, RegisterButton } from "./header.styles";
 
 function Header() {
     const { isAuthenticated, nickname, profileImage, logout } = useAuth();
-    const [imageSrc, setImageSrc] = useState(profileImage || Profile);
 
     const handleLogout = () => {
         logout();
@@ -25,7 +22,7 @@ function Header() {
             {isAuthenticated ? (
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <ProfileContainer>
-                        <Avatar src={imageSrc} />
+                        <Avatar src={profileImage} />
                         <NavButton to="/mypage">{nickname} 님</NavButton>
                     </ProfileContainer>
                     <RegisterButton to="/login" onClick={handleLogout}>로그아웃</RegisterButton>
