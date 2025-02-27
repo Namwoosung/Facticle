@@ -34,6 +34,8 @@ public class News {
     @Column(nullable = false)
     private String url;
 
+    private String naverUrl;
+
     private String imageUrl;
 
     @Column(columnDefinition = "TIMESTAMP", nullable = false)
