@@ -1,13 +1,20 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import Avatar from "../avatar";
 import { HeaderWrapper, ProfileContainer, HomeButton, NavButton, LoginButton, RegisterButton } from "./header.styles";
 
 function Header() {
     const { isAuthenticated, nickname, profileImage, logout } = useAuth();
+    const [avatarImage, setAvatarImage] = useState(profileImage);
 
     const handleLogout = () => {
         logout();
     };
+
+    useEffect(() => {
+        console.log(profileImage);
+        setAvatarImage(profileImage);
+    }, [profileImage]);
 
     return (
         <HeaderWrapper>
@@ -22,7 +29,7 @@ function Header() {
             {isAuthenticated ? (
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <ProfileContainer>
-                        <Avatar src={profileImage} />
+                        <Avatar src={avatarImage} />
                         <NavButton to="/mypage">{nickname} 님</NavButton>
                     </ProfileContainer>
                     <RegisterButton to="/login" onClick={handleLogout}>로그아웃</RegisterButton>
