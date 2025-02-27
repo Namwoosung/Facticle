@@ -85,7 +85,7 @@ public class UserController {
         // refresh token은 http only secure 쿠키에 저장
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")
@@ -107,7 +107,7 @@ public class UserController {
         // refresh token은 http only secure 쿠키에 저장
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")
@@ -128,7 +128,7 @@ public class UserController {
 
         ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/api/users")
                 .maxAge(0) // 쿠키 삭제
                 .sameSite("None")
@@ -241,7 +241,7 @@ public class UserController {
         // refresh token은 http only secure 쿠키에 저장
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokenInfo.getRefreshToken())
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
                 .sameSite("None")

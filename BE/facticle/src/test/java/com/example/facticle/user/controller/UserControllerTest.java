@@ -226,8 +226,9 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.access_token").exists())
                 .andExpect(jsonPath("$.data.grant_type").value("Bearer"))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
+//                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")));
+
     }
 
     @Test
@@ -257,8 +258,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.access_token").exists())
                 .andExpect(jsonPath("$.data.grant_type").value("Bearer"))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")));
+//                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")));
     }
 
     @Test
@@ -296,7 +297,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.code").value(200))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("refresh_token=")))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")))
+//                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Secure")))
                 .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
 
     }

@@ -25,8 +25,6 @@ public class EnvConfig {
         });
 
         // 로그로 환경변수가 잘 적용되었는 지 확인
-        log.info("AWS_ACCESS_KEY: {}", System.getProperty("AWS_ACCESS_KEY"));
-        log.info("AWS_SECRET_KEY: {}", System.getProperty("AWS_SECRET_KEY"));
         log.info("AWS_REGION: {}", System.getProperty("AWS_REGION"));
         log.info("AWS_BUCKET_NAME: {}", System.getProperty("AWS_BUCKET_NAME"));
     }
