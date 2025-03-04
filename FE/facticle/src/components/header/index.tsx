@@ -12,7 +12,6 @@ function Header() {
     };
 
     useEffect(() => {
-        console.log(profileImage);
         setAvatarImage(profileImage);
     }, [profileImage]);
 

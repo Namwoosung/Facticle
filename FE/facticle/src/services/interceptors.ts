@@ -2,7 +2,9 @@ import authService from "./auth/auth.service";
 import HttpService from "./htttp.service";
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 
-export const setupAxiosInterceptors = (onUnauthenticated: () => void): void => {
+export const setupAxiosInterceptors = (
+  onUnauthenticated: () => void,
+  onSuccess: () => void ): void => {
   const onRequestSuccess = (config : AxiosRequestConfig): AxiosRequestConfig => {
     return config;
   };
@@ -16,11 +18,11 @@ export const setupAxiosInterceptors = (onUnauthenticated: () => void): void => {
   const onResponseFail = async (error: AxiosError): Promise<never> => {
     const responseData = error.response?.data as { data?: { is_expired?: boolean } } | undefined;
     if (error.response?.status === 401) {
-      console.log('test');
       if (responseData?.data?.is_expired) {
         await authService.renewToken()
           .then((response: any) => {
             if (response?.data?.code === 200) {
+              onSuccess();
               return HttpService.addJWTToken(response.data.access_token);
             }
           })
