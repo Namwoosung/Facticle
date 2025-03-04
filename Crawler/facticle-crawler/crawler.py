@@ -92,7 +92,7 @@ def fetch_article(news):
 
         # 수집할 정보
         news["title"] = article.title or "" # 제목
-        news["context"] = article.text or "" # 본문
+        news["content"] = article.text or "" # 본문
         news["imageUrl"] = article.top_image or "" # 메인 이미지
 
         if article.publish_date: # 발행일이 추출된 경우 덮어쓰기
@@ -119,20 +119,10 @@ def fetch_article(news):
         # news["tags"] = list(article.tags) if article.tags else []  # 본문에서 추출된 태그 리스트
         # news["additional_images"] = list(article.images) if article.images else []  # 기사 내 포함된 모든 이미지 리스트
 
-        
-        # 수집된 데이터 검증
-        # "context" 길이 체크
-        # if len(news["context"]) < 30:
-        #     news["context"] = ""
 
-        # "title", "context", "publishedAt", "mediaName"가 모두 유효해야 함
-        required_fields = ["title", "context", "publishedAt", "mediaName"]
+        # "title", "content", "publishedAt", "mediaName"가 모두 유효해야 함
+        required_fields = ["title", "content", "publishedAt", "mediaName"]
         if all(news[field] for field in required_fields):
-
-            if len(news["context"]) < 80: # 길이 테스트를 위해 추가
-                print(f"❌ 필터링된 기사: {news}")
-                return None
-
             print(f"✅ 크롤링 성공: {link}")
             return news
         else:
@@ -147,6 +137,8 @@ def fetch_article(news):
 
 def crawl_news_articles(news_list, max_threads=5):
     """멀티쓰레딩을 활용하여 뉴스 기사 크롤링"""
+    print(f"\n {len(news_list)}개의 뉴스 기사 크롤링 시작...")
+
     start_time = time.time()  # 시작 시간 측정
     news_data = []
 
@@ -176,7 +168,6 @@ if __name__ == "__main__":
     print("네이버 뉴스 링크 가져오는 중...")
     news_list = fetch_news_links()
 
-    print(f"\n {len(news_list)}개의 뉴스 기사 크롤링 시작...")
     crawled_news = crawl_news_articles(news_list, max_threads=5)
 
     output_file = "crawled_news.json"
