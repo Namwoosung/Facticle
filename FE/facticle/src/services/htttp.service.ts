@@ -6,7 +6,6 @@ Axios.defaults.withCredentials = true;
 
 export class HttpService {
     _axios = Axios.create(); // Axios 인스턴스 생성
-
    
     addJWTToken(token: string) {
         this._axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -33,7 +32,7 @@ export class HttpService {
             method,
             url,
             data,
-            header: {
+            headers: {
                 'Content-Type': 'application/json',
             },
         };
@@ -62,6 +61,21 @@ export class HttpService {
 
     // DELETE 요청
     delete = async (url: string) => await this.request(this.getOptionsConfig('DELETE', url, null));
+
+    // 파일 업로드
+    upload = async (url: string, file: File) => {
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        return await this.request({
+            method: 'POST',
+            url: '/api' + url,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    };
 }
 
 export default new HttpService();

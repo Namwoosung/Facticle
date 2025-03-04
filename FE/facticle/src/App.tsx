@@ -6,6 +6,7 @@ import Redirection from './pages/auth/redirection';
 import RegisterOauth from './pages/auth/register-oauth';
 import MainLayout from './layouts/mainLayout';
 import AuthLayout from './layouts/authLayout';
+import Mypage from './pages/mypage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/mypage" element={<Mypage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
