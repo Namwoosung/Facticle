@@ -21,6 +21,10 @@ export const HomeButton = styled(Link)`
     outline: none;
 `;
 
+export const InputContainer = styled.form`
+    width: 100%;
+`;
+
 export const ErrorText = styled.p`
     color: red;
     font-size: 13px;
@@ -89,7 +93,9 @@ export const SNSContainer = styled.div`
   margin-top: 20px;
 `;
 
-export const SNSButton = styled.button<{ bgColor: string }>`
+export const SNSButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== "bgColor"
+})<{ bgColor: string }>`
   display: flex;
   align-items: center;
   justify-content: center;

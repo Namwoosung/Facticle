@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HomeButton, RegisterWrapper, RegisterButton } from "./register.styles";
+import { HomeButton, RegisterWrapper, RegisterButton, InputContainer } from "./register.styles";
 import Input from "../../../components/input";
 import authService from "../../../services/auth/auth.service";
 import { showSnackbar } from "../../../components/snackbar/util";
@@ -24,9 +24,13 @@ function Register() {
     email: { error: false, message: "" },
   });
 
-  // 입력 값 변경 함수
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault(); // 기본 동작(페이지 새로고침) 방지
+    await handleRegister();
   };
 
   // Blur 이벤트 핸들러
@@ -132,7 +136,6 @@ function Register() {
     }
   };
 
-  // 회원가입 함수
   const handleRegister = async () => {
     const isUsernameValid = await handleBlur("username");
     const isPasswordValid = await handleBlur("password");
@@ -146,7 +149,6 @@ function Register() {
 
     if (Object.values(errors).some((field) => field.error)) return;
 
-    // 에러가 없을 경우 회원가입 요청
     const registerData = {
       ...formData,
       email: formData.email.trim() === "" ? null : formData.email,
@@ -159,70 +161,73 @@ function Register() {
         navigate("/login");
       }
     } catch (error: any) {
-      // 오류 처리
+      console.error("회원가입 오류:", error);
     }
   };
 
   return (
     <RegisterWrapper>
       <HomeButton to="/">FACTICLE</HomeButton>
-      <Input
-        type="text"
-        value={formData.username}
-        placeholder="아이디"
-        error={errors.username.error}
-        errorMessage={errors.username.message}
-        tabIndex={1}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange("username", event.target.value)}
-        onBlur={() => handleBlur("username")}
-      />
-      <Input
-        type="password"
-        value={formData.password}
-        placeholder="비밀번호"
-        error={errors.password.error}
-        errorMessage={errors.password.message}
-        tabIndex={2}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange("password", event.target.value)}
-        onBlur={() => handleBlur("password")}
-      />
-      <Input
-        type="password"
-        value={formData.passwordCheck}
-        placeholder="비밀번호 확인"
-        error={errors.passwordCheck.error}
-        errorMessage={errors.passwordCheck.message}
-        tabIndex={3}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange("passwordCheck", event.target.value)}
-        onBlur={() => handleBlur("passwordCheck")}
-      />
-      <Input
-        type="text"
-        value={formData.nickname}
-        placeholder="닉네임"
-        error={errors.nickname.error}
-        errorMessage={errors.nickname.message}
-        tabIndex={4}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange("nickname", event.target.value)}
-        onBlur={() => handleBlur("nickname")}
-      />
-      <Input
-        type="text"
-        value={formData.email}
-        placeholder="이메일 (선택사항)"
-        error={errors.email.error}
-        errorMessage={errors.email.message}
-        tabIndex={5}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange("email", event.target.value)}
-        onBlur={() => handleBlur("email")}
-      />
-
-
-      <RegisterButton
-        onClick={handleRegister}
-        tabIndex={6}>
-        회원가입
-      </RegisterButton>
+      <InputContainer onSubmit={handleSubmit}>
+        <Input
+          type="text"
+          value={formData.username}
+          placeholder="아이디"
+          error={errors.username.error}
+          errorMessage={errors.username.message}
+          tabIndex={1}
+          onChange={(event) => handleChange("username", event.target.value)}
+          onBlur={() => handleBlur("username")}
+          autoComplete="username"
+        />
+        <Input
+          type="password"
+          value={formData.password}
+          placeholder="비밀번호"
+          error={errors.password.error}
+          errorMessage={errors.password.message}
+          tabIndex={2}
+          onChange={(event) => handleChange("password", event.target.value)}
+          onBlur={() => handleBlur("password")}
+          autoComplete="password"
+        />
+        <Input
+          type="password"
+          value={formData.passwordCheck}
+          placeholder="비밀번호 확인"
+          error={errors.passwordCheck.error}
+          errorMessage={errors.passwordCheck.message}
+          tabIndex={3}
+          onChange={(event) => handleChange("passwordCheck", event.target.value)}
+          onBlur={() => handleBlur("passwordCheck")}
+          autoComplete="password-check"
+        />
+        <Input
+          type="text"
+          value={formData.nickname}
+          placeholder="닉네임"
+          error={errors.nickname.error}
+          errorMessage={errors.nickname.message}
+          tabIndex={4}
+          onChange={(event) => handleChange("nickname", event.target.value)}
+          onBlur={() => handleBlur("nickname")}
+          autoComplete="nickname"
+        />
+        <Input
+          type="text"
+          value={formData.email}
+          placeholder="이메일 (선택사항)"
+          error={errors.email.error}
+          errorMessage={errors.email.message}
+          tabIndex={5}
+          onChange={(event) => handleChange("email", event.target.value)}
+          onBlur={() => handleBlur("email")}
+          autoComplete="email"
+        />
+        <RegisterButton type="submit" tabIndex={6}>
+          회원가입
+        </RegisterButton>
+      </InputContainer>
     </RegisterWrapper>
   );
 }

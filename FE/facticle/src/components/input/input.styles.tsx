@@ -6,7 +6,9 @@ export const InputWrapper = styled.div`
   margin-bottom: 30px;
 `;
 
-export const InputField = styled.input<{ error?: boolean }>`
+export const InputField = styled.input.withConfig({
+  shouldForwardProp: (prop) => prop !== 'error' // 'error'는 DOM에 전달되지 않도록 설정
+})<{ error?: boolean }>`
   width: 100%;
   height: 50px;
   padding: 10px;

@@ -23,6 +23,10 @@ export const HomeButton = styled(Link)`
     margin-bottom: 30px;
 `;
 
+export const InputContainer = styled.form`
+    width: 100%;
+`;
+
 //중복 확인 버튼
 export const CheckButton = styled.button`
     width: 100px;

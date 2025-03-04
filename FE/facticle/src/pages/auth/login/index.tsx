@@ -10,6 +10,7 @@ import {
     EasyLoginContainer,
     EasyLoginLine,
     EasyLoginText,
+    InputContainer,
 } from "./login.styles";
 import authService from "../../../services/auth/auth.service";
 import { useAuth } from "../../../hooks/useAuth";
@@ -31,7 +32,9 @@ function Login() {
         setFormData((prev) => ({ ...prev, [key]: value }));
     };
 
-    const handleLogin = async () => {
+    const handleLogin = async (event?: React.FormEvent) => {
+        if (event) event.preventDefault(); // 기본 폼 제출 동작 방지
+
         if (!formData.username || !formData.password) {
             setErrorCredentials("아이디와 비밀번호를 입력해주세요.");
             return;
@@ -60,41 +63,49 @@ function Login() {
         }
     };
 
+    // 🔽 엔터 입력 시 로그인 함수 호출
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter") {
+            event.preventDefault(); // 🔥 엔터 입력 시 기본 동작(새로고침) 방지
             handleLogin();
         }
-    };
+    }
 
     return (
         <LoginWrapper>
             <HomeButton to="/">FACTICLE</HomeButton>
-            <Input
-                type="text"
-                value={formData.username}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange("username", event.target.value);
-                }}
-                placeholder="아이디"
-                tabIndex={1}
-            />
-            <Input
-                type="password"
-                value={formData.password}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange("password", event.target.value);
-                }}
-                placeholder="비밀번호"
-                onKeyDown={handleKeyDown}
-                tabIndex={2}
-            />
 
-            {errorCredentials && <ErrorText>{errorCredentials}</ErrorText>}
-            <LoginButton
-                onClick={handleLogin}
-                tabIndex={3}>
+            {/* 🔽 form 태그 추가 */}
+            <InputContainer onSubmit={handleLogin}>
+                <Input
+                    type="text"
+                    value={formData.username}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        handleChange("username", event.target.value);
+                    }}
+                    placeholder="아이디"
+                    autoComplete="username"
+                    onKeyDown={handleKeyDown}
+                    tabIndex={1}
+                />
+                <Input
+                    type="password"
+                    value={formData.password}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        handleChange("password", event.target.value);
+                    }}
+                    placeholder="비밀번호"
+                    autoComplete="password"
+                    onKeyDown={handleKeyDown}
+                    tabIndex={2}
+                />
+
+                {errorCredentials && <ErrorText>{errorCredentials}</ErrorText>}
+
+                <LoginButton type="submit" tabIndex={3}>
                     로그인
-            </LoginButton>
+                </LoginButton>
+            </InputContainer>
 
             <RegisterButton to="/register" tabIndex={4}>회원가입</RegisterButton>
 
