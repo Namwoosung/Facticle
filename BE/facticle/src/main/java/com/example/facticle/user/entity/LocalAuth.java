@@ -2,7 +2,6 @@ package com.example.facticle.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,10 +14,9 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LocalAuth {
-    @Size(max = 50, message = "username must not exceed 50 characters")
     @Column(length = 50, unique = true)
     private String username;
-    @Size(max = 100, message = "hashed password must not exceed 100 characters")
+    @Column(length = 100)
     private String hashedPassword;
 
     //값 비교는 equals로 비교

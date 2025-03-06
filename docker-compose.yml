@@ -29,6 +29,8 @@ services:
       - "8080:8080"
     networks:
       - facticle-network
+    env_file:
+      - ./BE/facticle/.env
 
   frontend:
     build:
@@ -42,8 +44,8 @@ services:
       - "3000:3000"
     networks:
       - facticle-network
-    environment:
-      - REACT_APP_API_URL=http://backend:8080
+    env_file:
+      - ./FE/facticle/.env
 
 networks:
   facticle-network:
