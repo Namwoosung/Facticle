@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     for page in range(1, 10):
         if stop_crawling:
-            break  # 5분이 지난 뉴스가 나오면 반복 종료
+            break  # 2분이 지난 뉴스가 나오면 반복 종료
         
         news_list = get_news_list(page)
         if not news_list:  # 만약 뉴스 리스트가 비어 있으면 종료

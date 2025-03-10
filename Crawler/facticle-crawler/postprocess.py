@@ -179,11 +179,11 @@ if __name__ == "__main__":
             with open(file_path, "r", encoding="utf-8") as file:
                 data = json.load(file)
                 news_list.extend(data)  # 리스트에 추가
-            print(f"📥 {file_path}에서 {len(data)}개의 뉴스 로드 완료")
+            print(f"[info] {file_path}에서 {len(data)}개의 뉴스 로드 완료")
         except FileNotFoundError:
-            print(f"⚠️ {file_path} 파일을 찾을 수 없습니다. 건너뜁니다.")
+            print(f"[error] {file_path} 파일을 찾을 수 없습니다. 건너뜁니다.")
         except json.JSONDecodeError:
-            print(f"❌ {file_path} 파일의 JSON 형식이 올바르지 않습니다. 건너뜁니다.")
+            print(f"[error] {file_path} 파일의 JSON 형식이 올바르지 않습니다. 건너뜁니다.")
     
     analyzed_news = []
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         analyzed_news.append(analyze_news(news))
 
     elapsed_time = time.time() - start_time  # 걸린 시간 계산
-    print(f"\n✅ 분석 완료: {len(analyzed_news)}개의 뉴스 기사 수집 완료")
+    print(f"\n[info] 분석 완료: {len(analyzed_news)}개의 뉴스 기사 수집 완료")
     print(f"⏱ 분석에 걸린 시간: {elapsed_time:.2f}초")
 
     # 분석 결과 저장
