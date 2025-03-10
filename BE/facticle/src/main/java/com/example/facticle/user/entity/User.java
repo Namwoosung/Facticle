@@ -17,6 +17,11 @@ import java.util.List;
 @Builder
 @ToString(of = {"userId", "localAuth", "nickname", "email", "role", "signupType", "socialAuth"})
 @Table(name = "users",
+        indexes = {
+                @Index(name = "idx_nickname", columnList = "nickname"),
+                @Index(name = "idx_username", columnList = "username"),
+                @Index(name = "idx_social_provider_id", columnList = "socialProvider, socialId")
+        },
     uniqueConstraints = {
             @UniqueConstraint(columnNames = "nickname"),
             @UniqueConstraint(columnNames = "username"),

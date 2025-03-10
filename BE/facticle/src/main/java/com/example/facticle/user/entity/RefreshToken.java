@@ -11,7 +11,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString(of = {"tokenId", "hashedRefreshToken", "isRevoked", "issuedAt", "expiresAt"})
-@Table(name = "refresh_tokens")
+@Table(name = "refresh_tokens",
+    indexes = {
+            @Index(name = "idx_user_id", columnList = "user_id"),
+            @Index(name = "idx_expires_at", columnList = "expiresAt")
+    }
+)
 public class RefreshToken {
     //추후 hashedRefreshToken에 따른 성능을 측정해보고 문제가 된다면, 토큰의 UUID 값을 활용하도록 리팩토링 고려
 
@@ -29,10 +34,10 @@ public class RefreshToken {
     @Builder.Default
     private boolean isRevoked = false;
 
-    @Column(updatable = false, columnDefinition = "TIMESTAMP")
+    @Column(updatable = false, columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime issuedAt; //token의 발행시간과 동일하게 설정
 
-    @Column(columnDefinition = "TIMESTAMP")
+    @Column(columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime expiresAt; //token의 만료시간과 동일하게 설정
 
     public void revoke(){

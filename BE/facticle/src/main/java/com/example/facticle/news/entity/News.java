@@ -3,6 +3,7 @@ package com.example.facticle.news.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +14,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "news",
+        indexes = {
+                @Index(name = "idx_category", columnList = "category"),
+                @Index(name = "idx_headline_score", columnList = "headlineScore"),
+                @Index(name = "idx_fact_score", columnList = "factScore"),
+                @Index(name = "idx_collected_at", columnList = "collectedAt")
+        },
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "url")
         }
@@ -47,6 +54,13 @@ public class News {
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal factScore;  // 팩트 신뢰도 점수 (0~100)
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String headlineScoreReason;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String factScoreReason;
+
+    @CreationTimestamp
     @Column(columnDefinition = "TIMESTAMP", nullable = false)
     @Builder.Default
     private LocalDateTime collectedAt = LocalDateTime.now();
@@ -71,6 +85,6 @@ public class News {
     @Builder.Default
     private BigDecimal rating = BigDecimal.valueOf(0.0);
 
-    @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private NewsContent newsContent;
 }

@@ -92,7 +92,7 @@ def process_news():
         finally:
             news_queue.task_done()  # 큐 작업 완료 처리
 
-# 스케줄러 설정 (뉴스 수집 주기: 10초)
+# 스케줄러 설정 (뉴스 수집 주기: 2분)
 scheduler = BackgroundScheduler()
 scheduler.add_job(fetch_news, 'interval', minutes=2, next_run_time=datetime.now()) # 처음 시작 시 바로 함수를 한 번 실행
 

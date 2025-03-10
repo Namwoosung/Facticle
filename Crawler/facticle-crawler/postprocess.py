@@ -26,7 +26,9 @@ def normalize_score(score, old_range=(1, 5), new_range=(0, 100)):
     old_min, old_max = old_range
     new_min, new_max = new_range
     normalized_score = ((score - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
-    return round(normalized_score, 2)
+
+    return max(new_min, min(new_max, round(normalized_score, 2)))
+
 
 def calculate_score(logprobs, token_range=(1, 5)):
     """로그 확률을 받아 실제 확률로 변환하고, 종합 점수를 계산"""
@@ -76,6 +78,26 @@ def evaluate_score(title, content, prompt):
     return score, token_probs
 
 
+def get_reasoning(title, content, hs_score, fs_score, prompt):
+    """HS 및 FS 점수에 대한 판단 근거를 제공"""
+    cur_prompt = (prompt.replace("{{제목}}", title)
+                         .replace("{{본문}}", content)
+                         .replace("{{hs}}", str(hs_score))
+                         .replace("{{fs}}", str(fs_score)))
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "당신은 뉴스 분석 전문가입니다."},
+            {"role": "user", "content": cur_prompt}
+        ],
+        max_tokens=500,
+        temperature=0.2,
+        top_p=0.9
+    )
+
+    return json.loads(response.choices[0].message.content)  
+
 
 def analyze_news(news_data):
     """
@@ -84,10 +106,12 @@ def analyze_news(news_data):
     title = news_data["title"]
     content = news_data["content"]
     
-    # prompt_summary.txt, prompt_hs.txt, prompt_fs.txt 로드
-    prompt_summary = load_prompt("./prompt_summary.txt")
-    prompt_hs = load_prompt("./prompt_hs.txt")
-    prompt_fs = load_prompt("./prompt_fs.txt")
+    # 프롬프트 로드
+    prompt_summary = load_prompt("./prompts/prompt_summary.txt")
+    prompt_hs = load_prompt("./prompts/prompt_hs.txt")
+    prompt_fs = load_prompt("./prompts/prompt_fs.txt")
+    prompt_reason = load_prompt("./prompts/prompt_reason.txt")
+
 
     # 요약 생성 및 카테고리 분류
     prompt = prompt_summary.replace("{{제목}}", title).replace("{{본문}}", content)
@@ -129,7 +153,12 @@ def analyze_news(news_data):
 
     news_data["fact_score"] = normalized_fs_score
     news_data["fact_score_origin"] = fs_score
-    news_data["fact_score_probs"] = fs_token_probs        
+    news_data["fact_score_probs"] = fs_token_probs  
+
+    # 판단 근거 요청
+    reasoning_result = get_reasoning(title, content, normalized_hs_score, normalized_fs_score, prompt_reason)
+    news_data["hs_reason"] = reasoning_result["hs_reason"]
+    news_data["fs_reason"] = reasoning_result["fs_reason"]      
 
     print(f"\n✅ 분석 완료: {news_data['title']}")
 

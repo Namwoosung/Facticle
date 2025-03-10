@@ -17,7 +17,7 @@ public class NewsContent {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId //newsId가 PK이면서 FK가 되도록 설정
     @JoinColumn(name = "news_id")
     private News news;
