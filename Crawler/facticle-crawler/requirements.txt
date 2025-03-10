@@ -1,0 +1,11 @@
+# python에서 MySQL에 연결하기 위한 경량 라이브러리, 현재는 뉴스 수집이 무거운 것이지, 이후에는 후처리한 뉴스를 DB에 저장만 하면 됨
+# => 복잡한 ORM이나 정교한 데이터 처리가 필요한 것이 아니므로 경량 라이브러리인 pymysql을 사용(추후 ORM등 복잡한 DB 설정이 필요한 경우 SQLAlchemy 라이브러리로 리팩토링) 
+pymysql
+# MySQL 연결 시 비밀번호 검증 시 필요
+cryptography
+# .env파일로 환경변수를 관리할 수 있도록 하는 라이브러리
+python-dotenv
+# 외부 api 호출을 위해 사용
+requests
+#스케줄링을 위한 라이브러리
+apscheduler
