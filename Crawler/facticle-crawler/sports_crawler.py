@@ -38,7 +38,7 @@ def get_sports_list(page):
         for item in sports['packItemContents']:
             # 2분 이상이면 크롤링하지 않음
             _time = datetime.now(timezone.utc) - datetime.fromisoformat(item['createdDate'].rstrip('Z')).replace(tzinfo=timezone.utc)
-            if _time >= timedelta(minutes=2):
+            if _time >= timedelta(minutes=30):
                 continue
             result.append({
                 'url': item['orgUrl']['pc'],

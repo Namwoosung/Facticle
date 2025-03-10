@@ -33,7 +33,7 @@ def get_enter_list(page):
       pass
     else:
       time = int(enter['articleTime'].replace('"', '').replace('분전', ''))
-      if time >= 2: # 5분 이상 지난 뉴스는 크롤링하지 않음
+      if time >= 8: # 5분 이상 지난 뉴스는 크롤링하지 않음
         break
     result.append({
       'naverUrl': enter['url'],
