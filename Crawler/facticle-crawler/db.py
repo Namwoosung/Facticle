@@ -1,5 +1,4 @@
 #DB 연동 및 CRUD를 위한 모듈
-
 from dotenv import load_dotenv #for .env load
 import os
 import pymysql

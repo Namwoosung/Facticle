@@ -15,16 +15,22 @@ def get_news_list(page):
 
     result = []
     for news in news_list:
-        url = news.find("a")["href"]
+        naverUrl = news.find("a")["href"]
         time = int(news.find("span", class_="date is_new").get_text().replace("\"", "").replace("분전", ""))
-        if time >= 5: # 5분 이상 지난 뉴스는 크롤링하지 않음
+        if time >= 2: # 2분 이상 지난 뉴스는 크롤링하지 않음
             break
-        result.append(url)
+
+        result.append({
+            "naverUrl": naverUrl,
+            "news_type": "news"
+        })
+
     return result
 
 # 네이버 뉴스 가져오기
-def get_news(url):
+def get_news(data):
     try:
+        url = data["naverUrl"]
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         title = soup.find("h2", id="title_area").get_text()
@@ -40,6 +46,7 @@ def get_news(url):
         "content": content,
         "image_url": image_url,
         "mediaName": mediaName,
+        "news_type": data["news_type"]
         }
     except:
         return None
@@ -60,14 +67,14 @@ if __name__ == "__main__":
             break
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(get_news, url) for url in news_list]
+            futures = [executor.submit(get_news, news) for news in news_list]
             for future in as_completed(futures):
                 news = future.result()
                 if news: # 뉴스 결과 값이 있으면 추가
                     result.append(news)
 
     # json 파일로 저장
-    with open("news.json", "a", encoding='utf-8') as f:
+    with open("news.json", "w", encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
         f.write("\n")
     

@@ -7,8 +7,5 @@ cryptography
 python-dotenv
 # 외부 api 호출을 위해 사용
 requests
-#뉴스 크롤링 라이브러리
-newspaper4k
-lxml_html_clean
-#tokenizers를 위한 라이브러리
-nltk==3.8.1
+#스케줄링을 위한 라이브러리
+apscheduler

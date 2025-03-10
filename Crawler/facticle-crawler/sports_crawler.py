@@ -8,10 +8,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 #https://api-gw.sports.naver.com/news/scs/series?contentSort=contentId%3ADESC&size=18&page=2&contentSize=3&hasTotalCount=true&publishingType=SPORTS&serviceExposure=SE999
 
 useragent_list = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/131.0.2903.86"
 ]
 
 header = {
@@ -35,14 +36,15 @@ def get_sports_list(page):
     result = []
     for sports in sports_list:
         for item in sports['packItemContents']:
-            # 5분 이상이면 크롤링하지 않음
+            # 2분 이상이면 크롤링하지 않음
             _time = datetime.now(timezone.utc) - datetime.fromisoformat(item['createdDate'].rstrip('Z')).replace(tzinfo=timezone.utc)
-            if _time >= timedelta(minutes=10):
+            if _time >= timedelta(minutes=2):
                 continue
             result.append({
                 'url': item['orgUrl']['pc'],
                 'naverUrl': item['linkUrl'],
                 'image_url': item['imageUrl'],
+                'news_type': "sport",
             })
     return result
 
@@ -61,6 +63,7 @@ def get_sports(data):
             'content': article['refinedContent'],
             'image_url': data['image_url'],
             'mediaName': json_data['result']['officeInfo']['hname'],
+            "news_type": data["news_type"]
         }
     except:
         return None
@@ -83,6 +86,6 @@ if __name__ == "__main__":
           if data:
               result.append(data)
 
-    with open('sports.json', 'a', encoding='utf-8') as f:
+    with open('sport.json', 'w', encoding='utf-8') as f:
       json.dump(result, f, ensure_ascii=False, indent=2)
       f.write("\n")

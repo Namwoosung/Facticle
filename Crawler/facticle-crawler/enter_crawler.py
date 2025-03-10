@@ -5,10 +5,11 @@ import datetime, json, random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 useragent_list = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/131.0.2903.86"
 ]
 
 header = {
@@ -32,12 +33,13 @@ def get_enter_list(page):
       pass
     else:
       time = int(enter['articleTime'].replace('"', '').replace('분전', ''))
-      if time >= 5: # 5분 이상 지난 뉴스는 크롤링하지 않음
+      if time >= 2: # 5분 이상 지난 뉴스는 크롤링하지 않음
         break
     result.append({
       'naverUrl': enter['url'],
       "image_url": enter['image'],
       "mediaName": enter['officeName'],
+      "news_type": "enter",
     })
   return result
 
@@ -56,6 +58,7 @@ def get_enter(data):
       "content": article['refinedContent'],
       "image_url": data['image_url'],
       "mediaName": data['mediaName'],
+      "news_type": data["news_type"]
     }
   except:
     return None
@@ -79,6 +82,6 @@ if __name__ == "__main__":
         if data:
           result.append(data)
 
-  with open('enter.json', 'a', encoding='utf-8') as f:
+  with open('enter.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
     f.write("\n")

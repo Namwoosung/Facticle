@@ -77,86 +77,97 @@ def evaluate_score(title, content, prompt):
 
 
 
-def analyze_news(news_list):
-    print(f"\n {len(news_list)}개의 뉴스 기사 분석 시작...")
-
-    start_time = time.time()  # 시작 시간 측정
-
-    analyzed_news = []
+def analyze_news(news_data):
+    """
+    단일 뉴스 데이터를 분석하여 요약 생성, 카테고리 분류, HS/FS 점수 계산 후 반환.
+    """
+    title = news_data["title"]
+    content = news_data["content"]
     
     # prompt_summary.txt, prompt_hs.txt, prompt_fs.txt 로드
     prompt_summary = load_prompt("./prompt_summary.txt")
     prompt_hs = load_prompt("./prompt_hs.txt")
     prompt_fs = load_prompt("./prompt_fs.txt")
 
-    for news_data in news_list:
-        title = news_data["title"]
-        content = news_data["content"]
-
-        # 요약 생성 및 카테고리 분류
-        prompt = prompt_summary.replace("{{제목}}", title).replace("{{본문}}", content)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "당신은 뉴스 분석 전문가입니다."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            max_tokens=500,
-            temperature=0.2,
-            top_p=0.9
-        )
-        
-        result = json.loads(response.choices[0].message.content)
-        
-        # 요약과 카테고리 결과 추출
-        news_data["summary"] = result["summary"]
-        news_data["category"] = result["category"]
-        
-        # HS 점수 계산
-        hs_score, hs_token_probs = evaluate_score(title, content, prompt_hs)
-        normalized_hs_score = normalize_score(hs_score)
-
-        news_data["headline_score"] = normalized_hs_score
-        news_data["headline_score_origin"] = hs_score
-        news_data["headline_score_probs"] = hs_token_probs
-        
-        # FS 점수 계산
-        fs_score, fs_token_probs = evaluate_score(title, content, prompt_fs)
-        normalized_fs_score = normalize_score(fs_score)
-
-        news_data["fact_score"] = normalized_fs_score
-        news_data["fact_score_origin"] = fs_score
-        news_data["fact_score_probs"] = fs_token_probs
+    # 요약 생성 및 카테고리 분류
+    prompt = prompt_summary.replace("{{제목}}", title).replace("{{본문}}", content)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "당신은 뉴스 분석 전문가입니다."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        max_tokens=500,
+        temperature=0.2,
+        top_p=0.9
+    )
 
         
-        analyzed_news.append(news_data)
-        print(f"\n✅ 분석 완료: {news_data}")
-    
-    print(f"\n✅ 분석 완료: {len(analyzed_news)}개의 뉴스 기사 수집 완료")
-    elapsed_time = time.time() - start_time  # 걸린 시간 계산
-    print(f"⏱ 분석에 걸린 시간: {elapsed_time:.2f}초")
+    result = json.loads(response.choices[0].message.content)
+        
+    # 요약과 카테고리 결과 추출
+    news_data["summary"] = result["summary"]
+    news_data["category"] = result["category"]
+        
+    # HS 점수 계산
+    hs_score, hs_token_probs = evaluate_score(title, content, prompt_hs)
+    normalized_hs_score = normalize_score(hs_score)
 
-    return analyzed_news
+    news_data["headline_score"] = normalized_hs_score
+    news_data["headline_score_origin"] = hs_score
+    news_data["headline_score_probs"] = hs_token_probs
+        
+    # FS 점수 계산
+    fs_score, fs_token_probs = evaluate_score(title, content, prompt_fs)
+    normalized_fs_score = normalize_score(fs_score)
+
+    news_data["fact_score"] = normalized_fs_score
+    news_data["fact_score_origin"] = fs_score
+    news_data["fact_score_probs"] = fs_token_probs        
+
+    print(f"\n✅ 분석 완료: {news_data['title']}")
+
+    return news_data
 
 
 # 뉴스 데이터 분석 실행
 if __name__ == "__main__":
-    input_file = "./crawled_news_forTest.json"
+    input_files = ["./news.json", "./enter.json", "./sport.json"]  # 3개의 입력 파일
     output_file = "./analyzed_news.json"
     
-    # 뉴스 데이터 로드
-    with open(input_file, "r", encoding="utf-8") as file:
-        news_list = json.load(file)
+
+    news_list = []
+
+    # 3개의 JSON 파일을 로드하여 news_list에 추가
+    for file_path in input_files:
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+                news_list.extend(data)  # 리스트에 추가
+            print(f"📥 {file_path}에서 {len(data)}개의 뉴스 로드 완료")
+        except FileNotFoundError:
+            print(f"⚠️ {file_path} 파일을 찾을 수 없습니다. 건너뜁니다.")
+        except json.JSONDecodeError:
+            print(f"❌ {file_path} 파일의 JSON 형식이 올바르지 않습니다. 건너뜁니다.")
     
-    # 뉴스 데이터 분석
-    analyzed_news = analyze_news(news_list)
-    
+    analyzed_news = []
+
+    start_time = time.time()  # 시작 시간 측정
+
+    # 뉴스 데이터 하나씩 분석
+    for news in news_list:
+        analyzed_news.append(analyze_news(news))
+
+    elapsed_time = time.time() - start_time  # 걸린 시간 계산
+    print(f"\n✅ 분석 완료: {len(analyzed_news)}개의 뉴스 기사 수집 완료")
+    print(f"⏱ 분석에 걸린 시간: {elapsed_time:.2f}초")
+
     # 분석 결과 저장
     with open(output_file, "w", encoding="utf-8") as file:
         json.dump(analyzed_news, file, ensure_ascii=False, indent=4)
