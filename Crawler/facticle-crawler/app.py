@@ -8,7 +8,7 @@ from news_crawler import get_news_list, get_news  # 네이버 뉴스 크롤러
 from enter_crawler import get_enter_list, get_enter  # 네이버 엔터 뉴스 크롤러
 from sports_crawler import get_sports_list, get_sports  # 네이버 스포츠 뉴스 크롤러
 from postprocess import analyze_news
-from db import save_news
+from db import save_news, check_db_connection
 
 news_queue = queue.Queue()
 STOP_SIGNAL = "STOP"
@@ -30,6 +30,9 @@ def fetch_news():
 
 
     total_news_count = 0
+    seen_urls = set()  # 중복 확인을 위한 집합
+
+
     for source_name, list_func, news_type, max_pages in news_sources:
         start_page = 0 if news_type == "sport" else 1  # 스포츠 뉴스는 0부터 시작
 
@@ -39,10 +42,14 @@ def fetch_news():
                 break  # 뉴스가 없으면 해당 소스 크롤링 종료
 
             for news in news_list:
+                if news["naverUrl"] in seen_urls:  # 중복 뉴스 제거
+                    continue
+
+                seen_urls.add(news["naverUrl"])  # URL을 집합에 추가
                 news_queue.put(news)  # 뉴스 큐에 추가
                 total_news_count += 1
 
-    print(f"[info] 총 {total_news_count}개 뉴스 큐에 추가 완료!")
+    print(f"\n[info] 총 {total_news_count}개 뉴스 큐에 추가 완료!\n")
 
 
 
@@ -92,13 +99,17 @@ def process_news():
 
 # 스케줄러 설정 (뉴스 수집 주기: 2분)
 scheduler = BackgroundScheduler()
-scheduler.add_job(fetch_news, 'interval', minutes=2, next_run_time=datetime.now()) # 처음 시작 시 바로 함수를 한 번 실행
 
 if __name__ == "__main__":
     print("[info] 뉴스 크롤러 시작!")
 
+    # DB 연결 확인
+    check_db_connection()
+
     # 스케줄러 시작
+    fetch_news() # 바로 함수를 한 번 실행하기 위해 초기 처음에는 수동으로 바로 실행
     scheduler.start()
+    scheduler.add_job(fetch_news, 'interval', minutes=2) # 이후 2분 간격으로 실행되도록 작업을 스케줄러에 추가
 
     # 뉴스 처리 워커 스레드 실행, 각자 queue에서 데이터를 가져와 처리
     executor = concurrent.futures.ThreadPoolExecutor(max_threads)

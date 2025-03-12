@@ -1,19 +1,20 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: facticle-mysql-container
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: Qwer1234!
-      MYSQL_DATABASE: facticle
-      MYSQL_USER: facticle_user
-      MYSQL_PASSWORD: Qwer1234!
-    ports:
-      - "3307:3306"
-    networks:
-      - facticle-network
+  # DB를 mysql이 아니라 railway에서 제공하는 PaaS 기반으로 배포된 mysql을 사용
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: facticle-mysql-container
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: Qwer1234!
+  #     MYSQL_DATABASE: facticle
+  #     MYSQL_USER: facticle_user
+  #     MYSQL_PASSWORD: Qwer1234!
+  #   ports:
+  #     - "3307:3306"
+  #   networks:
+  #     - facticle-network
 
   backend:
     build:
@@ -21,8 +22,8 @@ services:
     image: facticle-be:latest
     container_name: facticle-be-container
     restart: unless-stopped
-    depends_on:
-      - mysql
+    # depends_on:
+    #   - mysql
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     ports:

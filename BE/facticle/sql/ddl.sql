@@ -80,3 +80,10 @@ CREATE INDEX idx_expires_at ON refresh_tokens (expires_at);
 CREATE INDEX idx_nickname ON users (nickname);
 CREATE INDEX idx_username ON users (username);
 CREATE INDEX idx_social_provider_id ON users (social_provider, social_id);
+
+
+-- DB 테이블의 데이터 사제
+SET FOREIGN_KEY_CHECKS = 0;  -- 외래 키 제약 조건 해제
+TRUNCATE TABLE news;
+TRUNCATE TABLE news_content;
+SET FOREIGN_KEY_CHECKS = 1;  -- 외래 키 제약 조건 설정

@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 load_dotenv()
-# 환경 변수 설정
+# 환경 변수 설정, 정보 없다면 local DB로 연결
 DB_USER = os.getenv("DB_USER", "facticle_user")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -16,6 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "facticle")
 
 DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+# scoped_session을 활용하여 각 스레드에서 독립적인 세션을 제공
 engine = create_engine(
     DATABASE_URL,
     echo=False, # 쿼리 출력 x
@@ -23,10 +24,19 @@ engine = create_engine(
     pool_timeout=30, #연결 시간 초과 제한
     pool_pre_ping=True # DB 연결이 끊어졌는 지 주기적으로 확인
 )
-
-# scoped_session을 활용하여 각 스레드에서 독립적인 세션을 제공
 SessionLocal = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
 
+def check_db_connection():
+    """DB 연결이 정상적으로 되는지 확인"""
+    print("[info] 데이터베이스 연결 확인 중...")
+
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))  # 간단한 쿼리 실행하여 연결 확인
+            print("[info] DB 연결 성공!")
+    except Exception as e:
+        print(f"[error] DB 연결 실패: {e}")
+        exit(1)  # 연결 실패 시 프로그램 종료
 
 # 뉴스 데이터를 DB에 삽입하는 함수, sqlalchemy은 기본적으로 ORM 라이브러리이지만, 해당 모듈에서는 단순히 news 데이터를 insert하는 동작만 담당하기에, Raw SQL로 사용
 def save_news(news_data):
@@ -89,10 +99,10 @@ def save_news(news_data):
         db.execute(news_content_sql, news_content_values)
         db.commit()
 
-        print(f"[INFO] 뉴스 저장 완료 (news_id={news_id})")
+        print(f"[info] 뉴스 저장 완료 (news_id={news_id})")
     except Exception as e:
         db.rollback()
-        print(f"[ERROR] 데이터 삽입 오류: {e}")
+        print(f"[error] 데이터 삽입 오류: {e}")
     finally:
         db.close()
         SessionLocal.remove()

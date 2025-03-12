@@ -160,7 +160,7 @@ def analyze_news(news_data):
     news_data["hs_reason"] = reasoning_result["hs_reason"]
     news_data["fs_reason"] = reasoning_result["fs_reason"]      
 
-    print(f"\n✅ 분석 완료: {news_data['title']}")
+    print(f"[info] 분석 완료: {news_data['title']}")
 
     return news_data
 
