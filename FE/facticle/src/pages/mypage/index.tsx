@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Avatar from "../../components/avatar";
 import Input from "../../components/input";
-import { MypageContainer, ProfileContainer, ProfileTitleContainer, ProfileTextContainer, UpdateButton, AvatarContainer } from "./mypage.styles";
+import { MypageContainer, ProfileContainer, ProfileTitleContainer, ProfileTextContainer, UpdateButton, AvatarContainer, ProfileInputTitle, AvatarNickname } from "./mypage.styles";
 import userService from "../../services/user/user.service";
 import { useAuth } from "../../hooks/useAuth";
 import authService from "../../services/auth/auth.service";
@@ -219,11 +219,11 @@ function Mypage() {
             onDelete={handleDelete}
             />
         </AvatarContainer>
-        <h2>{userNickname} 님</h2>
+        <AvatarNickname>{userNickname} 님</AvatarNickname>
       </ProfileContainer>
 
       <ProfileTextContainer>
-        <h4>닉네임</h4>
+        <ProfileInputTitle>닉네임</ProfileInputTitle>
       </ProfileTextContainer>
 
       <Input
@@ -237,7 +237,7 @@ function Mypage() {
       />
 
       <ProfileTextContainer>
-        <h4>이메일 (선택사항)</h4>
+        <ProfileInputTitle>이메일 (선택사항)</ProfileInputTitle>
       </ProfileTextContainer>
 
       <Input

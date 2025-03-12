@@ -19,6 +19,7 @@ export const HomeButton = styled(Link)`
   font-size: 28px;
   font-weight: bold;
   padding: 0.6em 1.2em;
+  padding-left: 0;
   margin-right: 20px;
   color: #080E4B;
   border-style: none;

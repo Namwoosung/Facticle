@@ -11,7 +11,7 @@ export const MypageContainer = styled.div`
 export const ProfileContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   gap: 60px;
 `;
 
@@ -20,6 +20,11 @@ export const AvatarContainer = styled.div`
   flex-direction: column;
   align-items: center;
 `;
+
+export const AvatarNickname = styled.h2`
+  position: relative;
+  top: -30px;
+`
 
 export const ProfileTitleContainer = styled.div`
   display: flex;
@@ -37,6 +42,10 @@ export const ProfileInputContainer = styled.div`
   align-items: center;
   margin-bottom: 20px;
 `;
+export const ProfileInputTitle = styled.h3`
+  padding: 0.3rem 0.6rem;
+  margin-bottom: 5px;
+  `
 
 export const UpdateButton = styled.button`
     height: 50px;
