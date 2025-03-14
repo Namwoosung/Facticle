@@ -2,6 +2,7 @@ package com.example.facticle.user.repository;
 
 import com.example.facticle.user.entity.*;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.TimeZone;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -16,6 +18,11 @@ import java.util.List;
 class UserRepositoryTest {
     @Autowired
     UserRepository userRepository;
+
+    @BeforeAll
+    static void setTime() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     @Test
     public void basicUserTest(){

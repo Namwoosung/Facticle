@@ -2,6 +2,7 @@ package com.example.facticle.user.repository;
 
 import com.example.facticle.user.entity.*;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,6 +34,11 @@ class RefreshTokenRepositoryTest {
     private RefreshToken expiredToken;
     private RefreshToken revokedToken;
     private LocalAuth localAuth;
+
+    @BeforeAll
+    static void setTime() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     @BeforeEach
     void setUp() {

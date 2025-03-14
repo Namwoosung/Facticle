@@ -66,6 +66,7 @@ public class SecurityConfig {
                             "/api/users/check-username",
                             "/api/users/check-nickname",
                             "/api/users/token/refresh",
+                            "/api/news/**",
                             "/static/**",
                             "/favicon.ico"
                     ).permitAll()

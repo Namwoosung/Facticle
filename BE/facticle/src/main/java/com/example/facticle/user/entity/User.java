@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@ToString(of = {"userId", "localAuth", "nickname", "email", "role", "signupType", "socialAuth"})
+@ToString(of = {"userId", "localAuth", "nickname", "email", "role", "signupType", "socialAuth", "createdAt"})
 @Table(name = "users",
         indexes = {
                 @Index(name = "idx_nickname", columnList = "nickname"),

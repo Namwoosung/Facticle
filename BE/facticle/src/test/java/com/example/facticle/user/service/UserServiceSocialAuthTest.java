@@ -10,6 +10,7 @@ import com.example.facticle.user.oauth.SocialAuthProviderFactory;
 import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
+import java.util.TimeZone;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -59,6 +61,11 @@ public class UserServiceSocialAuthTest {
     private SocialLoginRequestDto socialLoginRequestDto;
     private SocialUserInfo mockSocialUserInfo;
     private User mockUser;
+
+    @BeforeAll
+    static void setTime() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     @BeforeEach
     void setUp() {

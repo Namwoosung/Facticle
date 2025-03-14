@@ -14,6 +14,7 @@ import com.example.facticle.user.repository.RefreshTokenRepository;
 import com.example.facticle.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -61,6 +63,12 @@ class UserServiceTest {
     private final String BUCKET_NAME = "facticle-profile-images";
     private final String FOLDER_NAME = "profile-images/";
     private final String DEFAULT_PROFILE_IMAGE_URL = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png";
+
+
+    @BeforeAll
+    static void setTime() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     @BeforeEach
     void setUp() throws InterruptedException {

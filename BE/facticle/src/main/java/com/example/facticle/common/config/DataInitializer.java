@@ -137,6 +137,8 @@ public class DataInitializer {
                 log.debug("user1 AccessToken: {}", user1AccessTokenJwt);
                 log.debug("user2 AccessToken: {}", user2AccessTokenJwt);
 
+                log.debug("user1 {}", user1);
+
             } else {
                 log.debug("[info] Test User already exists. do not add new Test User");
             }

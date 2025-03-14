@@ -10,9 +10,11 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        jdbc:
-          time_zone: Asia/Seoul # 시간을 KTC로 설정
         format_sql: true
+        timezone:
+          default_storage: NORMALIZE # Hibernate 시간대 처리 방식 설정
+        jdbc:
+          time_zone: UTC # 시간을 UTC로 통일
         #show_sql: true
         default_batch_fetch_size: 300 #ToMany관계에서 페이징 및 성능을 위한 옵션, 필요한 경우 개별 엔티티나 컬렉션에서 추가 설정
 

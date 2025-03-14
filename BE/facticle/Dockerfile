@@ -22,4 +22,4 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/facticle-0.0.1-SNAPSHOT.jar app.jar
 
 # Step 7: 컨테이너에서 실행할 명령어 설정
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=UTC", "-jar", "app.jar"]

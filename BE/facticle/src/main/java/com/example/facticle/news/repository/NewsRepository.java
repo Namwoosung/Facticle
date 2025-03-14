@@ -1,6 +1,7 @@
 package com.example.facticle.news.repository;
 
 import com.example.facticle.news.entity.News;
+import lombok.extern.java.Log;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
