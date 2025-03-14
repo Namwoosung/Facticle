@@ -1,6 +1,7 @@
 package com.example.facticle.news.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@ToString(of = {"newsId", "url", "naverUrl", "title", "summary", "imageUrl", "mediaName", "category", "headlineScore", "factScore", "headlineScoreReason", "factScoreReason", "collectedAt"})
 @Table(name = "news",
         indexes = {
                 @Index(name = "idx_category", columnList = "category"),
@@ -62,8 +64,7 @@ public class News {
 
     @CreationTimestamp
     @Column(columnDefinition = "TIMESTAMP", nullable = false)
-    @Builder.Default
-    private LocalDateTime collectedAt = LocalDateTime.now();
+    private LocalDateTime collectedAt;
 
     @Column(nullable = false)
     @Builder.Default
@@ -85,6 +86,14 @@ public class News {
     @Builder.Default
     private BigDecimal rating = BigDecimal.valueOf(0.0);
 
+    @JsonIgnore
     @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private NewsContent newsContent;
+
+    //연관관계 편의 메서드
+    //사실 뉴스 저장은 모두 크롤링 서버에서 담당하므로 호출될 일은 없을 것으료 예상되지만, 추후 확장성을 고려해 작성해둠
+    public void addNewsContent(NewsContent newsContent){
+        this.newsContent = newsContent;
+        newsContent.setNews(this);
+    }
 }

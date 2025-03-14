@@ -35,7 +35,6 @@ class UserRepositoryTest {
                 .signupType(SignupType.LOCAL)
                 .build();
 
-
         ///when
         User savedUser = userRepository.save(user);
 

@@ -1,45 +1,49 @@
-package com.example.facticle.news.service;
+package com.example.facticle.news.controller;
 
-import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.entity.NewsCategory;
 import com.example.facticle.news.entity.NewsContent;
-import com.example.facticle.news.repository.NewsContentRepository;
 import com.example.facticle.news.repository.NewsRepository;
+import com.example.facticle.news.service.NewsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.TimeZone;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class NewsServiceTest {
+@AutoConfigureMockMvc
+class NewsControllerTest {
+    @Autowired
+    MockMvc mockMvc;
+    ObjectMapper objectMapper = new ObjectMapper(); //Json 직렬화
+
+    @Autowired
+    NewsController newsController;
 
     @Autowired
     NewsService newsService;
 
     @Autowired
     NewsRepository newsRepository;
-
-    @Autowired
-    NewsContentRepository newsContentRepository;
 
     @Autowired
     EntityManager entityManager;
@@ -123,21 +127,22 @@ class NewsServiceTest {
         entityManager.flush();
     }
 
-
     @Test
-    @DisplayName("개별 뉴스 조회 - 성공, 실패 모두")
-    void getNewsTest() {
-        //성공
-        News news = newsService.getNews(news1.getNewsId());
+    @DisplayName("개별 뉴스 조회 테스트 - 성공, 실패 모두")
+    void getNewsTest() throws Exception {
 
-        Assertions.assertThat(news.getNewsId()).isEqualTo(news1.getNewsId());
-        Assertions.assertThat(newsRepository.count()).isEqualTo(2);
+        News news = newsRepository.findById(news1.getNewsId()).get();
 
-        //실패
-        Assertions.assertThatThrownBy(() -> {
-                    newsService.getNews(100L);
-                })
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("news not found");
+
+        mockMvc.perform(MockMvcRequestBuilders.get(String.format("/api/news/%d", news.getNewsId()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("news retrieved successfully."));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/news/-1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid input"));
+
     }
 }

@@ -182,20 +182,7 @@ public class UserController {
     public BaseResponse getUserProfile(@AuthenticationPrincipal CustomUserDetails customUserDetails){
         User user = userService.getUserById(customUserDetails.getUserId());
 
-        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.builder()
-                .userId(user.getUserId())
-                .nickname(user.getNickname())
-                .username(user.getSignupType() == SignupType.LOCAL ? user.getLocalAuth().getUsername() : null)
-                .socialId(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialId() : null)
-                .socialProvider(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialProvider() : null)
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .role(user.getRole())
-                .signupType(user.getSignupType())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .lastLogin(user.getLastLogin())
-                .build();
+        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.from(user);
 
         return BaseResponse.success(Map.of("code", 200, "User", getProfileResponseDto), "User profile retrieved successfully.");
     }
@@ -209,20 +196,7 @@ public class UserController {
                                           @RequestBody @Valid UpdateProfileRequestDto updateProfileRequestDto){
         User user = userService.updateUserProfile(customUserDetails.getUserId(), updateProfileRequestDto);
 
-        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.builder()
-                .userId(user.getUserId())
-                .nickname(user.getNickname())
-                .username(user.getSignupType() == SignupType.LOCAL ? user.getLocalAuth().getUsername() : null)
-                .socialId(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialId() : null)
-                .socialProvider(user.getSignupType() == SignupType.SOCIAL ? user.getSocialAuth().getSocialProvider() : null)
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .role(user.getRole())
-                .signupType(user.getSignupType())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .lastLogin(user.getLastLogin())
-                .build();
+        GetProfileResponseDto getProfileResponseDto = GetProfileResponseDto.from(user);
 
         return BaseResponse.success(Map.of("code", 200, "User", getProfileResponseDto), "User profile updated successfully.");
     }

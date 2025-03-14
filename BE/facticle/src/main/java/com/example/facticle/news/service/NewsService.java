@@ -1,11 +1,14 @@
 package com.example.facticle.news.service;
 
+import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -17,6 +20,6 @@ public class NewsService {
     @Transactional(readOnly = true)
     public News getNews(Long newsId) {
         return newsRepository.findById(newsId)
-                .orElseThrow(() -> new IllegalArgumentException("news not found"));
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "newsId does not exist.")));
     }
 }

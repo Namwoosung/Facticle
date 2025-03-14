@@ -22,4 +22,8 @@ public class NewsContent {
     @JoinColumn(name = "news_id")
     private News news;
 
+    protected void setNews(News news){
+        this.news = news;
+    }
+
 }
