@@ -64,7 +64,7 @@ class NewsServiceTest {
                 .summary("첫 번째 뉴스의 요약")
                 .imageUrl("https://news.example.com/article1.jpg")
                 .mediaName("뉴스미디어1")
-                .category(NewsCategory.경제)
+                .category(NewsCategory.ECONOMY)
                 .headlineScore(new BigDecimal("85.50"))
                 .factScore(new BigDecimal("90.20"))
                 .headlineScoreReason("신뢰할 만한 헤드라인")
@@ -93,7 +93,7 @@ class NewsServiceTest {
                 .summary("두 번째 뉴스의 요약")
                 .imageUrl("https://news.example.com/article2.jpg")
                 .mediaName("뉴스미디어2")
-                .category(NewsCategory.스포츠)
+                .category(NewsCategory.SPORTS)
                 .headlineScore(new BigDecimal("75.80"))
                 .factScore(new BigDecimal("88.40"))
                 .headlineScoreReason("흥미로운 헤드라인")
@@ -129,6 +129,8 @@ class NewsServiceTest {
     void getNewsTest() {
         //성공
         News news = newsService.getNews(news1.getNewsId());
+
+        System.out.println("news = " + news);
 
         Assertions.assertThat(news.getNewsId()).isEqualTo(news1.getNewsId());
         Assertions.assertThat(newsRepository.count()).isEqualTo(2);

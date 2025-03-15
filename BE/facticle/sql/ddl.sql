@@ -49,7 +49,7 @@ CREATE TABLE news (
     image_url VARCHAR(255),
     media_name VARCHAR(255),
     naver_url VARCHAR(255),
-    category ENUM('IT_과학', '경제', '국제', '날씨', '문화', '사회', '스포츠', '연예', '정치') NOT NULL,
+    category ENUM('POLITICS', 'ECONOMY', 'SOCIETY', 'INTERNATIONAL', 'TECH', 'CULTURE', 'ENTERTAINMENT', 'SPORTS', 'WEATHER') NOT NULL,
     headline_score DECIMAL(5,2) NOT NULL,
     fact_score DECIMAL(5,2) NOT NULL,
     headline_score_reason TEXT NOT NULL,

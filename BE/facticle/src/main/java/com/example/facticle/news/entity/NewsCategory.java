@@ -1,5 +1,26 @@
 package com.example.facticle.news.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum NewsCategory {
-    정치, 경제, 사회, 국제, IT_과학, 문화, 연예, 스포츠, 날씨
+    POLITICS("politics"),
+    ECONOMY("economy"),
+    SOCIETY("society"),
+    INTERNATIONAL("international"),
+    TECH("tech"),
+    CULTURE("culture"),
+    ENTERTAINMENT("entertainment"),
+    SPORTS("sports"),
+    WEATHER("weather");
+
+    private final String value;
+
+    NewsCategory(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
 }
