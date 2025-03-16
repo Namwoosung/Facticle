@@ -5,6 +5,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +25,9 @@ public class NewsSearchCondition {
     private List<String> publishers; // 언론사 목록
     private List<NewsCategory> categories; // 카테고리 목록
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startDate; // 시작 날짜
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endDate; // 종료 날짜
 
     private BigDecimal minHsScore;
@@ -32,6 +35,7 @@ public class NewsSearchCondition {
     private BigDecimal minFsScore;
     private BigDecimal maxFsScore;
 
+    //좋아요, 싫어요, 댓글, 조회 수, 별점 등의 검색 조건은 추후 뉴스 상호작용 기능 개발 후 다시 한번 더 테스트
     private Integer minLikes;
     private Integer maxLikes;
     private Integer minDislikes;
