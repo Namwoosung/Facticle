@@ -1,6 +1,7 @@
 package com.example.facticle.news.controller;
 
 import com.example.facticle.common.dto.BaseResponse;
+import com.example.facticle.common.service.DateTimeUtil;
 import com.example.facticle.news.dto.*;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.service.NewsService;
@@ -52,6 +53,14 @@ public class NewsController {
         }
         if (condition.getSize() == null) {
             condition.setSize(10);
+        }
+
+        //KST 시간을 UTC로 변환
+        if(condition.getStartDate() != null){
+            condition.setStartDate(DateTimeUtil.convertKSTToUTC(condition.getStartDate()));
+        }
+        if(condition.getEndDate() != null){
+            condition.setEndDate(DateTimeUtil.convertKSTToUTC(condition.getEndDate()));
         }
 
         List<News> newsList =  newsService.getNewsList(condition);

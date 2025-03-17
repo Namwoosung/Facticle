@@ -137,7 +137,7 @@ class NewsServiceTest {
 
         //실패
         Assertions.assertThatThrownBy(() -> {
-                    newsService.getNews(100L);
+                    newsService.getNews(-1L);
                 })
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("news not found");

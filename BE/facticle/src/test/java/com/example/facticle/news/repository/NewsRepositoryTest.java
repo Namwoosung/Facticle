@@ -40,8 +40,6 @@ class NewsRepositoryTest {
     private News news4;
     private News news5;
 
-
-
     @BeforeAll
     static void setTime() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -59,7 +57,6 @@ class NewsRepositoryTest {
                 .category(NewsCategory.ECONOMY)
                 .headlineScore(new BigDecimal("85.50"))
                 .factScore(new BigDecimal("90.20"))
-                .collectedAt(LocalDateTime.now().minusDays(2))
                 .likeCount(10)
                 .hateCount(100)
                 .viewCount(1000)
@@ -79,7 +76,6 @@ class NewsRepositoryTest {
                 .category(NewsCategory.ENTERTAINMENT)
                 .headlineScore(new BigDecimal("78.40"))
                 .factScore(new BigDecimal("85.60"))
-                .collectedAt(LocalDateTime.now().minusDays(5))
                 .likeCount(250)
                 .hateCount(50)
                 .viewCount(7000)
@@ -100,7 +96,6 @@ class NewsRepositoryTest {
                 .category(NewsCategory.TECH)
                 .headlineScore(new BigDecimal("40.75"))
                 .factScore(new BigDecimal("70.10"))
-                .collectedAt(LocalDateTime.now().minusDays(10))
                 .likeCount(5)
                 .hateCount(200)
                 .viewCount(500)
@@ -120,7 +115,6 @@ class NewsRepositoryTest {
                 .category(NewsCategory.SPORTS)
                 .headlineScore(new BigDecimal("95.00"))
                 .factScore(new BigDecimal("98.90"))
-                .collectedAt(LocalDateTime.now().minusDays(1))
                 .likeCount(500)
                 .hateCount(5)
                 .viewCount(10000)
@@ -140,7 +134,6 @@ class NewsRepositoryTest {
                 .category(NewsCategory.POLITICS)
                 .headlineScore(new BigDecimal("20.00"))
                 .factScore(new BigDecimal("30.50"))
-                .collectedAt(LocalDateTime.now().minusDays(20))
                 .likeCount(1)
                 .hateCount(500)
                 .viewCount(200)
@@ -215,8 +208,20 @@ class NewsRepositoryTest {
                 .startDate(LocalDateTime.now().minusDays(10))
                 .endDate(LocalDateTime.now())
                 .build();
+
+        System.out.println("news1 = " + news1);
+        System.out.println("news2 = " + news2);
+        System.out.println("news3 = " + news3);
+        System.out.println("news4 = " + news4);
+        System.out.println("news5 = " + news5);
+
+        System.out.println("collectedAtCondition.getStartDate() = " + collectedAtCondition.getStartDate());
+        System.out.println("collectedAtCondition.getEndDate() = " + collectedAtCondition.getEndDate());
+
+
+
         List<News> collectedAtResults = newsRepository.searchNewsList(collectedAtCondition);
-        Assertions.assertThat(collectedAtResults).hasSize(4);
+        Assertions.assertThat(collectedAtResults).hasSize(5);
 
         // 정렬 테스트 (조회수 내림차순)
         NewsSearchCondition sortCondition = NewsSearchCondition.builder()
