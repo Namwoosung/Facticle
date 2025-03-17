@@ -9,6 +9,7 @@ export const RegisterWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap:30px;
 `;
 
 export const HomeButton = styled(Link)`

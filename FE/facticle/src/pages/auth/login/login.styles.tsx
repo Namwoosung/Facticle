@@ -23,6 +23,10 @@ export const HomeButton = styled(Link)`
 
 export const InputContainer = styled.form`
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
 `;
 
 export const ErrorText = styled.p`

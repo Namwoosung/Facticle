@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const InputWrapper = styled.div`
   position: relative;
   width: 100%;
-  margin-bottom: 30px;
 `;
 
 export const InputField = styled.input.withConfig({
