@@ -23,9 +23,5 @@ public class EnvConfig {
         dotenv.entries().forEach(entry -> {
             System.setProperty(entry.getKey(), entry.getValue());
         });
-
-        // 로그로 환경변수가 잘 적용되었는 지 확인
-        log.info("AWS_REGION: {}", System.getProperty("AWS_REGION"));
-        log.info("AWS_BUCKET_NAME: {}", System.getProperty("AWS_BUCKET_NAME"));
     }
 }

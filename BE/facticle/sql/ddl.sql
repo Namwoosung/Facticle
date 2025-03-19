@@ -70,6 +70,9 @@ CREATE TABLE news_content (
     CONSTRAINT FK_news_content FOREIGN KEY (news_id) REFERENCES news(news_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+
+
+
 -- 인덱스 추가
 CREATE INDEX idx_category ON news (category);
 CREATE INDEX idx_headline_score ON news (headline_score);

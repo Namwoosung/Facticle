@@ -5,7 +5,6 @@ import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.dto.BaseResponse;
 import com.example.facticle.common.dto.CustomUserDetails;
 import com.example.facticle.user.dto.*;
-import com.example.facticle.user.entity.SignupType;
 import com.example.facticle.user.entity.User;
 import com.example.facticle.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -88,7 +87,7 @@ public class UserController {
 //                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
-                .sameSite("None")
+                //.sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
@@ -110,7 +109,7 @@ public class UserController {
 //                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
-                .sameSite("None")
+                //.sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
@@ -131,7 +130,7 @@ public class UserController {
 //                .secure(true)
                 .path("/api/users")
                 .maxAge(0) // 쿠키 삭제
-                .sameSite("None")
+                //.sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", deleteCookie.toString());
 
@@ -218,7 +217,7 @@ public class UserController {
 //                .secure(true)
                 .path("/api/users") //유저관련 api에 한정하여 전송
                 .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenValidTime()).getSeconds()) //밀리초와 초 단위를 맞춰줌
-                .sameSite("None")
+                //.sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 

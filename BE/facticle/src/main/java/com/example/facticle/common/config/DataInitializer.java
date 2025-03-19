@@ -60,7 +60,7 @@ public class DataInitializer {
 
 
                 // 토큰을 고정되게 생성하기 위해 고정된 발급시간을 지정
-                long fixedIssuedAtMillis = Instant.parse("2025-02-13T00:00:00Z").toEpochMilli();
+                long fixedIssuedAtMillis = Instant.parse("2025-03-15T00:00:00Z").toEpochMilli();
                 long accessTokenValidity = 1000L * 60 * 60 * 24 * 30; // 30일
                 long refreshTokenValidity = 1000L * 60 * 60 * 24 * 60; // 60일
 

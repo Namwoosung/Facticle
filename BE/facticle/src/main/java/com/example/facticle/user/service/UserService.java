@@ -1,9 +1,7 @@
 package com.example.facticle.user.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
 import com.example.facticle.common.authority.JwtTokenProvider;
 import com.example.facticle.common.authority.TokenInfo;
 import com.example.facticle.common.authority.TokenValidationResult;
@@ -20,7 +18,6 @@ import com.example.facticle.user.repository.UserRepository;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -50,12 +47,9 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SocialAuthProviderFactory socialAuthProviderFactory;
 
-    //S3 설정 및 사진 규격
-    private final AmazonS3 amazonS3;
-    @Value("${cloud.aws.s3.bucket}")
-    private String BUCKET_NAME;
-    private static final String FOLDER_NAME = "profile-images/";
-    private static final String DEFAULT_PROFILE_IMAGE_URL = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png"; //기본 프로필 이미지 URL
+    //Azure 설정 및 사진 규격
+    private final BlobContainerClient blobContainerClient;
+    private static final String DEFAULT_PROFILE_IMAGE_URL = "https://facticlefilestorage.blob.core.windows.net/profile-images/default.png"; //기본 프로필 이미지 URL
     private static final List<String> ALLOWED_FILE_TYPES = List.of("image/jpeg", "image/png");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB 제한
 
@@ -264,13 +258,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // 기본 프로필 이미지가 아니면 S3에서 삭제
         if (user.getProfileImage() != null && !user.getProfileImage().equals(DEFAULT_PROFILE_IMAGE_URL)) {
-            if(user.getProfileImage().contains(BUCKET_NAME)){
-                String oldFilePath = FOLDER_NAME +  user.getProfileImage().substring(user.getProfileImage().lastIndexOf("/") + 1);
-                if (amazonS3.doesObjectExist(BUCKET_NAME, oldFilePath)) {
-                    amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, oldFilePath));
-                }
+
+            String oldFileName = user.getProfileImage().substring(user.getProfileImage().lastIndexOf("/") + 1);
+            if(blobContainerClient.getBlobClient(oldFileName).exists()){
+                blobContainerClient.getBlobClient(oldFileName).delete();
             }
         }
 
@@ -281,26 +273,19 @@ public class UserService {
             fileExtension = profileImage.getOriginalFilename().substring(lastDotIndex);
         }
         String newFileName = UUID.randomUUID() + "_" + userId + fileExtension;
-        String filePath = FOLDER_NAME + newFileName;
 
         try {
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentType(profileImage.getContentType());
-            objectMetadata.setContentLength(profileImage.getSize());
+            // Azure Blob Storage에 업로드
+            BlobClient blobClient = blobContainerClient.getBlobClient(newFileName);
+            blobClient.upload(profileImage.getInputStream(), profileImage.getSize(), true);
 
-            //S3에 저장
-            amazonS3.putObject(new PutObjectRequest(
-                    BUCKET_NAME, filePath, profileImage.getInputStream(), objectMetadata
-                )
-            );
-
-            //업로드된 이미지 Url
-            String imageUrl = amazonS3.getUrl(BUCKET_NAME, filePath).toString();
+            // 업로드된 이미지 URL
+            String imageUrl = blobClient.getBlobUrl();
 
             // 사용자 프로필 이미지 업데이트
             user.updateProfileImage(imageUrl);
+            
             return imageUrl;
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -325,11 +310,11 @@ public class UserService {
         String currentImage = user.getProfileImage();
 
         if(currentImage != null && !currentImage.contains(DEFAULT_PROFILE_IMAGE_URL)){
-            if(currentImage.contains(BUCKET_NAME)){
-                String oldFilePath = FOLDER_NAME +  user.getProfileImage().substring(user.getProfileImage().lastIndexOf("/") + 1);
-                if (amazonS3.doesObjectExist(BUCKET_NAME, oldFilePath)) {
-                    amazonS3.deleteObject(new DeleteObjectRequest(BUCKET_NAME, oldFilePath));
-                }
+
+            String oldFileName = user.getProfileImage().substring(user.getProfileImage().lastIndexOf("/") + 1);
+            BlobClient blobClient = blobContainerClient.getBlobClient(oldFileName);
+            if (blobClient.exists()) {
+                blobClient.delete();
             }
         }
 

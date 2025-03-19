@@ -43,7 +43,7 @@ public class User {
     private String email;
 
     @Builder.Default
-    private String profileImage = "https://facticle-profile-images.s3.ap-northeast-2.amazonaws.com/profile-images/default.png"; //S3 기본 이미지
+    private String profileImage = "https://facticlefilestorage.blob.core.windows.net/profile-images/default.png"; //azure 기본 이미지
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)

@@ -44,17 +44,11 @@ jwt:
   access-token-valid-time: 600000   # 30분 -> 10분
   refresh-token-valid-time: 3600000 # 1일 -> 1시간
 
-cloud: #S3 설정 -> key의 경우 노출되지 않는 것이 중요 -> 베포 전 환경변수 등으로 관리
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: ${AWS_REGION}
-    stack:
-      auto: false
-    s3:
-      bucket: ${AWS_BUCKET_NAME}
+azure:
+  storage:
+    account-name: ${AZURE_STORAGE_ACCOUNT_NAME}
+    sas-token: ${AZURE_STORAGE_SAS_TOKEN}
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME}
 
 oauth:
   google:

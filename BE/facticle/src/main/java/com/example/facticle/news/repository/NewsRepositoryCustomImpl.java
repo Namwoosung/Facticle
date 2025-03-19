@@ -219,5 +219,4 @@ public class NewsRepositoryCustomImpl implements NewsRepositoryCustom{
             default -> news.collectedAt.desc();
         };
     }
-
 }
