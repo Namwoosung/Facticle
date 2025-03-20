@@ -19,8 +19,10 @@ import java.util.Map;
 public class NewsService {
     private final NewsRepository newsRepository;
 
-    @Transactional(readOnly = true)
     public News getNews(Long newsId) {
+        //조회 수 관련 로직 추가
+
+        //DTO를 추가해서 댓글정보도 함께 전달
         return newsRepository.findById(newsId)
                 .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "newsId does not exist.")));
     }
@@ -29,4 +31,6 @@ public class NewsService {
     public List<News> getNewsList(NewsSearchCondition condition){
         return newsRepository.searchNewsList(condition);
     }
+
+
 }

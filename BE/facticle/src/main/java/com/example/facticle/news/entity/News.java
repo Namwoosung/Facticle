@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,7 +22,8 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_category", columnList = "category"),
                 @Index(name = "idx_headline_score", columnList = "headlineScore"),
                 @Index(name = "idx_fact_score", columnList = "factScore"),
-                @Index(name = "idx_collected_at", columnList = "collectedAt")
+                @Index(name = "idx_collected_at", columnList = "collectedAt"),
+                @Index(name = "idx_media_name", columnList = "mediaName")
         },
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "url")
@@ -90,10 +93,27 @@ public class News {
     @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private NewsContent newsContent;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private NewsInteraction newsInteraction;
+    protected void setNewsInteraction(NewsInteraction newsInteraction){
+        this.newsInteraction = newsInteraction;
+    }
+
     //연관관계 편의 메서드
     //사실 뉴스 저장은 모두 크롤링 서버에서 담당하므로 호출될 일은 없을 것으료 예상되지만, 추후 확장성을 고려해 작성해둠
     public void addNewsContent(NewsContent newsContent){
         this.newsContent = newsContent;
         newsContent.setNews(this);
+    }
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    public void addComment(Comment comment){
+        comments.add(comment);
+        comment.updateNews(this);
     }
 }

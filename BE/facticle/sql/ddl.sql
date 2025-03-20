@@ -70,6 +70,49 @@ CREATE TABLE news_content (
     CONSTRAINT FK_news_content FOREIGN KEY (news_id) REFERENCES news(news_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+--뉴스 상호작용 테이블 생성  --시간은 모두 마지막에 인터랙션한 시간, 현재 프로젝트에서는 과거의 유저 인터랙션까지 전부 기록하지는 않고, 가장 최근 인터랙션만 기록
+-- 만약 추후 과거 행적까지 기록해야 하면, one-to-one이 아니라 many-to-one으로 바꾸고, 하나의 유저가 하나의 뉴스에 대해 여러 인터랙션일 할 수 있게 관리
+CREATE TABLE news_interactions (
+    news_interaction_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    news_id BIGINT NOT NULL,
+    reaction ENUM('LIKE', 'DISLIKE') DEFAULT NULL,
+    rating DECIMAL(2,1) NOT NULL DEFAULT 0.0,
+    reaction_at TIMESTAMP,
+    rated_at TIMESTAMP,
+    viewed_at TIMESTAMP,
+    CONSTRAINT FK_news_interactions_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT FK_news_interactions_news FOREIGN KEY (news_id) REFERENCES news(news_id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_news UNIQUE (news_id, user_id)
+) ENGINE=InnoDB;
+
+-- 댓글 테이블 생성
+CREATE TABLE comments (
+    comment_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    news_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    like_count INT DEFAULT 0,
+    hate_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    parent_comment_id BIGINT,
+    CONSTRAINT FK_comments_news FOREIGN KEY (news_id) REFERENCES news(news_id) ON DELETE CASCADE,
+    CONSTRAINT FK_comments_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT FK_comments_parent FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 댓글 상호작용 테이블 생성
+CREATE TABLE comment_interactions (
+    comment_interaction_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    reaction ENUM('LIKE', 'DISLIKE') DEFAULT NULL,
+    reaction_at TIMESTAMP,
+    CONSTRAINT FK_comment_interactions_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT FK_comment_interactions_comment FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_comment UNIQUE (comment_id, user_id)
+) ENGINE=InnoDB;
 
 
 
@@ -78,11 +121,19 @@ CREATE INDEX idx_category ON news (category);
 CREATE INDEX idx_headline_score ON news (headline_score);
 CREATE INDEX idx_fact_score ON news (fact_score);
 CREATE INDEX idx_collected_at ON news (collected_at);
+CREATE INDEX idx_media_name ON news (media_name);
 CREATE INDEX idx_user_id ON refresh_tokens (user_id);
 CREATE INDEX idx_expires_at ON refresh_tokens (expires_at);
 CREATE INDEX idx_nickname ON users (nickname);
 CREATE INDEX idx_username ON users (username);
 CREATE INDEX idx_social_provider_id ON users (social_provider, social_id);
+
+CREATE INDEX idx_news_interactions_user_id ON news_interactions (user_id);
+CREATE INDEX idx_news_interactions_news_id ON news_interactions (news_id);
+CREATE INDEX idx_comments_news_id ON comments (news_id);
+CREATE INDEX idx_comments_user_id ON comments (user_id);
+CREATE INDEX idx_comment_interactions_user_id ON comment_interactions (user_id);
+CREATE INDEX idx_comment_interactions_comment_id ON comment_interactions (comment_id);
 
 
 -- DB 테이블의 데이터 사제

@@ -1,5 +1,8 @@
 package com.example.facticle.user.entity;
 
+import com.example.facticle.news.entity.Comment;
+import com.example.facticle.news.entity.CommentInteraction;
+import com.example.facticle.news.entity.NewsInteraction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -98,6 +101,31 @@ public class User {
         refreshToken.setUser(this);
     }
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private NewsInteraction newsInteraction;
+    public void updateNewsInteraction(NewsInteraction newsInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
+        this.newsInteraction = newsInteraction;
+    }
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CommentInteraction commentInteraction;
+    public void updateCommentInteraction(CommentInteraction commentInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
+        this.commentInteraction = commentInteraction;
+    }
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    //연관관계 편의 메서드
+    public void addComments(Comment comment){
+        comments.add(comment);
+        comment.updateUser(this);
+    }
+
     public void updateLastLogin(LocalDateTime time){
         this.lastLogin = time;
     }
@@ -110,4 +138,5 @@ public class User {
     public void updateEmail(String email){
         this.email = email;
     }
+
 }
