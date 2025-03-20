@@ -1,14 +1,16 @@
-package com.example.facticle.news.repository;
+package com.example.facticle.news.repository.jpa;
 
 import com.example.facticle.news.dto.NewsSearchCondition;
 import com.example.facticle.news.dto.SortBy;
 import com.example.facticle.news.dto.SortDirection;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.entity.NewsCategory;
+import com.example.facticle.news.repository.elasticsearch.NewsDocumentRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -18,12 +20,13 @@ import java.util.List;
 
 import static com.example.facticle.news.entity.QNews.news;
 
-
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class NewsRepositoryCustomImpl implements NewsRepositoryCustom{
 
     private final JPAQueryFactory jpaQueryFactory;
+    private final NewsDocumentRepository newsDocumentRepository;
 
     @Override
     public List<News> searchNewsList(NewsSearchCondition condition) {
@@ -55,16 +58,35 @@ public class NewsRepositoryCustomImpl implements NewsRepositoryCustom{
     /**
      * 추후 ElasticSearch 적용 시 검색된 뉴스 ID 리스트를 받아서 필터링할 예정
      */
-    private BooleanExpression titleKeywordIn(String titleKeyword) {
-        return null; // ElasticSearch 적용 후 뉴스 ID 리스트 필터링 추가 예정
+    private BooleanExpression titleKeywordIn(List<String> titleKeyword) {
+        log.info("titleKeyword {}", titleKeyword);
+        if (titleKeyword == null || titleKeyword.isEmpty()) {
+            return null;
+        }
+        List<Long> newsIds = newsDocumentRepository.searchByTitle(titleKeyword);
+
+        return (newsIds != null) ? news.newsId.in(newsIds) : null;
     }
 
-    private BooleanExpression contentKeywordIn(String contentKeyword) {
-        return null; // ElasticSearch 적용 후 뉴스 ID 리스트 필터링 추가 예정
+    private BooleanExpression contentKeywordIn(List<String> contentKeyword) {
+        log.info("contentKeyword {}", contentKeyword);
+        if (contentKeyword == null || contentKeyword.isEmpty()) {
+            return null;
+        }
+        List<Long> newsIds = newsDocumentRepository.searchByContent(contentKeyword);
+
+        return (newsIds != null) ? news.newsId.in(newsIds) : null;
     }
 
-    private BooleanExpression titleOrContentKeywordIn(String titleOrContentKeyword) {
-        return null; // ElasticSearch 적용 후 뉴스 ID 리스트 필터링 추가 예정
+    private BooleanExpression titleOrContentKeywordIn(List<String> titleOrContentKeyword) {
+        log.info("titleOrContentKeyword {}", titleOrContentKeyword);
+        if (titleOrContentKeyword == null || titleOrContentKeyword.isEmpty()) {
+            return null;
+        }
+
+        List<Long> newsIds = newsDocumentRepository.searchByTitleOrContent(titleOrContentKeyword);
+
+        return (newsIds != null) ? news.newsId.in(newsIds) : null;
     }
 
 

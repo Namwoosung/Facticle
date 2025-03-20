@@ -1,4 +1,4 @@
-package com.example.facticle.news.repository;
+package com.example.facticle.news.repository.jpa;
 
 import com.example.facticle.news.entity.News;
 import org.springframework.data.jpa.repository.JpaRepository;

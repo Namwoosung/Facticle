@@ -50,6 +50,13 @@ azure:
     sas-token: ${AZURE_STORAGE_SAS_TOKEN}
     container-name: ${AZURE_STORAGE_CONTAINER_NAME}
 
+  elasticsearch:
+    uris: ${ELASTICSEARCH_HOST}
+    username: ${ELASTICSEARCH_USERNAME}
+    password: ${ELASTICSEARCH_PASSWORD}
+
+
+
 oauth:
   google:
     client-id: ${GOOGLE_CLIENT_ID}

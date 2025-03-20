@@ -34,6 +34,9 @@ dependencies {
 	implementation 'com.azure:azure-storage-blob:12.20.0' // azure blob storage 접근을 위해 추가
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2' //.env 파일 자동 로드를 위해 추가
 
+	//elasticsearch 연동을 위한 라이브러리
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"

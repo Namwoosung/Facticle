@@ -1,4 +1,4 @@
-package com.example.facticle.news.repository;
+package com.example.facticle.news.repository.jpa;
 
 import com.example.facticle.news.dto.NewsListResponseDto;
 import com.example.facticle.news.dto.NewsSearchCondition;

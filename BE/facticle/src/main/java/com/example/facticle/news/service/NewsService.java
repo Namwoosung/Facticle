@@ -3,7 +3,7 @@ package com.example.facticle.news.service;
 import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.news.dto.NewsSearchCondition;
 import com.example.facticle.news.entity.News;
-import com.example.facticle.news.repository.NewsRepository;
+import com.example.facticle.news.repository.jpa.NewsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

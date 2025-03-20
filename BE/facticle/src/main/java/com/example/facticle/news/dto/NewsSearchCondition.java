@@ -17,9 +17,9 @@ import java.util.List;
 @Builder
 @ToString
 public class NewsSearchCondition {
-    private String titleKeyword; // 제목 키워드
-    private String contentKeyword; // 본문 키워드
-    private String titleOrContentKeyword; // 제목 또는 본문 키워드
+    private List<String> titleKeyword; // 제목 키워드
+    private List<String> contentKeyword; // 본문 키워드
+    private List<String> titleOrContentKeyword; // 제목 또는 본문 키워드
 
 
     private List<String> publishers; // 언론사 목록

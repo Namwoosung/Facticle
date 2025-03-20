@@ -2,8 +2,7 @@ package com.example.facticle.news.controller;
 
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.entity.NewsCategory;
-import com.example.facticle.news.entity.NewsContent;
-import com.example.facticle.news.repository.NewsRepository;
+import com.example.facticle.news.repository.jpa.NewsRepository;
 import com.example.facticle.news.service.NewsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;

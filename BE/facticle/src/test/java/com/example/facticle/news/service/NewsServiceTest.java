@@ -4,8 +4,8 @@ import com.example.facticle.common.exception.InvalidInputException;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.entity.NewsCategory;
 import com.example.facticle.news.entity.NewsContent;
-import com.example.facticle.news.repository.NewsContentRepository;
-import com.example.facticle.news.repository.NewsRepository;
+import com.example.facticle.news.repository.jpa.NewsContentRepository;
+import com.example.facticle.news.repository.jpa.NewsRepository;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,14 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.TimeZone;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")

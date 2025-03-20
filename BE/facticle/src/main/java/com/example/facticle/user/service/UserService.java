@@ -284,7 +284,7 @@ public class UserService {
 
             // 사용자 프로필 이미지 업데이트
             user.updateProfileImage(imageUrl);
-            
+
             return imageUrl;
         } catch (IOException e) {
             throw new RuntimeException(e);

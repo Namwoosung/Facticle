@@ -8,7 +8,7 @@ from news_crawler import get_news_list, get_news  # 네이버 뉴스 크롤러
 from enter_crawler import get_enter_list, get_enter  # 네이버 엔터 뉴스 크롤러
 from sports_crawler import get_sports_list, get_sports  # 네이버 스포츠 뉴스 크롤러
 from postprocess import analyze_news
-from db import save_news, check_db_connection
+from db import save_news, check_db_connection, check_elasticsearch_connection
 
 news_queue = queue.Queue()
 STOP_SIGNAL = "STOP"
@@ -105,6 +105,7 @@ if __name__ == "__main__":
 
     # DB 연결 확인
     check_db_connection()
+    check_elasticsearch_connection()
 
     # 스케줄러 시작
     fetch_news() # 바로 함수를 한 번 실행하기 위해 초기 처음에는 수동으로 바로 실행

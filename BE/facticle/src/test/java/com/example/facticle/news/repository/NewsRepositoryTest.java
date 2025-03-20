@@ -5,6 +5,7 @@ import com.example.facticle.news.dto.SortBy;
 import com.example.facticle.news.dto.SortDirection;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.entity.NewsCategory;
+import com.example.facticle.news.repository.jpa.NewsRepository;
 import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,8 +21,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.TimeZone;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")

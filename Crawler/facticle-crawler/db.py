@@ -5,16 +5,20 @@ import json
 import pymysql
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, scoped_session
+from elasticsearch import Elasticsearch, helpers
 
 load_dotenv()
 # 환경 변수 설정, 정보 없다면 local DB로 연결
-DB_USER = os.getenv("DB_USER", "facticle_user")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME", "facticle")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DATABASE_URL = (
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    "?ssl_verify_cert=false"
+)
 
 # scoped_session을 활용하여 각 스레드에서 독립적인 세션을 제공
 engine = create_engine(
@@ -25,6 +29,19 @@ engine = create_engine(
     pool_pre_ping=True # DB 연결이 끊어졌는 지 주기적으로 확인
 )
 SessionLocal = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
+
+# Elasticsearch 설정
+ES_HOST = os.getenv("ES_HOST")
+ES_USER = os.getenv("ES_USER")
+ES_PASSWORD = os.getenv("ES_PASSWORD")
+
+es = Elasticsearch(
+    [ES_HOST],
+    basic_auth=(ES_USER, ES_PASSWORD)  # 기본 인증 추가
+)
+
+ES_INDEX = "news_index"
+
 
 def check_db_connection():
     """DB 연결이 정상적으로 되는지 확인"""
@@ -37,6 +54,22 @@ def check_db_connection():
     except Exception as e:
         print(f"[error] DB 연결 실패: {e}")
         exit(1)  # 연결 실패 시 프로그램 종료
+
+
+def check_elasticsearch_connection():
+    """Elasticsearch 연결 확인"""
+    print("[info] Elasticsearch 연결 확인 중...")
+
+    try:
+        if es.ping():
+            print("[info] Elasticsearch 연결 성공!")
+        else:
+            print("[error] Elasticsearch 연결 실패!")
+            exit(1)
+    except Exception as e:
+        print(f"[error] Elasticsearch 연결 오류: {e}")
+        exit(1)
+
 
 # 뉴스 데이터를 DB에 삽입하는 함수, sqlalchemy은 기본적으로 ORM 라이브러리이지만, 해당 모듈에서는 단순히 news 데이터를 insert하는 동작만 담당하기에, Raw SQL로 사용
 def save_news(news_data):
@@ -100,6 +133,14 @@ def save_news(news_data):
         db.commit()
 
         print(f"[info] 뉴스 저장 완료 (news_id={news_id})")
+
+        # Elasticsearch에 저장
+        es.index(index=ES_INDEX, id=news_id, document={
+            "title": news_data["title"],
+            "content": news_data["content"]
+        })
+
+        print(f"[info] Elasticsearch에 저장 완료 (news_id={news_id})")
     except Exception as e:
         db.rollback()
         print(f"[error] 데이터 삽입 오류: {e}")
@@ -107,10 +148,58 @@ def save_news(news_data):
         db.close()
         SessionLocal.remove()
 
+# mysql의 data들을 엘라스틱 서치로 동기화
+def sync_mysql_to_elasticsearch():
+    """
+    MySQL에 저장된 뉴스 데이터를 Elasticsearch와 동기화
+    """
+    db = SessionLocal()
+
+    try:
+        # MySQL에서 뉴스 데이터 조회
+        query = text("""
+            SELECT n.news_id, n.title, nc.content
+            FROM news n
+            JOIN news_content nc ON n.news_id = nc.news_id
+        """)
+        result = db.execute(query)
+        news_data = [dict(row) for row in result.mappings().all()]
+
+        if not news_data:
+            print("[info] 동기화할 데이터가 없습니다.")
+            return
+        
+        # Elasticsearch에 배치 삽입 (Bulk API 사용)
+        def generate_bulk_data():
+            for row in news_data:
+                yield {
+                    "_index": ES_INDEX,
+                    "_id": row["news_id"],
+                    "_source": {
+                        "title": row["title"],
+                        "content": row["content"]
+                    }
+                }
+
+        helpers.bulk(es, generate_bulk_data())
+
+        print(f"[info] MySQL → Elasticsearch 동기화 완료! ({len(news_data)}건)")
+    except Exception as e:
+        print(f"[error] Elasticsearch 동기화 오류: {e}")
+    finally:
+        db.close()
+        SessionLocal.remove()
+
+
+
 
 
 # 테스트
 if __name__ == "__main__":
+    # 1. DB & Elasticsearch 연결 확인
+    check_db_connection()
+    check_elasticsearch_connection()
+
     input_file = "./analyzed_news.json"
 
     try:
@@ -130,3 +219,6 @@ if __name__ == "__main__":
         exit(1)
 
     save_news(news)  # 뉴스 저장 실행
+
+    # 3. MySQL → Elasticsearch 전체 동기화 실행
+    # sync_mysql_to_elasticsearch()
