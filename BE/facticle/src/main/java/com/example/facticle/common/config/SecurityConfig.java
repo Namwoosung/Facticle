@@ -66,7 +66,8 @@ public class SecurityConfig {
                             "/api/users/check-username",
                             "/api/users/check-nickname",
                             "/api/users/token/refresh",
-                            "/api/news/**",
+                            "/api/news/search",
+                            "/api/news/{newsId}",
                             "/static/**",
                             "/favicon.ico"
                     ).permitAll()
@@ -74,7 +75,9 @@ public class SecurityConfig {
                             "/api/users/logout",
                             "/api/users/profile",
                             "/api/users/profile-image",
-                            "/api/users/mypage"
+                            "/api/users/mypage",
+                            "/api/news/like",
+                            "/api/news/hate"
                     ).authenticated()
                     .requestMatchers("/api/users/admin/**").hasRole("ADMIN") //어드민 api 요청은 ADMIN 역할만 접근 가능
                     .anyRequest().authenticated() //그 외 요청은 모두 인증 필요

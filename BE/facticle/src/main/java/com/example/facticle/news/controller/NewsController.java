@@ -1,6 +1,7 @@
 package com.example.facticle.news.controller;
 
 import com.example.facticle.common.dto.BaseResponse;
+import com.example.facticle.common.dto.CustomUserDetails;
 import com.example.facticle.common.service.DateTimeUtil;
 import com.example.facticle.news.dto.*;
 import com.example.facticle.news.entity.News;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +30,12 @@ public class NewsController {
      */
     @GetMapping("/{newsId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse getNews(@PathVariable Long newsId){
+    public BaseResponse getNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId){
+
+        log.info("customUserDetails {}", customUserDetails);
+
         News news = newsService.getNews(newsId);
         GetNewsResponseDto newsResponseDto = GetNewsResponseDto.from(news);
 
@@ -71,7 +78,52 @@ public class NewsController {
                         .toList();
 
         return BaseResponse.success(Map.of("code", 200, "totalCount", newsListResponseDtos.size(), "newsList", newsListResponseDtos), "Search results retrieved successfully.");
+    }
 
+    @PostMapping("/{newsId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse likeNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ){
+
+        newsService.likeNews(newsId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "Like added successfully.");
+    }
+
+    @DeleteMapping("/{newsId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse unlikeNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ){
+        newsService.unlikeNews(newsId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "Like canceled successfully.");
+    }
+
+    @PostMapping("/{newsId}/hate")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse hateNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ){
+
+        newsService.hateNews(newsId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "hate added successfully.");
+    }
+
+    @DeleteMapping("/{newsId}/hate")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse unhateNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ){
+        newsService.unhateNews(newsId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "hate canceled successfully.");
     }
 
 }

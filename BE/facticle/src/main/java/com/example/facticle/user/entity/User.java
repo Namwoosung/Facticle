@@ -104,14 +104,14 @@ public class User {
     @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private NewsInteraction newsInteraction;
-    public void updateNewsInteraction(NewsInteraction newsInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
+    public void setNewsInteraction(NewsInteraction newsInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
         this.newsInteraction = newsInteraction;
-    }
+    } //사용 x
 
     @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private CommentInteraction commentInteraction;
-    public void updateCommentInteraction(CommentInteraction commentInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
+    public void setCommentInteraction(CommentInteraction commentInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
         this.commentInteraction = commentInteraction;
     }
 
@@ -123,7 +123,7 @@ public class User {
     //연관관계 편의 메서드
     public void addComments(Comment comment){
         comments.add(comment);
-        comment.updateUser(this);
+        comment.setUser(this);
     }
 
     public void updateLastLogin(LocalDateTime time){

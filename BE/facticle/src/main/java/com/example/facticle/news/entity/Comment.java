@@ -74,17 +74,17 @@ public class Comment {
     @JsonIgnore
     @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private CommentInteraction commentInteraction;
-    protected void updateCommentInteraction(CommentInteraction commentInteraction){
+    protected void setCommentInteraction(CommentInteraction commentInteraction){ //사용x
         this.commentInteraction = commentInteraction;
     }
 
-    public void updateUser(User user) { //사용 x, 연관관계 편의메서드를 위한 메서드
+    public void setUser(User user) { //사용 x, 연관관계 편의메서드를 위한 메서드
         this.user = user;
-    }
-    protected void updateNews(News news){
+    } //사용 x
+    protected void setNews(News news){
         this.news = news;
-    }
-    protected void updateParentComment(Comment comment){
+    } //사용 x
+    protected void setParentComment(Comment comment){
         this.parentComment = comment;
-    }
+    } //사용 x
 }

@@ -41,13 +41,13 @@ public class CommentInteraction {
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime reactionAt;
 
-    public void setUser(User user){
+    public void updateUser(User user){
         this.user = user;
-        user.updateCommentInteraction(this);
+        user.setCommentInteraction(this);
     }
 
-    public void setComment(Comment comment){
+    public void updateComment(Comment comment){
         this.comment = comment;
-        comment.updateCommentInteraction(this);
+        comment.setCommentInteraction(this);
     }
 }

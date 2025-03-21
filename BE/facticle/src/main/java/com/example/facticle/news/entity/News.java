@@ -112,8 +112,8 @@ public class News {
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    public void addComment(Comment comment){
+    public void updateComment(Comment comment){
         comments.add(comment);
-        comment.updateNews(this);
+        comment.setNews(this);
     }
 }

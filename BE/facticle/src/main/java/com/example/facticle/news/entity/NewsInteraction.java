@@ -52,14 +52,20 @@ public class NewsInteraction {
     private LocalDateTime viewedAt;
 
     //연관관계 편의 메서드
-    public void setUser(User user){
+    public void updateUser(User user){
         this.user = user;
-        user.updateNewsInteraction(this);
+        user.setNewsInteraction(this);
     }
 
     //연관관계 편의 메서드
-    public void setNews(News news){
+    public void updateNews(News news){
         this.news = news;
         news.setNewsInteraction(this);
+    }
+
+    //리액션 수정
+    public void updateReaction(ReactionType reaction, LocalDateTime reactionAt){
+        this.reaction = reaction;
+        this.reactionAt = reactionAt;
     }
 }
