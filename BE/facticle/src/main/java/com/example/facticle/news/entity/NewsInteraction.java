@@ -68,4 +68,8 @@ public class NewsInteraction {
         this.reaction = reaction;
         this.reactionAt = reactionAt;
     }
+
+    public void updateViewedAt(LocalDateTime viewedAt){
+        this.viewedAt =viewedAt;
+    }
 }

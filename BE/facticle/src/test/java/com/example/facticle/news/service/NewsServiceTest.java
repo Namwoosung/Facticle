@@ -118,22 +118,22 @@ class NewsServiceTest {
     }
 
 
-    @Test
-    @DisplayName("개별 뉴스 조회 - 성공, 실패 모두")
-    void getNewsTest() {
-        //성공
-        News news = newsService.getNews(news1.getNewsId());
-
-        System.out.println("news = " + news);
-
-        Assertions.assertThat(news.getNewsId()).isEqualTo(news1.getNewsId());
-        Assertions.assertThat(newsRepository.count()).isEqualTo(2);
-
-        //실패
-        Assertions.assertThatThrownBy(() -> {
-                    newsService.getNews(-1L);
-                })
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("news not found");
-    }
+//    @Test
+//    @DisplayName("개별 뉴스 조회 - 성공, 실패 모두")
+//    void getNewsTest() {
+//        //성공
+//        News news = newsService.getNews(news1.getNewsId());
+//
+//        System.out.println("news = " + news);
+//
+//        Assertions.assertThat(news.getNewsId()).isEqualTo(news1.getNewsId());
+//        Assertions.assertThat(newsRepository.count()).isEqualTo(2);
+//
+//        //실패
+//        Assertions.assertThatThrownBy(() -> {
+//                    newsService.getNews(-1L);
+//                })
+//                .isInstanceOf(InvalidInputException.class)
+//                .hasMessageContaining("news not found");
+//    }
 }

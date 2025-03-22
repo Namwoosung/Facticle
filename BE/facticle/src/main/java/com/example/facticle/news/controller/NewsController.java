@@ -6,6 +6,7 @@ import com.example.facticle.common.service.DateTimeUtil;
 import com.example.facticle.news.dto.*;
 import com.example.facticle.news.entity.News;
 import com.example.facticle.news.service.NewsService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,14 +34,27 @@ public class NewsController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse getNews(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @PathVariable Long newsId){
+            @PathVariable Long newsId,
+            @CookieValue(name = "viewed_news_ids", required = false) String viewedNewsIds,
+            HttpServletResponse response
+    ){
 
-        log.info("customUserDetails {}", customUserDetails);
+        Long userId = (customUserDetails != null) ? customUserDetails.getUserId() : null;
 
-        News news = newsService.getNews(newsId);
-        GetNewsResponseDto newsResponseDto = GetNewsResponseDto.from(news);
+        GetNewsResponseDto responseDto = newsService.getNewsPage(newsId, userId, viewedNewsIds, response);
 
-        return BaseResponse.success(Map.of("code", 200, "news", newsResponseDto), "news retrieved successfully.");
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("isUser", responseDto.isUser());
+        result.put("news", responseDto.getGetNewsDto());
+        result.put("comment", responseDto.getGetCommentDtos());
+
+        if(userId != null){
+            result.put("newsInteraction", responseDto.getGetNewsInteractionDto());
+            result.put("commentInteraction", responseDto.getGetCommentInteractionDtos());
+        }
+
+        return BaseResponse.success(result, "news retrieved successfully.");
     }
 
     /**
