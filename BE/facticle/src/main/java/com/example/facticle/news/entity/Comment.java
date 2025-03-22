@@ -78,12 +78,23 @@ public class Comment {
         this.commentInteraction = commentInteraction;
     }
 
-    public void setUser(User user) { //사용 x, 연관관계 편의메서드를 위한 메서드
+    //연관관계 편의 메서드
+    public void updateUser(User user){
         this.user = user;
-    } //사용 x
-    protected void setNews(News news){
+        user.getComments().add(this);
+    }
+
+    //연관관계 편의 메서드
+    public void updateNews(News news){
         this.news = news;
-    } //사용 x
+        news.getComments().add(this);
+    }
+
+    public void updateContent(String content, LocalDateTime updatedAt){
+        this.content = content;
+        this.updatedAt = updatedAt;
+    }
+
     protected void setParentComment(Comment comment){
         this.parentComment = comment;
     } //사용 x

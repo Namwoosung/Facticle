@@ -40,7 +40,7 @@ public class GetCommentDto {
                 .hateCount(comment.getHateCount())
                 .createdAt(DateTimeUtil.convertUTCToKST(comment.getCreatedAt()))
                 .updatedAt(DateTimeUtil.convertUTCToKST(comment.getUpdatedAt()))
-                .parentCommentId(comment.getParentComment().getCommentId())
+                .parentCommentId((comment.getParentComment() != null) ? comment.getParentComment().getCommentId() : null)
                 .replies(new ArrayList<>())
                 .build();
     }

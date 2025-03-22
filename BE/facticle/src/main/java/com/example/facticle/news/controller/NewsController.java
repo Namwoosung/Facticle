@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -141,4 +140,40 @@ public class NewsController {
         return BaseResponse.success(Map.of("code", 200), "hate canceled successfully.");
     }
 
+    @PostMapping("{newsId}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BaseResponse addComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId,
+            @RequestBody @Valid SetCommentDto setCommentDto
+    ){
+        GetCommentDto getCommentDto =  newsService.createComment(newsId, customUserDetails.getUserId(), setCommentDto.getContent());
+
+        return BaseResponse.success(Map.of("code", 201, "comment", getCommentDto), "add comment successfully.");
+    }
+
+    @PatchMapping("{newsId}/comment/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse updateComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId,
+            @PathVariable Long commentId,
+            @RequestBody @Valid SetCommentDto setCommentDto
+    ){
+        GetCommentDto getCommentDto =  newsService.updateComment(newsId, commentId, customUserDetails.getUserId(), setCommentDto.getContent());
+
+        return BaseResponse.success(Map.of("code", 200, "comment", getCommentDto), "update comment successfully.");
+    }
+
+    @DeleteMapping("{newsId}/comment/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse deleteComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId,
+            @PathVariable Long commentId
+    ){
+        newsService.deleteComment(newsId, commentId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "delete comment successfully.");
+    }
 }

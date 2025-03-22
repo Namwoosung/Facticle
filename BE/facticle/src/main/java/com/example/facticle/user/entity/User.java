@@ -120,11 +120,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    //연관관계 편의 메서드
-    public void addComments(Comment comment){
-        comments.add(comment);
-        comment.setUser(this);
-    }
+
 
     public void updateLastLogin(LocalDateTime time){
         this.lastLogin = time;

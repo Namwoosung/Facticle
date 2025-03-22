@@ -176,6 +176,58 @@ public class NewsService {
         newsInteraction.updateReaction(null, null);
     }
 
+    public GetCommentDto createComment(Long newsId, Long userId, String content) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+
+        Comment comment = Comment.builder()
+                .content(content)
+                .build();
+        comment.updateUser(user);
+        comment.updateNews(news);
+
+        commentRepository.save(comment);
+        news.increaseCommentCount();
+
+        return GetCommentDto.from(comment);
+    }
+
+    public GetCommentDto updateComment(Long newsId, Long commentId, Long userId, String content) {
+        Comment comment = commentRepository.findWithUserAndNewsById(commentId)
+                .orElseThrow(() -> new InvalidInputException("comment not found", Map.of("commentId", "comment not exist")));
+
+        if(!comment.getUser().getUserId().equals(userId)){
+            throw new InvalidInputException("user not matched",  Map.of("userId", "user not matched"));
+        }
+        if(!comment.getNews().getNewsId().equals(newsId)){
+            throw new InvalidInputException("news not matched",  Map.of("newsId", "news not matched"));
+        }
+
+        comment.updateContent(content, LocalDateTime.now());
+
+        return GetCommentDto.from(comment);
+    }
+
+    public void deleteComment(Long newsId, Long commentId, Long userId) {
+        Comment comment = commentRepository.findWithUserAndNewsById(commentId)
+                .orElseThrow(() -> new InvalidInputException("comment not found", Map.of("commentId", "comment not exist")));
+
+        if(!comment.getUser().getUserId().equals(userId)){
+            throw new InvalidInputException("user not matched",  Map.of("userId", "user not matched"));
+        }
+        if(!comment.getNews().getNewsId().equals(newsId)){
+            throw new InvalidInputException("news not matched",  Map.of("newsId", "news not matched"));
+        }
+
+        comment.getNews().decreaseCommentCount();
+
+        commentRepository.delete(comment);
+    }
+
+
+
     private NewsInteraction getExistingNewsInteraction(Long newsId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
@@ -210,4 +262,7 @@ public class NewsService {
 
         return roots;
     }
+
+
+
 }

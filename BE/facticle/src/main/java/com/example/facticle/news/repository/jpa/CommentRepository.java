@@ -20,4 +20,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     ORDER BY c.createdAt ASC
     """)
     List<Comment> findAllByNewsWithUser(News news);
+
+    @Query("SELECT c FROM Comment c JOIN FETCH c.user JOIN FETCH c.news WHERE c.id = :commentId")
+    Optional<Comment> findWithUserAndNewsById(Long commentId);
 }
