@@ -195,7 +195,7 @@ public class NewsService {
     }
 
     public GetCommentDto updateComment(Long newsId, Long commentId, Long userId, String content) {
-        Comment comment = commentRepository.findWithUserAndNewsById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new InvalidInputException("comment not found", Map.of("commentId", "comment not exist")));
 
         if(!comment.getUser().getUserId().equals(userId)){
@@ -211,7 +211,7 @@ public class NewsService {
     }
 
     public void deleteComment(Long newsId, Long commentId, Long userId) {
-        Comment comment = commentRepository.findWithUserAndNewsById(commentId)
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new InvalidInputException("comment not found", Map.of("commentId", "comment not exist")));
 
         if(!comment.getUser().getUserId().equals(userId)){
@@ -224,6 +224,32 @@ public class NewsService {
         comment.getNews().decreaseCommentCount();
 
         commentRepository.delete(comment);
+    }
+
+    public GetCommentDto createReplyComment(Long newsId, Long parentCommentId, Long userId, String content) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        Comment parentComment = commentRepository.findById(parentCommentId)
+                .orElseThrow(() -> new InvalidInputException("parentComment not found", Map.of("parentCommentId", "parentCommentId not exist")));
+
+        if(!parentComment.getNews().equals(news)){
+            throw new InvalidInputException("news not matched",  Map.of("newsId", "news not matched"));
+        }
+
+        Comment comment = Comment.builder()
+                .content(content)
+                .build();
+        comment.updateUser(user);
+        comment.updateNews(news);
+
+        parentComment.addReplies(comment);
+
+        commentRepository.save(comment);
+        news.increaseCommentCount();
+
+        return GetCommentDto.from(comment);
     }
 
 
@@ -262,7 +288,4 @@ public class NewsService {
 
         return roots;
     }
-
-
-
 }

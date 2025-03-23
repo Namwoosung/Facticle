@@ -176,4 +176,17 @@ public class NewsController {
 
         return BaseResponse.success(Map.of("code", 200), "delete comment successfully.");
     }
+
+    @PostMapping("{newsId}/comment/{parentCommentId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BaseResponse addReplyComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId,
+            @PathVariable Long parentCommentId,
+            @RequestBody @Valid SetCommentDto setCommentDto
+    ){
+        GetCommentDto getCommentDto =  newsService.createReplyComment(newsId, parentCommentId,customUserDetails.getUserId(), setCommentDto.getContent());
+
+        return BaseResponse.success(Map.of("code", 201, "comment", getCommentDto), "add comment successfully.");
+    }
 }
