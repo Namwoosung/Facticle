@@ -115,6 +115,7 @@ public class NewsService {
                 List<CommentInteraction> commentInteractions = commentInteractionRepository.findAllByUserAndComments(user, comments);
 
                 getCommentInteractionDtos = commentInteractions.stream()
+                        .filter(ci -> ci.getReaction() != null)
                         .map(GetCommentInteractionDto::from)
                         .collect(Collectors.toList());
             }
@@ -137,43 +138,77 @@ public class NewsService {
 
 
     public void likeNews(Long newsId, Long userId) {
-        NewsInteraction newsInteraction = getExistingNewsInteraction(newsId, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
 
-        if(newsInteraction.getReaction() == ReactionType.LIKE){
+        ReactionType previousReaction = newsInteraction.getReaction();
+        if(previousReaction == ReactionType.LIKE){
             throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is already Like"));
         }
 
+        if (previousReaction == ReactionType.HATE) {
+            news.decreaseHateCount();
+        }
+
         newsInteraction.updateReaction(ReactionType.LIKE, LocalDateTime.now());
+        news.increaseLikeCount();
     }
 
     public void unlikeNews(Long newsId, Long userId) {
-        NewsInteraction newsInteraction = getExistingNewsInteraction(newsId, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
 
         if(newsInteraction.getReaction() != ReactionType.LIKE){
             throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is not Like"));
         }
 
         newsInteraction.updateReaction(null, null);
+        news.decreaseLikeCount();
     }
 
     public void hateNews(Long newsId, Long userId) {
-        NewsInteraction newsInteraction = getExistingNewsInteraction(newsId, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
 
-        if(newsInteraction.getReaction() == ReactionType.HATE){
+        ReactionType previousReaction = newsInteraction.getReaction();
+        if(previousReaction == ReactionType.HATE){
             throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is already hate"));
         }
 
+        if(previousReaction == ReactionType.LIKE){
+            news.decreaseLikeCount();
+        }
+
         newsInteraction.updateReaction(ReactionType.HATE, LocalDateTime.now());
+        news.increaseHateCount();
     }
 
     public void unhateNews(Long newsId, Long userId) {
-        NewsInteraction newsInteraction = getExistingNewsInteraction(newsId, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
 
         if(newsInteraction.getReaction() != ReactionType.HATE){
             throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is not hate"));
         }
 
         newsInteraction.updateReaction(null, null);
+        news.decreaseHateCount();
     }
 
     public GetCommentDto createComment(Long newsId, Long userId, String content) {
@@ -252,16 +287,106 @@ public class NewsService {
         return GetCommentDto.from(comment);
     }
 
-
-
-    private NewsInteraction getExistingNewsInteraction(Long newsId, Long userId) {
+    public void likeComment(Long commentId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
-        News news = newsRepository.findById(newsId)
-                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidInputException("commentId not found", Map.of("commentId", "commentId not exist")));
 
-        return newsInteractionRepository.findByUserAndNews(user, news)
-                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
+        Optional<CommentInteraction> optionalCommentInteraction = commentInteractionRepository.findByUserAndComment(user, comment);
+
+        if(optionalCommentInteraction.isPresent()){
+            CommentInteraction commentInteraction = optionalCommentInteraction.get();
+
+            ReactionType previousReaction = commentInteraction.getReaction();
+            if(previousReaction == ReactionType.LIKE){
+                throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is already Like"));
+            }
+
+            if(previousReaction == ReactionType.HATE){
+                comment.decreaseHateCount();
+            }
+            commentInteraction.updateReaction(ReactionType.LIKE, LocalDateTime.now());
+            comment.increaseLikeCount();
+
+        }else{
+            CommentInteraction commentInteraction = CommentInteraction.builder()
+                    .reaction(ReactionType.LIKE)
+                    .reactionAt(LocalDateTime.now())
+                    .build();
+            commentInteraction.updateUser(user);
+            commentInteraction.updateComment(comment);
+
+            commentInteractionRepository.save(commentInteraction);
+            comment.increaseLikeCount();
+        }
+    }
+
+    public void unlikeComment(Long commentId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidInputException("commentId not found", Map.of("commentId", "commentId not exist")));
+
+        CommentInteraction commentInteraction = commentInteractionRepository.findByUserAndComment(user, comment)
+                .orElseThrow(() -> new InvalidInputException("commentInteraction not found", Map.of("commentInteraction", "user does not have any Interaction for comment")));
+
+        if(commentInteraction.getReaction() != ReactionType.LIKE){
+            throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is not Like"));
+        }
+        commentInteraction.updateReaction(null, null);
+        comment.decreaseLikeCount();
+    }
+
+    public void hateComment(Long commentId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidInputException("commentId not found", Map.of("commentId", "commentId not exist")));
+
+        Optional<CommentInteraction> optionalCommentInteraction = commentInteractionRepository.findByUserAndComment(user, comment);
+
+        if(optionalCommentInteraction.isPresent()){
+            CommentInteraction commentInteraction = optionalCommentInteraction.get();
+
+            ReactionType previousReaction = commentInteraction.getReaction();
+            if(previousReaction == ReactionType.HATE){
+                throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is already Hate"));
+            }
+
+            if(previousReaction == ReactionType.LIKE){
+                comment.decreaseLikeCount();
+            }
+            commentInteraction.updateReaction(ReactionType.HATE, LocalDateTime.now());
+            comment.increaseHateCount();
+
+        }else{
+            CommentInteraction commentInteraction = CommentInteraction.builder()
+                    .reaction(ReactionType.HATE)
+                    .reactionAt(LocalDateTime.now())
+                    .build();
+            commentInteraction.updateUser(user);
+            commentInteraction.updateComment(comment);
+
+            commentInteractionRepository.save(commentInteraction);
+            comment.increaseHateCount();
+        }
+    }
+
+    public void unhateComment(Long commentId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidInputException("commentId not found", Map.of("commentId", "commentId not exist")));
+
+        CommentInteraction commentInteraction = commentInteractionRepository.findByUserAndComment(user, comment)
+                .orElseThrow(() -> new InvalidInputException("commentInteraction not found", Map.of("commentInteraction", "user does not have any Interaction for comment")));
+
+        if(commentInteraction.getReaction() != ReactionType.HATE){
+            throw new InvalidInputException("reaction is not available", Map.of("ReactionType" ,"user's ReactionType is not Hate"));
+        }
+        commentInteraction.updateReaction(null, null);
+        comment.decreaseHateCount();
     }
 
     private List<GetCommentDto> buildCommentDtoTree(List<Comment> comments){

@@ -31,15 +31,6 @@ CREATE TABLE refresh_tokens (
     CONSTRAINT FK_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 유저 활동 테이블 생성
-CREATE TABLE user_activities (
-    activity_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    created_at TIMESTAMP NULL,
-    activity_type ENUM('COMMENT', 'HATE', 'LIKE', 'RATE', 'VIEW') NOT NULL,
-    CONSTRAINT FK_user_activities_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
 -- 뉴스 테이블 생성
 CREATE TABLE news (
     news_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -76,7 +67,7 @@ CREATE TABLE news_interactions (
     news_interaction_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     news_id BIGINT NOT NULL,
-    reaction ENUM('LIKE', 'DISLIKE') DEFAULT NULL,
+    reaction ENUM('LIKE', 'HATE') DEFAULT NULL,
     rating DECIMAL(2,1) NOT NULL DEFAULT 0.0,
     reaction_at TIMESTAMP,
     rated_at TIMESTAMP,
@@ -107,7 +98,7 @@ CREATE TABLE comment_interactions (
     comment_interaction_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
-    reaction ENUM('LIKE', 'DISLIKE') DEFAULT NULL,
+    reaction ENUM('LIKE', 'HATE') DEFAULT NULL,
     reaction_at TIMESTAMP,
     CONSTRAINT FK_comment_interactions_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     CONSTRAINT FK_comment_interactions_comment FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE,

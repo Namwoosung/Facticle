@@ -15,4 +15,6 @@ public interface CommentInteractionRepository extends JpaRepository<CommentInter
     @Query("SELECT ci FROM CommentInteraction ci WHERE ci.user = :user AND ci.comment IN :comments")
     List<CommentInteraction> findAllByUserAndComments(User user, List<Comment> comments);
 
+    Optional<CommentInteraction> findByUserAndComment(User user, Comment comment);
+
 }

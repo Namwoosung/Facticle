@@ -50,4 +50,9 @@ public class CommentInteraction {
         this.comment = comment;
         comment.setCommentInteraction(this);
     }
+
+    public void updateReaction(ReactionType reaction, LocalDateTime reactionAt){
+        this.reaction = reaction;
+        this. reactionAt = reactionAt;
+    }
 }

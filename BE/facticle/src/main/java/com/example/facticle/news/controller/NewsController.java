@@ -189,4 +189,48 @@ public class NewsController {
 
         return BaseResponse.success(Map.of("code", 201, "comment", getCommentDto), "add comment successfully.");
     }
+
+    @PostMapping("/comment/{commentId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse likeComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long commentId
+    ){
+        newsService.likeComment(commentId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "comment like interaction added successfully.");
+    }
+
+    @DeleteMapping("/comment/{commentId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse unlikeComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long commentId
+    ){
+        newsService.unlikeComment(commentId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "comment like interaction canceled successfully.");
+    }
+
+    @PostMapping("/comment/{commentId}/hate")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse hateComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long commentId
+    ){
+        newsService.hateComment(commentId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "comment hate interaction added successfully.");
+    }
+
+    @DeleteMapping("/comment/{commentId}/hate")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse unhateComment(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long commentId
+    ){
+        newsService.unhateComment(commentId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "comment hate interaction canceled successfully.");
+    }
 }
