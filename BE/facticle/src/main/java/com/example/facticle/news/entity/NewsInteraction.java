@@ -72,4 +72,9 @@ public class NewsInteraction {
     public void updateViewedAt(LocalDateTime viewedAt){
         this.viewedAt =viewedAt;
     }
+
+    public void updateRating(BigDecimal rating, LocalDateTime ratedAt){
+        this.rating = rating;
+        this.ratedAt = ratedAt;
+    }
 }

@@ -8,6 +8,7 @@ import com.example.facticle.news.entity.NewsCategory;
 import com.example.facticle.news.repository.elasticsearch.NewsDocumentRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -219,12 +220,15 @@ public class NewsRepositoryCustomImpl implements NewsRepositoryCustom{
             maxRating = maxRating.setScale(1, RoundingMode.HALF_UP);
         }
 
+        NumberExpression<BigDecimal> averageRating =
+                news.totalRatingSum.divide(news.ratingCount.castToNum(BigDecimal.class));
+
         if (minRating != null && maxRating != null) {
-            return news.rating.between(minRating, maxRating);
+            return averageRating.between(minRating, maxRating);
         } else if (minRating != null) {
-            return news.rating.goe(minRating);
+            return averageRating.goe(minRating);
         } else if (maxRating != null) {
-            return news.rating.loe(maxRating);
+            return averageRating.loe(maxRating);
         }
         return null;
     }
@@ -235,7 +239,11 @@ public class NewsRepositoryCustomImpl implements NewsRepositoryCustom{
             case FACT_SCORE -> (sortDirection == SortDirection.ASC ? news.factScore.asc() : news.factScore.desc());
             case HEADLINE_SCORE -> (sortDirection == SortDirection.ASC ? news.headlineScore.asc() : news.headlineScore.desc());
             case VIEW_COUNT -> (sortDirection == SortDirection.ASC ? news.viewCount.asc() : news.viewCount.desc());
-            case RATING -> (sortDirection == SortDirection.ASC ? news.rating.asc() : news.rating.desc());
+            case RATING -> {
+                NumberExpression<BigDecimal> avgRating = news.totalRatingSum
+                        .divide(news.ratingCount.castToNum(BigDecimal.class));
+                yield sortDirection == SortDirection.ASC ? avgRating.asc() : avgRating.desc();
+            }
             case LIKE_COUNT -> (sortDirection == SortDirection.ASC ? news.likeCount.asc() : news.likeCount.desc());
             case HATE_COUNT -> (sortDirection == SortDirection.ASC ? news.hateCount.asc() : news.hateCount.desc());
             default -> news.collectedAt.desc();

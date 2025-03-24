@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,9 +86,9 @@ public class News {
     @Builder.Default
     private int ratingCount = 0;
 
-    @Column(precision = 2, scale = 1)
+    @Column(precision = 10, scale = 1)
     @Builder.Default
-    private BigDecimal rating = BigDecimal.valueOf(0.0);
+    private BigDecimal totalRatingSum = BigDecimal.valueOf(0.0);
 
     @JsonIgnore
     @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -142,5 +143,18 @@ public class News {
 
     public void decreaseRatingCount() {
         this.ratingCount--;
+    }
+
+    public void increaseRating(BigDecimal rating){
+        this.totalRatingSum =  this.totalRatingSum.add(rating);
+    }
+
+    public void decreaseRating(BigDecimal rating){
+        this.totalRatingSum =  this.totalRatingSum.subtract(rating);
+    }
+
+    public BigDecimal getAverageRating() {
+        return ratingCount == 0 ? BigDecimal.ZERO :
+                totalRatingSum.divide(BigDecimal.valueOf(ratingCount), 1, RoundingMode.HALF_UP);
     }
 }

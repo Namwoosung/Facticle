@@ -51,7 +51,7 @@ CREATE TABLE news (
     comment_count INT NOT NULL DEFAULT 0,
     view_count INT NOT NULL DEFAULT 0,
     rating_count INT NOT NULL DEFAULT 0,
-    rating DECIMAL(2,1) NOT NULL DEFAULT 0.0
+    total_rating_sum DECIMAL(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB;
 
 -- 뉴스 컨텐츠 테이블 생성

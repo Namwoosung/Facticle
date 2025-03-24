@@ -16,6 +16,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -389,14 +391,55 @@ public class NewsService {
         comment.decreaseHateCount();
     }
 
-    private List<GetCommentDto> buildCommentDtoTree(List<Comment> comments){
+    public void rateNews(Long newsId, Long userId, BigDecimal rating) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
+
+        BigDecimal previousRating = newsInteraction.getRating();
+
+        if (!previousRating.equals(BigDecimal.valueOf(0.0))) {
+            // 기존 평점을 빼고 새 평점을 더함
+            news.decreaseRating(previousRating);
+            news.increaseRating(rating);
+        } else {
+            // 새로운 평가일 경우
+            news.increaseRatingCount();
+            news.increaseRating(rating);
+        }
+
+        newsInteraction.updateRating(rating, LocalDateTime.now());
+    }
+
+    public void deleteRateNews(Long newsId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidInputException("user not found", Map.of("userId", "user not exist")));
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("news not found", Map.of("newsId", "news not exist")));
+        NewsInteraction newsInteraction = newsInteractionRepository.findByUserAndNews(user, news)
+                .orElseThrow(() -> new InvalidInputException("newsInteraction not found", Map.of("newsInteraction", "user does not have any Interaction for news")));
+
+        if(newsInteraction.getRating().equals(BigDecimal.valueOf(0.0))){
+            throw new InvalidInputException("rating is not available", Map.of("rating" ,"user's rating does not exist"));
+        }
+        BigDecimal previousRating = newsInteraction.getRating();
+
+        newsInteraction.updateRating(BigDecimal.valueOf(0.0), null);
+        news.decreaseRatingCount();
+        news.decreaseRating(previousRating);
+    }
+
+    private List<GetCommentDto> buildCommentDtoTree(List<Comment> comments) {
         Map<Long, GetCommentDto> dtoMap = new LinkedHashMap<>();
         List<GetCommentDto> roots = new ArrayList<>();
 
         for (Comment comment : comments) {
             GetCommentDto getCommentDto = GetCommentDto.from(comment);
             dtoMap.put(getCommentDto.getCommentId(), getCommentDto);
-            if(getCommentDto.getParentCommentId() == null){
+            if (getCommentDto.getParentCommentId() == null) {
                 roots.add(getCommentDto);
             }
         }

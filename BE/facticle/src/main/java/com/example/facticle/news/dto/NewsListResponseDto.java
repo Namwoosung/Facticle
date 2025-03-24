@@ -40,7 +40,7 @@ public class NewsListResponseDto {
                 .commentCount(news.getCommentCount())
                 .viewCount(news.getViewCount())
                 .ratingCount(news.getRatingCount())
-                .rating(news.getRating())
+                .rating(news.getAverageRating())
                 .build();
     }
 }

@@ -233,4 +233,27 @@ public class NewsController {
 
         return BaseResponse.success(Map.of("code", 200), "comment hate interaction canceled successfully.");
     }
+
+    @PostMapping("{newsId}/rating")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse rateNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId,
+            @RequestBody @Valid SetRatingDto setRatingDto
+    ){
+        newsService.rateNews(newsId, customUserDetails.getUserId(), setRatingDto.getRating());
+
+        return BaseResponse.success(Map.of("code", 200), "rate added successfully.");
+    }
+
+    @DeleteMapping("{newsId}/rating")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse deleteRateNews(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ) {
+        newsService.deleteRateNews(newsId, customUserDetails.getUserId());
+
+        return BaseResponse.success(Map.of("code", 200), "rate canceled successfully.");
+    }
 }
