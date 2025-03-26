@@ -45,7 +45,6 @@ public class CustomExceptionHandler {
         data.put("errors", ex.getErrors());
 
         return BaseResponse.failure(data, "Invalid input");
-
     }
 
     //인증 과정에서 실패한 경우

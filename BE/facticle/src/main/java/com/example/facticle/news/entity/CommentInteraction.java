@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+//일대다로 매핑 수정 필요
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
