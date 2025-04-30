@@ -7,6 +7,7 @@ import RegisterOauth from './pages/auth/register-oauth';
 import MainLayout from './layouts/mainLayout';
 import AuthLayout from './layouts/authLayout';
 import Mypage from './pages/mypage';
+import NewsPage from './pages/newspage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/mypage" element={<Mypage />} />
+          <Route path="/news/*" element={<NewsPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
