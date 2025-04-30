@@ -1,10 +1,10 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App.tsx'
 import { AuthProvider } from './context/index.tsx'
 import { createGlobalStyle } from 'styled-components'
 import NanumGothic from './assets/fonts/NanumBarunGothic.ttf'
+import ScrollToTop from './hooks/scrollToTop.tsx'
 
 const GlobalStyles = createGlobalStyle`
   @font-face {
@@ -54,6 +54,7 @@ const GlobalStyles = createGlobalStyle`
 createRoot(document.getElementById('root')!).render(
   //<StrictMode>
   <Router>
+    <ScrollToTop />
     <AuthProvider>
       <GlobalStyles />
       <App />
