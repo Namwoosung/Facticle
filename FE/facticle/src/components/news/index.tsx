@@ -1,4 +1,4 @@
-import { NewsContent, NewsContentWrapper, NewsImage, NewsInfoWrapper, NewsTitle, NewsWrapper,ReviewWrapper,ScoreNumber, ScoreText, ScoreWrapper, TimeText } from "./news.styles";
+import { NewsContent, NewsContentWrapper, NewsImage, NewsInfoWrapper, NewsTitle, NewsWrapper, ReviewText, ReviewWrapper, ScoreNumber, ScoreText, ScoreWrapper, TimeText } from "./news.styles";
 import { FaStar } from "react-icons/fa";
 
 interface NewsProps {
@@ -10,20 +10,23 @@ interface NewsProps {
     fs_score: number;
     rating: number;
     axis?: 'row' | 'column';
+    imageHeight?: number;
+    titleSize?: number;
 }
 
-function News({ src, image_url, title, content, hs_score, fs_score, rating, axis = 'column' }: NewsProps) {
+function News({ src, image_url, title, content, hs_score, fs_score, rating, axis = 'column', imageHeight, titleSize }: NewsProps) {
     return (
         <NewsWrapper to={`/news/${src}`} direction={axis}>
-            <NewsImage src={image_url} direction={axis} />
-            <ReviewWrapper>
-            <FaStar style={{ color: "#524DD6" }} />
-                <ScoreText>{rating}</ScoreText>
+            <NewsImage src={image_url} direction={axis} $customheight={imageHeight} />
+            <ReviewWrapper direction={axis}>
+                {/* axis에 따라 사이즈가 달라짐 */}
+                <FaStar style={{ color: "#524DD6" }}  size={axis === 'row' ? 12 : 16}/>
+                <ReviewText direction={axis}>{rating}</ReviewText>
             </ReviewWrapper>
             <NewsContentWrapper>
-                <NewsTitle>{title}</NewsTitle>
+                <NewsTitle size={titleSize}>{title}</NewsTitle>
                 {content && <NewsContent>{content}</NewsContent>}
-                
+
                 <NewsInfoWrapper>
                     <ScoreWrapper>
                         <ScoreText>유사도</ScoreText>

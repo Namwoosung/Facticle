@@ -2,12 +2,14 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 // NewsWrapper에서 정의할 수 있도록 위에 선언 (hover 시 ReviewWrapper의 opacity를 1로 변경)
-export const ReviewWrapper = styled.div`
+export const ReviewWrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'direction' // 'direction' prop을 DOM에 전달되지 않도록 필터링
+})<{ direction: 'row' | 'column' }>`
   position: absolute;
   top: 10px;
   left: 10px;
   width: fit-content;
-  height: 30px;
+  height: ${({ direction }) => (direction === 'row' ? '15px' : '30px')};
   padding: 5px 10px;
   z-index: 2;
   display: flex;
@@ -17,6 +19,14 @@ export const ReviewWrapper = styled.div`
   border-radius: 20px;
   opacity: 0; /* 초기에는 별점 표시 안함 */
   transition: opacity 0.2s ease-in-out;
+`;
+
+export const ReviewText = styled.span.withConfig({
+  shouldForwardProp: (prop) => prop !== 'direction' // 'direction' prop을 DOM에 전달되지 않도록 필터링
+})<{ direction: 'row' | 'column' }>`
+  font-size: ${({ direction }) => (direction === 'row' ? '12px' : '16px')};
+  font-weight: 600;
+  color: black;
 `;
 
 export const NewsWrapper = styled(Link).withConfig({
@@ -43,10 +53,13 @@ export const NewsWrapper = styled(Link).withConfig({
 `;
 
 export const NewsImage = styled.img.withConfig({
-  shouldForwardProp: (prop) => prop !== 'direction' // 'direction' prop을 DOM에 전달되지 않도록 필터링
-})<{ direction: 'row' | 'column' }>`
-  width: ${({ direction }) => (direction === 'row' ? '180px' : '100%')};
-  height: ${({ direction }) => (direction === 'row' ? '180px' : '300px')};
+  shouldForwardProp: (prop) => prop !== 'direction' && prop !== '$customheight'
+})<{ direction: 'row' | 'column'; $customheight?: number }>`
+  width: ${({ direction }) => (direction === 'row' ? '100px' : '100%')};
+  height: ${({ direction, $customheight }) =>
+    $customheight ? `${$customheight}px` : direction === 'row' ? '100px' : '300px'};
+  min-width: ${({ direction }) => (direction === 'row' ? '100px' : 'auto')};
+  min-height: ${({ direction }) => (direction === 'row' ? '100px' : 'auto')};
   border-radius: 10px;
   object-fit: cover; /* 이미지 비율 유지하면서 채우기 */
   overflow: hidden;
@@ -59,8 +72,10 @@ export const NewsContentWrapper = styled.div`
   flex-direction: column;
 `;
 
-export const NewsTitle = styled.h3`
-  font-size: 20px;
+export const NewsTitle = styled.h3.withConfig({
+  shouldForwardProp: (prop) => prop !== 'size'
+})<{ size?: number }>`
+  font-size: ${({ size }) => (size ? `${size}px` : '20px')};
   font-weight: 600;
   text-align: left;
   color: black;
@@ -88,6 +103,7 @@ export const NewsInfoWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 5px;
+  margin-top: 10px;
 `;
 
 export const ScoreWrapper = styled.div`

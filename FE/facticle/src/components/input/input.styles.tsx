@@ -79,3 +79,15 @@ export const ShowPasswordButton = styled.button`
     outline: none;
   }
 `;
+
+export const IconButton = styled.span`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;
