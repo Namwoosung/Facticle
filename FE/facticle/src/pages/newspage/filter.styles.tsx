@@ -1,5 +1,10 @@
 import styled from 'styled-components';
 
+export const FilterAllWrapper = styled.div`
+    display: flex;
+    align-items: center;
+`;
+
 export const FilterWrapper = styled.div`
     position: relative;
     display: flex;

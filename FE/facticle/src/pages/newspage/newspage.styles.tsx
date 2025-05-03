@@ -41,7 +41,6 @@ export const CategoryButton = styled(Link).withConfig({
 
 export const CategoryLine = styled.div`
     position: relative;
-    top: -20px;
     left: -50px;
     z-index: -1;
     width: 1380px;
@@ -52,8 +51,8 @@ export const CategoryLine = styled.div`
 export const ControlsWrapper = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 20px;
 `;
 
 export const ControlsContainer = styled.div`
@@ -107,7 +106,7 @@ export const ContentWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
-    margin-top: 20px;
+    margin-top: 10px;
 `;
 
 export const NewsContainer = styled.div`

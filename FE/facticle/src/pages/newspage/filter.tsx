@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ControlsContainer } from "./newspage.styles";
-import { DialogText, FilterButton, FilterDialogButton, FilterLine, FilterResetButton, FilterWrapper, StarContainer } from "./filter.styles";
+import { DialogText, FilterAllWrapper, FilterButton, FilterDialogButton, FilterLine, FilterResetButton, FilterWrapper, StarContainer } from "./filter.styles";
 import FilterDialog from "../../components/filterdialog";
 import { MdChevronRight } from "react-icons/md";
 import { GrPowerReset } from "react-icons/gr";
@@ -177,7 +177,7 @@ function Filter() {
 
 
   return (
-    <ControlsContainer>
+    <FilterAllWrapper>
       <FilterWrapper>
         <FilterButton open={filters.category} onClick={() => handleFilters("category")}>
           분야
@@ -281,7 +281,7 @@ function Filter() {
         {/* 필터 초기화 버튼 클릭 시 모든 필터 초기화 */}
         필터&정렬 초기화 <GrPowerReset />
       </FilterResetButton>
-    </ControlsContainer>
+    </FilterAllWrapper>
   )
 }
 
