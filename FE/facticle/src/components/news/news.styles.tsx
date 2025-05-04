@@ -113,13 +113,13 @@ export const ScoreWrapper = styled.div`
 `;
 
 export const ScoreText = styled.p`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: black;
 `;
 
 export const ScoreNumber = styled.span`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   background-color: #D9D9D9;
   border-radius: 20px;
@@ -128,7 +128,7 @@ export const ScoreNumber = styled.span`
 `;
 
 export const TimeText = styled.p`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #A4A4A4;
   white-space: nowrap;
