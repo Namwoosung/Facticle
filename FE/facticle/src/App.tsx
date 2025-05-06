@@ -8,6 +8,7 @@ import MainLayout from './layouts/mainLayout';
 import AuthLayout from './layouts/authLayout';
 import Mypage from './pages/mypage';
 import NewsPage from './pages/newspage';
+import NewsContent from './pages/newscontent';
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/mypage" element={<Mypage />} />
-          <Route path="/news/*" element={<NewsPage />} />
+          <Route path="/news" element={<NewsPage />} />
+          <Route path="/news/:category" element={<NewsPage />} />
+          <Route path="/news/content/:id" element={<NewsContent />} />
         </Route>
 
         <Route element={<AuthLayout />}>

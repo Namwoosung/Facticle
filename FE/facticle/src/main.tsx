@@ -49,6 +49,11 @@ const GlobalStyles = createGlobalStyle`
     text-align: left;
   }
 
+  p {
+    margin: 0;
+    padding: 0;
+  }
+
 `;
 
 createRoot(document.getElementById('root')!).render(

@@ -16,7 +16,7 @@ interface NewsProps {
 
 function News({ src, image_url, title, content, hs_score, fs_score, rating, axis = 'column', imageHeight, titleSize }: NewsProps) {
     return (
-        <NewsWrapper to={`/news/${src}`} direction={axis}>
+        <NewsWrapper to={`/news/content/${src}`} direction={axis}>
             <NewsImage src={image_url} direction={axis} $customheight={imageHeight} />
             <ReviewWrapper direction={axis}>
                 {/* axis에 따라 사이즈가 달라짐 */}
