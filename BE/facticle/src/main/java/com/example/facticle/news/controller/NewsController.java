@@ -76,6 +76,8 @@ public class NewsController {
             condition.setSize(10);
         }
 
+        log.info("NewsSearchCondition {}", condition);
+
         //KST 시간을 UTC로 변환
         if(condition.getStartDate() != null){
             condition.setStartDate(DateTimeUtil.convertKSTToUTC(condition.getStartDate()));

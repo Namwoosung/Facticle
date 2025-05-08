@@ -36,7 +36,7 @@ def get_sports_list(page):
     result = []
     for sports in sports_list:
         for item in sports['packItemContents']:
-            # 2분 이상이면 크롤링하지 않음
+            # 2분 이상 지난 기사면 크롤링하지 않음
             _time = datetime.now(timezone.utc) - datetime.fromisoformat(item['createdDate'].rstrip('Z')).replace(tzinfo=timezone.utc)
             if _time >= timedelta(minutes=2):
                 continue
