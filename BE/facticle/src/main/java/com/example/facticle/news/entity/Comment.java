@@ -72,10 +72,11 @@ public class Comment {
     }
 
     @JsonIgnore
-    @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CommentInteraction commentInteraction;
-    protected void setCommentInteraction(CommentInteraction commentInteraction){ //사용x
-        this.commentInteraction = commentInteraction;
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentInteraction> commentInteractions = new ArrayList<>();
+    protected void addCommentInteraction(CommentInteraction commentInteraction){ //사용x
+        this.commentInteractions.add(commentInteraction);
     }
 
     //연관관계 편의 메서드

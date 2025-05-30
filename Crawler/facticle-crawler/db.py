@@ -92,10 +92,18 @@ def save_news(news_data):
         # news 테이블 삽입
         news_sql = text("""
             INSERT INTO news (
-                url, naver_url, title, summary, image_url, media_name, 
-                category, headline_score, fact_score, headline_score_reason, fact_score_reason
-            ) VALUES (:url, :naver_url, :title, :summary, :image_url, :media_name, 
-                      :category, :headline_score, :fact_score, :headline_score_reason, :fact_score_reason)
+                url, naver_url, title, summary, image_url, media_name,
+                category, headline_score, fact_score,
+                headline_score_reason, fact_score_reason,
+                like_count, hate_count, comment_count, view_count,
+                rating_count, total_rating_sum
+            ) VALUES (
+                :url, :naver_url, :title, :summary, :image_url, :media_name,
+                :category, :headline_score, :fact_score,
+                :headline_score_reason, :fact_score_reason,
+                :like_count, :hate_count, :comment_count, :view_count,
+                :rating_count, :total_rating_sum
+            )
         """)
 
         # news 테이블 데이터
@@ -110,7 +118,13 @@ def save_news(news_data):
             "headline_score": news_data["headline_score"],
             "fact_score": news_data["fact_score"],
             "headline_score_reason": news_data["hs_reason"],
-            "fact_score_reason": news_data["fs_reason"]
+            "fact_score_reason": news_data["fs_reason"],
+            "like_count": news_data.get("like_count", 0),
+            "hate_count": news_data.get("hate_count", 0),
+            "comment_count": news_data.get("comment_count", 0),
+            "view_count": news_data.get("view_count", 0),
+            "rating_count": news_data.get("rating_count", 0),
+            "total_rating_sum": news_data.get("total_rating_sum", 0)
         }
 
         # SQL 실행

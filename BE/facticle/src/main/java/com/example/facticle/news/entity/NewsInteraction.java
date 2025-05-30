@@ -29,11 +29,11 @@ public class NewsInteraction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long newsInteractionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)
     private News news;
 
@@ -56,13 +56,13 @@ public class NewsInteraction {
     //연관관계 편의 메서드
     public void updateUser(User user){
         this.user = user;
-        user.setNewsInteraction(this);
+        user.addNewsInteraction(this);
     }
 
     //연관관계 편의 메서드
     public void updateNews(News news){
         this.news = news;
-        news.setNewsInteraction(this);
+        news.addNewsInteraction(this);
     }
 
     //리액션 수정

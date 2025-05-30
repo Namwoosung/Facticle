@@ -46,7 +46,7 @@ public class User {
     private String email;
 
     @Builder.Default
-    private String profileImage = "https://facticlefilestorage.blob.core.windows.net/profile-images/default.png"; //azure 기본 이미지
+    private String profileImage = "https://facticlestorage.blob.core.windows.net/profile-images/default.png"; //azure 기본 이미지
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
@@ -102,17 +102,21 @@ public class User {
     }
 
     @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private NewsInteraction newsInteraction;
-    public void setNewsInteraction(NewsInteraction newsInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
-        this.newsInteraction = newsInteraction;
-    } //사용 x
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsInteraction> newsInteractions = new ArrayList<>();
+
+    public void addNewsInteraction(NewsInteraction newsInteraction) {
+        newsInteractions.add(newsInteraction);
+    }
 
     @JsonIgnore
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CommentInteraction commentInteraction;
-    public void setCommentInteraction(CommentInteraction commentInteraction){ //사용 x, 연관관계 편의 메서드를 위한 메서드
-        this.commentInteraction = commentInteraction;
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentInteraction> commentInteractions = new ArrayList<>();
+
+    public void addCommentInteraction(CommentInteraction commentInteraction) {
+        commentInteractions.add(commentInteraction);
     }
 
     @JsonIgnore
