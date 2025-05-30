@@ -86,7 +86,7 @@ public class News {
     @Builder.Default
     private int ratingCount = 0;
 
-    @Column(precision = 10, scale = 1)
+    @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal totalRatingSum = BigDecimal.valueOf(0.0);
 

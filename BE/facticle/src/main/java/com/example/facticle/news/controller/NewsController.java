@@ -40,20 +40,43 @@ public class NewsController {
 
         Long userId = (customUserDetails != null) ? customUserDetails.getUserId() : null;
 
-        GetNewsResponseDto responseDto = newsService.getNewsPage(newsId, userId, viewedNewsIds, response);
+        GetNewsResponseDto responseDto = newsService.getNews(newsId, userId, viewedNewsIds, response);
 
         Map<String, Object> result = new HashMap<>();
         result.put("code", 200);
         result.put("isUser", responseDto.isUser());
         result.put("news", responseDto.getGetNewsDto());
-        result.put("comment", responseDto.getGetCommentDtos());
 
         if(userId != null){
             result.put("newsInteraction", responseDto.getGetNewsInteractionDto());
-            result.put("commentInteraction", responseDto.getGetCommentInteractionDtos());
         }
 
         return BaseResponse.success(result, "news retrieved successfully.");
+    }
+
+    /**
+     * 개별 뉴스의 댓글 조회
+     */
+    @GetMapping("/{newsId}/comments")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse getComments(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PathVariable Long newsId
+    ){
+        Long userId = (customUserDetails != null) ? customUserDetails.getUserId() : null;
+
+        GetCommentResponseDto responseDto = newsService.getCommentByNews(newsId, userId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("isUser", responseDto.isUser());
+        result.put("comment", responseDto.getGetCommentDtos());
+
+        if(userId != null){
+            result.put("commentInteraction", responseDto.getGetCommentInteractionDtos());
+        }
+
+        return BaseResponse.success(result, "comments retrieved successfully.");
     }
 
     /**
