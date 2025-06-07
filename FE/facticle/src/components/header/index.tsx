@@ -20,9 +20,7 @@ function Header() {
             <div>
                 <HomeButton to="/">FACTICLE</HomeButton>
                 <NavButton to="/">홈</NavButton>
-                <NavButton to="/about"> 소개</NavButton>
                 <NavButton to="/news">뉴스 보기</NavButton>
-                <NavButton to="/search">검색</NavButton>
             </div>
 
             {isAuthenticated ? (
