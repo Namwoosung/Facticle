@@ -2,7 +2,7 @@
 CREATE DATABASE IF NOT EXISTS facticle;
 USE facticle;
 
---사용자 테이블 생성
+-- 사용자 테이블 생성
 CREATE TABLE users (
     user_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50),
@@ -61,7 +61,7 @@ CREATE TABLE news_content (
     CONSTRAINT FK_news_content FOREIGN KEY (news_id) REFERENCES news(news_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
---뉴스 상호작용 테이블 생성  --시간은 모두 마지막에 인터랙션한 시간, 현재 프로젝트에서는 과거의 유저 인터랙션까지 전부 기록하지는 않고, 가장 최근 인터랙션만 기록
+-- 뉴스 상호작용 테이블 생성  --시간은 모두 마지막에 인터랙션한 시간, 현재 프로젝트에서는 과거의 유저 인터랙션까지 전부 기록하지는 않고, 가장 최근 인터랙션만 기록
 -- 만약 추후 과거 행적까지 기록해야 하면, one-to-one이 아니라 many-to-one으로 바꾸고, 하나의 유저가 하나의 뉴스에 대해 여러 인터랙션일 할 수 있게 관리
 CREATE TABLE news_interactions (
     news_interaction_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -128,7 +128,7 @@ CREATE INDEX idx_comment_interactions_comment_id ON comment_interactions (commen
 
 
 -- DB 테이블의 데이터 사제
-SET FOREIGN_KEY_CHECKS = 0;  -- 외래 키 제약 조건 해제
-TRUNCATE TABLE news;
-TRUNCATE TABLE news_content;
-SET FOREIGN_KEY_CHECKS = 1;  -- 외래 키 제약 조건 설정
+-- SET FOREIGN_KEY_CHECKS = 0;  -- 외래 키 제약 조건 해제
+-- TRUNCATE TABLE news;
+-- TRUNCATE TABLE news_content;
+-- SET FOREIGN_KEY_CHECKS = 1;  -- 외래 키 제약 조건 설정

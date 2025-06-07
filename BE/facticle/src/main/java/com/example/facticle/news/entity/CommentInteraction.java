@@ -29,11 +29,11 @@ public class CommentInteraction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentInteractionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
@@ -43,14 +43,16 @@ public class CommentInteraction {
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime reactionAt;
 
+    //연관관계 편의 메서드
     public void updateUser(User user){
         this.user = user;
-        user.setCommentInteraction(this);
+        user.addCommentInteraction(this);
     }
 
+    //연관관계 편의 메서드
     public void updateComment(Comment comment){
         this.comment = comment;
-        comment.setCommentInteraction(this);
+        comment.addCommentInteraction(this);
     }
 
     public void updateReaction(ReactionType reaction, LocalDateTime reactionAt){

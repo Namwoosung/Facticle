@@ -8,8 +8,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class GetNewsResponseDto {
+public class GetCommentResponseDto {
     private boolean isUser;
-    private GetNewsDto getNewsDto;
-    private GetNewsInteractionDto getNewsInteractionDto;
+    private List<GetCommentDto> getCommentDtos;
+    private List<GetCommentInteractionDto> getCommentInteractionDtos;
 }

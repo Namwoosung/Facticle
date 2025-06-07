@@ -33,7 +33,7 @@ public class NewsService {
     private final CommentRepository commentRepository;
     private final CommentInteractionRepository commentInteractionRepository;
 
-    public GetNewsResponseDto getNewsPage(Long newsId, Long userId, String viewedNewsIdsCookie, HttpServletResponse response) {
+    public GetNewsResponseDto getNews(Long newsId, Long userId, String viewedNewsIdsCookie, HttpServletResponse response) {
         //일단 일반적인 방식으로 조회하는 방식을 사용
         //추후 성능일 비교하고 페치조인을 사용하는 것이 적합한 지 비교 후 상황에 맞게 리패토링
 
@@ -97,6 +97,33 @@ public class NewsService {
                 .orElseThrow(() -> new InvalidInputException("invalid input", Map.of("newsId", "news not found")));
         GetNewsDto getNewsDto = GetNewsDto.from(news);
 
+
+        //유저가 존재한다면, 해당 유저의 뉴스 인터랙션 정보를 추가
+        GetNewsInteractionDto getNewsInteractionDto = null;
+        if(user != null){
+            getNewsInteractionDto = newsInteractionRepository.findByUserAndNews(user, news)
+                    .map(GetNewsInteractionDto::from)
+                    .orElse(null);
+        }
+
+        return GetNewsResponseDto.builder()
+                .isUser(user != null)
+                .getNewsDto(getNewsDto)
+                .getNewsInteractionDto(getNewsInteractionDto)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public GetCommentResponseDto getCommentByNews(Long newsId, Long userId){
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new InvalidInputException("invalid input", Map.of("userId", "user not found")));
+        }
+
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new InvalidInputException("invalid input", Map.of("newsId", "news not found")));
+
         //댓글 정보 조회
         List<Comment> comments = commentRepository.findAllByNewsWithUser(news);
         List<GetCommentDto> getCommentDtos = new ArrayList<>();
@@ -104,15 +131,9 @@ public class NewsService {
             getCommentDtos = buildCommentDtoTree(comments);
         }
 
-
-        //유저가 존재한다면, 해당 유저의 뉴스 인터랙션, 댓글 인터랙션 정보를 추가
-        GetNewsInteractionDto getNewsInteractionDto = null;
+        //유저가 존재한다면, 댓글 인터랙션 정보를 추가
         List<GetCommentInteractionDto> getCommentInteractionDtos = new ArrayList<>();
         if(user != null){
-            getNewsInteractionDto = newsInteractionRepository.findByUserAndNews(user, news)
-                    .map(GetNewsInteractionDto::from)
-                    .orElse(null);
-
             if(comments != null && !comments.isEmpty()){
                 List<CommentInteraction> commentInteractions = commentInteractionRepository.findAllByUserAndComments(user, comments);
 
@@ -123,12 +144,9 @@ public class NewsService {
             }
         }
 
-        //DTO를 추가해서 댓글정보도 함께 전달
-        return GetNewsResponseDto.builder()
+        return GetCommentResponseDto.builder()
                 .isUser(user != null)
-                .getNewsDto(getNewsDto)
                 .getCommentDtos(getCommentDtos)
-                .getNewsInteractionDto(getNewsInteractionDto)
                 .getCommentInteractionDtos(getCommentInteractionDtos)
                 .build();
     }

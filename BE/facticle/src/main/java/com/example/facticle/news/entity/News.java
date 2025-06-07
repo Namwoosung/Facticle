@@ -86,7 +86,7 @@ public class News {
     @Builder.Default
     private int ratingCount = 0;
 
-    @Column(precision = 10, scale = 1)
+    @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal totalRatingSum = BigDecimal.valueOf(0.0);
 
@@ -95,10 +95,11 @@ public class News {
     private NewsContent newsContent;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private NewsInteraction newsInteraction;
-    protected void setNewsInteraction(NewsInteraction newsInteraction){
-        this.newsInteraction = newsInteraction;
+    @Builder.Default
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NewsInteraction> newsInteractions = new ArrayList<>();
+    protected void addNewsInteraction(NewsInteraction newsInteraction){
+        this.newsInteractions.add(newsInteraction);
     }
 
     //연관관계 편의 메서드
