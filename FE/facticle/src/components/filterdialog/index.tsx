@@ -5,9 +5,10 @@ interface FilterDialogProps {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  hasSlider?: boolean; // 슬라이더가 있는지 여부
 }
 
-function FilterDialog({ open, onClose, children }: FilterDialogProps) {
+function FilterDialog({ open, onClose, children, hasSlider = false }: FilterDialogProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,11 +29,9 @@ function FilterDialog({ open, onClose, children }: FilterDialogProps) {
   if (!open) return null;
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative", zIndex: 1000 }}>
-      <FilterDialogWrapper open={open}>
-        {children}
-      </FilterDialogWrapper>
-    </div>
+    <FilterDialogWrapper open={open} hasSlider={hasSlider} ref={wrapperRef}>
+      {children}
+    </FilterDialogWrapper>
   );
 }
 

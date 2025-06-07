@@ -76,16 +76,6 @@ export const DialogText = styled.p`
     margin: 0;
 `
 
-export const StarContainer = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 10px;
-    margin-bottom: 0px;
-    position: relative;
-    top: 5px;
-`;
-
 // 세로 구분선
 export const FilterLine = styled.div`
     width: 1px;

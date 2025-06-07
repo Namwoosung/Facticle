@@ -26,6 +26,8 @@ export const DialogHeader = styled.div`
     margin: 0;
     font-size: 18px;
   }
+  display: flex;
+  justify-content: center;
 `;
 
 export const DialogContent = styled.div`

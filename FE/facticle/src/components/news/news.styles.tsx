@@ -36,7 +36,7 @@ export const NewsWrapper = styled(Link).withConfig({
   display: flex;
   flex-direction: ${({ direction }) => (direction === 'row' ? 'row' : 'column')};
   align-items: ${({ direction }) => (direction === 'row' ? 'center' : 'none')};
-  gap: 20px;
+  gap: 10px;
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -73,8 +73,10 @@ export const NewsContentWrapper = styled.div`
 `;
 
 export const NewsTitle = styled.h3.withConfig({
-  shouldForwardProp: (prop) => prop !== 'size'
-})<{ size?: number }>`
+  shouldForwardProp: (prop) => prop !== 'size' && prop !== 'direction' // 'size'와 'direction' prop을 DOM에 전달되지 않도록 필터링
+})<{ size?: number; direction: 'row' | 'column' }>`
+  //height는 고정
+  height: ${({ direction }) => (direction === 'row' ? 'fit-content' : '45px')};
   font-size: ${({ size }) => (size ? `${size}px` : '20px')};
   font-weight: 600;
   text-align: left;
@@ -82,7 +84,7 @@ export const NewsTitle = styled.h3.withConfig({
   text-overflow: ellipsis;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* 최대 2줄 */
+  -webkit-line-clamp: ${({ direction }) => (direction === 'row' ? 1 : 2)}; /* 최대 2줄 */
   -webkit-box-orient: vertical;
 `;
 
@@ -95,7 +97,7 @@ export const NewsContent = styled.p`
   display: -webkit-box;
   -webkit-line-clamp: 2; /* 최대 3줄 */
   -webkit-box-orient: vertical;
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 export const NewsInfoWrapper = styled.div`
@@ -103,7 +105,7 @@ export const NewsInfoWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  margin-top: 10px;
+  margin-top: 5px;
 `;
 
 export const ScoreWrapper = styled.div`

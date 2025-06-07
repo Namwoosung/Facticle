@@ -103,14 +103,9 @@ export const SearchButton = styled.button`
 `;
 
 export const ContentWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    margin-top: 10px;
-`;
-
-export const NewsContainer = styled.div`
-    display: flex;
-    gap: 20px;
-    margin-top: 40px;
+    width: 100%;
+    margin: 40px 0;
 `;
