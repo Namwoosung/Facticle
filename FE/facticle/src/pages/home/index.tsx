@@ -1,241 +1,296 @@
+import { useEffect, useState } from "react";
 import News from "../../components/news";
-import { CategoryNewsWrapper, CategoryText, CategoryTitle, CategoryTitleWrapper, CategoryWrapper, MoreButton, MoreNewsButton, MoreNewsTitle, MoreNewsWrapper, NewsHighlightContainer, NewsHighlightContent, NewsHighlightWrapper, PageWrapper} from "./home.styles";
+import newsService from "../../services/news/news.service";
+import { CategoryNewsWrapper, CategoryText, CategoryTitle, CategoryTitleWrapper, CategoryWrapper, MoreButton, MoreNewsButton, MoreNewsTitle, MoreNewsWrapper, NewsHighlightContainer, NewsHighlightContent, NewsHighlightWrapper, PageWrapper } from "./home.styles";
 import { FaChevronRight } from "react-icons/fa";
 
 function Home() {
-    return (
-        <PageWrapper>
-            <CategoryWrapper>
-                <CategoryTitleWrapper>
-                    <CategoryTitle>
-                        <h2>최신 뉴스 보기</h2>
-                        <CategoryText>뉴스 제목과 내용의 유사도를 분석해 신뢰할 수 있는 뉴스를 제공합니다.</CategoryText>
-                    </CategoryTitle>
-                    <MoreButton to="/news">
-                        더보기
-                        <FaChevronRight />
-                    </MoreButton>
-                </CategoryTitleWrapper>
+  const [recentNewsList, setRecentNewsList] = useState<any[]>([]);
+  const [popularNewsList, setPopularNewsList] = useState<any[]>([]);
+  const [similarNewsList, setSimilarNewsList] = useState<any[]>([]);
+  const [entertainmentNewsList, setEntertainmentNewsList] = useState<any[]>([]);
+  const [sportsNewsList, setSportsNewsList] = useState<any[]>([]);
 
-                <CategoryNewsWrapper>
-                    <News
-                        src="1"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다. 망자는 40명으로 늘었습니다."
-                        hs_score={80}
-                        fs_score={90}
-                        rating={4.7}
-                    />
-                    <News
-                        src="2"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                        hs_score={20}
-                        fs_score={30}
-                        rating={4.0}
-                    />
-                    <News
-                        src="3"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다. 망자는 40명으로 늘었습니다."
-                        hs_score={70}
-                        fs_score={80}
-                        rating={4.5}
-                    />
-                    <News
-                        src="3"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                        hs_score={100}
-                        fs_score={100}
-                        rating={5.0}
-                    />
-                </CategoryNewsWrapper>
-            </CategoryWrapper>
+  const fetchRecentNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: [],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "",
+      star: 0,
+      time: 0
+    }, 4, 0);
+    if (response.data.code === 200) {
+      setRecentNewsList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
 
-            <NewsHighlightWrapper>
-                <NewsHighlightContainer>
-                    <CategoryTitleWrapper>
-                        <CategoryTitle>
-                            <h2>인기 뉴스</h2>
-                        </CategoryTitle>
-                        <MoreButton to="/news">
-                            더보기
-                            <FaChevronRight />
-                        </MoreButton>
-                    </CategoryTitleWrapper>
+  const fetchPopularNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: [],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "조회수순",
+      star: 0,
+      time: 0
+    }, 4, 0);
+    if (response.data.code === 200) {
+      setPopularNewsList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
 
-                    <NewsHighlightContent>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px",width:"100%", height: "100%" }}> 
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                rating={5.0}
-                            />
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                axis='row'
-                                rating={3.5}
-                            />
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                axis='row'
-                                rating={4.0}
-                            />
-                        </div>
-                    </NewsHighlightContent>
-                </NewsHighlightContainer>
+  const fetchSimilarNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: [],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "유사도점수순",
+      star: 0,
+      time: 0
+    }, 4, 0);
+    if (response.data.code === 200) {
+      setSimilarNewsList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
 
-                <NewsHighlightContainer>
-                    <CategoryTitleWrapper>
-                        <CategoryTitle>
-                            <h2>유사도 높은 뉴스</h2>
-                        </CategoryTitle>
-                        <MoreButton to="/news">
-                            더보기
-                            <FaChevronRight />
-                        </MoreButton>
-                    </CategoryTitleWrapper>
+  const fetchEntertainmentNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: ["연예"],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "",
+      star: 0,
+      time: 0
+    }, 4, 0);
+    if (response.data.code === 200) {
+      setEntertainmentNewsList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
 
-                    <NewsHighlightContent>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px",width:"100%", height: "100%" }}> 
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                rating={5.0}
-                            />
-                            
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                axis='row'
-                                rating={4.0}
-                            />
-                            <News
-                                src="3"
-                                image_url="https://imgnews.pstatic.net/image/311/2025/03/16/0001838655_001_20250316070019616.jpg?type=w647"
-                                title="코로나19 신규 확진 1,500명대…사망자 40명"
-                                content="코로나19 신규 확진자가 1,500명대를 기록했습니다. 사망자는 40명으로 늘었습니다."
-                                hs_score={100}
-                                fs_score={100}
-                                axis='row'
-                                rating={3.0}
-                            />
-                        </div>
-                    </NewsHighlightContent>
-                </NewsHighlightContainer>
-            </NewsHighlightWrapper>
+  const fetchSportsNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: ["스포츠"],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "",
+      star: 0,
+      time: 0
+    }, 4, 0);
+    if (response.data.code === 200) {
+      setSportsNewsList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
 
-            <CategoryWrapper>
-                <CategoryTitleWrapper>
-                    <CategoryTitle>
-                        <h2>연예</h2>
-                    </CategoryTitle>
-                    <MoreButton to="/news">
-                        더보기
-                        <FaChevronRight />
-                    </MoreButton>
-                </CategoryTitleWrapper>
+  useEffect(() => {
+    fetchRecentNews();
+    fetchPopularNews();
+    fetchSimilarNews();
+    fetchEntertainmentNews();
+    fetchSportsNews();
+  }, []);
 
-                <CategoryNewsWrapper>
-                    <News
-                        src="1"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={80}
-                        fs_score={90}
-                        rating={4.7}
-                    />
-                    <News
-                        src="2"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={20}
-                        fs_score={30}
-                        rating={2.4}
-                    />
-                    <News
-                        src="3"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={70}
-                        fs_score={80}
-                        rating={3.5}
-                    />
-                </CategoryNewsWrapper>
-            </CategoryWrapper>
+  return (
+    <PageWrapper>
+      <CategoryWrapper>
+        <CategoryTitleWrapper>
+          <CategoryTitle>
+            <h2>최신 뉴스 보기</h2>
+            <CategoryText>뉴스 제목과 내용의 유사도를 분석해 신뢰할 수 있는 뉴스를 제공합니다.</CategoryText>
+          </CategoryTitle>
+          <MoreButton to="/news">
+            더보기
+            <FaChevronRight />
+          </MoreButton>
+        </CategoryTitleWrapper>
 
-            <CategoryWrapper>
-                <CategoryTitleWrapper>
-                    <CategoryTitle>
-                        <h2>스포츠</h2>
-                    </CategoryTitle>
-                    <MoreButton to="/news">
-                        더보기
-                        <FaChevronRight />
-                    </MoreButton>
-                </CategoryTitleWrapper>
+        <CategoryNewsWrapper>
+          {recentNewsList.map((news, index) => (
+            <News
+              key={index}
+              src={String(news.newsId)}
+              image_url={news.imageUrl}
+              title={news.title}
+              content={news.summary}
+              hs_score={news.headlineScore}
+              fs_score={news.factScore}
+              rating={news.rating}
+              time={news.collectedAt}
+            />
+          ))}
+        </CategoryNewsWrapper>
+      </CategoryWrapper>
 
-                <CategoryNewsWrapper>
-                    <News
-                        src="1"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={80}
-                        fs_score={90}
-                        rating={4.7}
-                    />
-                    <News
-                        src="2"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={20}
-                        fs_score={30}
-                        rating={2.4}
-                    />
-                    <News
-                        src="3"
-                        image_url="https://image.dongascience.com/Photo/2024/08/a409753fb8046fc66e8fc506fec06cb2.jpg"
-                        title="코로나19 신규 확진 1,500명대…사망자 40명"
-                        hs_score={70}
-                        fs_score={80}
-                        rating={3.5}
-                    />
-                </CategoryNewsWrapper>
-            </CategoryWrapper>
+      <NewsHighlightWrapper>
+        <NewsHighlightContainer>
+          <CategoryTitleWrapper>
+            <CategoryTitle>
+              <h2>인기 뉴스</h2>
+            </CategoryTitle>
+            <MoreButton to="/news" state={{ sort: "조회수순" }}>
+              더보기
+              <FaChevronRight />
+            </MoreButton>
+          </CategoryTitleWrapper>
 
-            <MoreNewsWrapper>
-                <MoreNewsTitle>더 많은 뉴스 보러가기</MoreNewsTitle>
-                <MoreNewsButton to="/news">더보기</MoreNewsButton>
-            </MoreNewsWrapper>
-        </PageWrapper>
-    );
+          <NewsHighlightContent>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", height: "100%" }}>
+              {popularNewsList.map((news, index) => (
+                index === 0 ? (
+                  <News
+                    key={index}
+                    src={String(news.newsId)}
+                    image_url={news.imageUrl}
+                    title={news.title}
+                    content={news.summary}
+                    hs_score={news.headlineScore}
+                    fs_score={news.factScore}
+                    rating={news.rating}
+                    time={news.collectedAt}
+                  />
+                ) : (
+                  <News
+                    key={index}
+                    src={String(news.newsId)}
+                    image_url={news.imageUrl}
+                    title={news.title}
+                    content={news.summary}
+                    hs_score={news.headlineScore}
+                    fs_score={news.factScore}
+                    axis='row'
+                    rating={news.rating}
+                    time={news.collectedAt}
+                  />
+                )
+              ))}
+            </div>
+          </NewsHighlightContent>
+        </NewsHighlightContainer>
+
+        <NewsHighlightContainer>
+          <CategoryTitleWrapper>
+            <CategoryTitle>
+              <h2>유사도 높은 뉴스</h2>
+            </CategoryTitle>
+            <MoreButton to="/news" state={{ sort: "유사도점수순" }}>
+              더보기
+              <FaChevronRight />
+            </MoreButton>
+          </CategoryTitleWrapper>
+
+          <NewsHighlightContent>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", height: "100%" }}>
+              {similarNewsList.map((news, index) => (
+                index === 0 ? (
+                  <News
+                    key={index}
+                    src={String(news.newsId)}
+                    image_url={news.imageUrl}
+                    title={news.title}
+                    content={news.summary}
+                    hs_score={news.headlineScore}
+                    fs_score={news.factScore}
+                    rating={news.rating}
+                    time={news.collectedAt}
+                  />
+                ) : (
+                  <News
+                    key={index}
+                    src={String(news.newsId)}
+                    image_url={news.imageUrl}
+                    title={news.title}
+                    content={news.summary}
+                    hs_score={news.headlineScore}
+                    fs_score={news.factScore}
+                    axis='row'
+                    rating={news.rating}
+                    time={news.collectedAt}
+                  />
+                )
+              ))}
+            </div>
+          </NewsHighlightContent>
+        </NewsHighlightContainer>
+      </NewsHighlightWrapper>
+
+      <CategoryWrapper>
+        <CategoryTitleWrapper>
+          <CategoryTitle>
+            <h2>연예</h2>
+          </CategoryTitle>
+          <MoreButton to="/news/entertainment" state={{ category: ['연예'] }}>
+            더보기
+            <FaChevronRight />
+          </MoreButton>
+        </CategoryTitleWrapper>
+
+        <CategoryNewsWrapper>
+          {entertainmentNewsList.map((news, index) => (
+              <News
+                key={index}
+                src={String(news.newsId)}
+                image_url={news.imageUrl}
+                title={news.title}
+                content={news.summary}
+                hs_score={news.headlineScore}
+                fs_score={news.factScore}
+                rating={news.rating}
+                time={news.collectedAt}
+              />
+            ))
+          }
+        </CategoryNewsWrapper>
+      </CategoryWrapper>
+
+      <CategoryWrapper>
+        <CategoryTitleWrapper>
+          <CategoryTitle>
+            <h2>스포츠</h2>
+          </CategoryTitle>
+          <MoreButton to="/news/sports" state={{ category: ['스포츠'] }}>
+            더보기
+            <FaChevronRight />
+          </MoreButton>
+        </CategoryTitleWrapper>
+
+        <CategoryNewsWrapper>
+          {sportsNewsList.map((news, index) => (
+              <News
+                key={index}
+                src={String(news.newsId)}
+                image_url={news.imageUrl}
+                title={news.title}
+                content={news.summary}
+                hs_score={news.headlineScore}
+                fs_score={news.factScore}
+                rating={news.rating}
+                time={news.collectedAt}
+              />
+            ))
+          }
+        </CategoryNewsWrapper>
+      </CategoryWrapper>
+
+      <MoreNewsWrapper>
+        <MoreNewsTitle>더 많은 뉴스 보러가기</MoreNewsTitle>
+        <MoreNewsButton to="/news">더보기</MoreNewsButton>
+      </MoreNewsWrapper>
+    </PageWrapper>
+  );
 }
 
 export default Home;

@@ -31,7 +31,7 @@ export const setupAxiosInterceptors = (
           });
       }
     } else {
-      onUnauthenticated();
+      //onUnauthenticated();
     }
     return Promise.reject(error);
   }
