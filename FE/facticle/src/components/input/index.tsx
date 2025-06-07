@@ -12,17 +12,38 @@ interface InputProps {
   errorMessage?: string;
   placeholder?: string;
   title?: string;
-  // 아이콘버튼 추가
+  // 아이콘 관련 props 추가
   icon?: React.ReactNode;
+  onIconClick?: () => void; // 아이콘 클릭 핸들러 추가
   disabled?: boolean;
   [key: string]: any;
 }
 
-function Input({ type, value, onChange, onBlur, error, errorMessage, placeholder, title, icon, disabled, ...props }: InputProps) {
+function Input({ 
+  type, 
+  value, 
+  onChange, 
+  onBlur, 
+  error, 
+  errorMessage, 
+  placeholder, 
+  title, 
+  icon, 
+  onIconClick, // 아이콘 클릭 핸들러
+  disabled, 
+  ...props 
+}: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClear = () => {
-    onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>); // 타겟의 값이 빈 문자열인 이벤트 객체를 만들어서 onChange 함수에 전달
+    onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
+  };
+
+  // 아이콘 클릭 핸들러
+  const handleIconClick = () => {
+    if (onIconClick) {
+      onIconClick(); // 전달받은 핸들러 실행
+    }
   };
 
   return (
@@ -38,22 +59,28 @@ function Input({ type, value, onChange, onBlur, error, errorMessage, placeholder
         error={error}
         disabled={disabled}
       />
+      
+      {/* 커스텀 아이콘 (Send 버튼 등) */}
       {!disabled && icon && (
-        <IconButton onClick={handleClear}>
+        <IconButton onClick={handleIconClick}>
           {icon}
-        </IconButton> 
+        </IconButton>
       )}
-      {/* 아이콘 버튼이 있을 때는 아이콘을 보여줌 */}
-      {!disabled && value && (
+      
+      {/* Clear 버튼 (X 버튼) */}
+      {!disabled && value && !icon && ( // icon이 있을 때는 clear 버튼 숨김
         <ClearButton onClick={handleClear}>
-          &times; {/*HTML 엔티티 코드로, × (곱하기 또는 닫기 기호) 를 의미*/}
+          &times;
         </ClearButton>
       )}
+      
+      {/* 패스워드 표시/숨김 버튼 */}
       {!disabled && type === "password" && value && (
         <ShowPasswordButton onClick={() => setShowPassword((prev) => !prev)}>
           {showPassword ? <IoEyeSharp /> : <FaEyeSlash />}
         </ShowPasswordButton>
       )}
+      
       {error && <ErrorMessage>{errorMessage}</ErrorMessage>}
     </InputWrapper>
   );

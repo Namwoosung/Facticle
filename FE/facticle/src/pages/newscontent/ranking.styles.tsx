@@ -54,6 +54,6 @@ export const RankingButton = styled.button.withConfig({ // open을 props로 받�
 export const RankingNewsContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 `;
 

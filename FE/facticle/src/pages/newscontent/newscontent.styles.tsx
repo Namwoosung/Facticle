@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { PiThumbsUpLight, PiThumbsDownLight } from "react-icons/pi";
+import { Link } from "react-router-dom";
 
 export const Wrapper = styled.div`
     width: 1280px;
@@ -91,6 +91,19 @@ export const StarText = styled.p`
     color: black;
     margin-left: 5px;
 `;
+ 
+export const OriginalButton = styled(Link)`
+    width: fit-content;
+    height: fit-content;
+    border-radius: 10px;
+    border: 1px solid #E2E2E2;
+    background-color: #fff;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-left: 10px;
+`;
 
 export const NewsContentImg = styled.img`
     width: 100%;
@@ -123,6 +136,50 @@ export const NewsContentBodyText = styled.div`
     background-color: #E2E2E2;
     padding: 30px 20px;
     border-radius: 10px;
+    text-align: left;
+    line-height: 1.5;
+`;
+
+export const ReasonWrapper = styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 40px;
+    margin-top: 20px;
+`;
+
+export const ReasonContainer = styled.div`
+    flex: 1;
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 10px;
+    border: 1px solid #E2E2E2;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    padding: 25px 0px;
+`;
+
+export const ReasonTitle = styled.h3`
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    margin-left: 20px;
+`;
+
+export const ReasonText = styled.p`
+    font-size: 16px;
+    font-weight: 500;
+    color: black;
+    margin: 0 20px;
+    padding: 10px 20px;
+    background-color: #F5F5F5;
+    border-radius: 10px;
+    text-align: left;
+    line-height: 2;
 `;
 
 export const NewsContentLine = styled.div`
@@ -139,6 +196,36 @@ export const ReviewWrapper = styled.div`
     gap: 20px;
 `;
 
+export const ReviewTitle = styled.h3`
+    margin: 0;
+    display: flex;
+    align-items: center;
+`;
+
+export const DeleteRatingButton = styled.button<{ $loading?: boolean }>`
+    margin-left: 15px;
+    padding: 4px 8px;
+    background-color: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    cursor: ${props => props.$loading ? 'not-allowed' : 'pointer'};
+    opacity: ${props => props.$loading ? 0.5 : 1};
+    font-size: 12px;
+    font-weight: normal;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: ${props => props.$loading ? 'transparent' : '#dc3545'};
+        color: ${props => props.$loading ? '#dc3545' : 'white'};
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+`;
+
 export const StarWrapper = styled.div`
     display: flex;
     align-items: center;
@@ -146,7 +233,29 @@ export const StarWrapper = styled.div`
     gap: 30px;
 `;
 
-export const ConfiremButton = styled.button`
+export const StarClickArea = styled.div<{ $isAuthenticated: boolean }>`
+    position: relative;
+    width: 60px;
+    height: 60px;
+`;
+
+export const StarHalfClickArea = styled.div<{ $isAuthenticated: boolean; $isLeft?: boolean }>`
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    ${props => props.$isLeft ? 'left: 0;' : 'right: 0;'}
+    top: 0;
+    z-index: 1;
+    cursor: ${props => props.$isAuthenticated ? 'pointer' : 'not-allowed'};
+`;
+
+export const RatingButtonWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+`;
+
+export const ConfiremButton = styled.button<{ $disabled?: boolean }>`
     width: 50%;
     height: 50px;
     border-radius: 10px;
@@ -155,152 +264,25 @@ export const ConfiremButton = styled.button`
     font-size: 16px;
     font-weight: 600;
     color: black;
-    cursor: pointer;
+    cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
     margin: 0 auto;
-    margin-top: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-`;
+    opacity: ${props => props.$disabled ? 0.5 : 1};
 
-export const CommentWrapper = styled.div`
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 10px;
-`;
-
-export const CommentTitleWrapper = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-`;
-
-export const CommentTItleNumber = styled.p`
-    font-size: 16px;
-    font-weight: 600;
-    color: grey;
-`;
-
-export const UserCommentWrapper = styled.div`
-    width: 100%;
-    margin-top: 20px;
-    align-self: end;
-`;
-
-export const CommentsWrapper = styled.div`
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 30px;
-    box-sizing: border-box;
-`;
-
-export const Comment = styled.div`
-    width: 100%;
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    box-sizing: border-box;
-`;
-
-export const CommentContainer = styled.div`
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-`;
-
-export const CommentTextWrapper = styled.div`
-    height: fit-content;
-    min-height: 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background-color: #F5F5F5;
-    padding: 15px 20px;
-    border-radius: 10px;
-`;
-
-export const CommentTextTitleWrapper = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 5px;
-`;
-
-export const CommentTextTitle = styled.p`
-    font-size: 16px;
-    font-weight: 600;
-    color: black;
-    margin-right: 5px;
-`;
-
-export const CommentTextDate = styled.p`
-    font-size: 14px;
-    color: #999999;
-    margin-right: 5px;
-`;
-
-export const CommentThumbsUpButton = styled(PiThumbsUpLight)`
-    cursor: pointer;
-    border-radius: 50%;
-    padding: 5px;
-    margin: 0;
-    &:hover {
-        background-color: #E2E2E2;
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
     }
 `;
 
-export const CommentThumbsDownButton = styled(PiThumbsDownLight)`
-    cursor: pointer;
-    border-radius: 50%;
-    padding: 5px;
-    margin: 0;
-    &:hover {
-        background-color: #E2E2E2;
-    }
-`;
-
-export const CommentText = styled.p`
-    font-size: 16px;
-    color: black;
-    margin-top: 5px;
-    text-align: left;
-`;
-
-export const CommentReplyButton = styled.button`
-    width: fit-content;
+export const LoginWarningText = styled.p`
+    color: #666;
     font-size: 14px;
-    font-weight: 600;
-    margin-left: 20px;    
-    border: none;
-    border-radius: 10px;
-    background-color: white;
-    text-align: left;
+    margin-top: 15px;
+    text-align: center;
 `;
 
-export const ReplyWrapper = styled.div`
-  width: 100%-55px;
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-  margin-left: 55px; /* 원 댓글보다 들여쓰기 */
-`;
 
-export const ReplyContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background-color: #f5f5f5;
-  padding: 10px 15px;
-  border-radius: 10px;
-`;
-
-export const ReplyInputWrapper = styled.div`
-  margin-left: 55px;
-  margin-top: 8px;
-`;

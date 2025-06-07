@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RankingBodyWrapper, RankingButton, RankingButtonWrapper, RankingNewsContainer, RankingSubTitle, RankingTitle, RankingTitleWrapper, RankingWrapper } from "./ranking.styles";
 import News from "../../components/news";
+import newsService from "../../services/news/news.service";
 
 function Ranking() {
+  const [content, setContent] = useState<any[]>([]);
+  const [similarityList, setSimilarityList] = useState<any[]>([]);
+  const [factList, setFactList] = useState<any[]>([]);
+
   const [openSimialr, setOpenSimilar] = useState(true);
   const [openFact, setOpenFact] = useState(false);
 
@@ -10,6 +15,56 @@ function Ranking() {
     setOpenSimilar(!openSimialr);
     setOpenFact(!openFact);
   }
+
+  const fetchSimilarNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: [],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "유사도점수순",
+      star: 0,
+      time: 0
+    }, 5, 0);
+    if (response.data.code === 200) {
+      setSimilarityList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
+
+  const fetchFactNews = async () => {
+    const response: any = await newsService.getNewsList({
+      category: [],
+      factScore: 0,
+      keyword: "",
+      similarity: 0,
+      sort: "팩트점수순",
+      star: 0,
+      time: 0
+    }, 5, 0);
+    if (response.data.code === 200) {
+      setFactList(response.data.newsList);
+    } else {
+      // Handle error
+    }
+  }
+
+  useEffect(() => {
+    fetchSimilarNews();
+    fetchFactNews();
+  }, []);
+
+  useEffect(() => {
+    if (openSimialr) {
+      setContent(similarityList);
+    }
+    if (openFact) {
+      setContent(factList);
+    }
+  }, [openSimialr, openFact, similarityList, factList]);
+
+
 
   return (
     <RankingWrapper>
@@ -23,71 +78,22 @@ function Ranking() {
           <RankingButton open={openSimialr} onClick={handleButtonClick}>유사도 순</RankingButton>
           <RankingButton open={openFact} onClick={handleButtonClick}>신뢰도 순</RankingButton>
         </RankingButtonWrapper>
-        <RankingNewsContainer>
-          <h4>1</h4>
-          <News
-            src="1"
-            image_url="https://img.etnews.com/news/article/2025/04/16/news-p.v1.20250416.38f8366f95fc4d0284464bc1703123e4_P1.jpg"
-            title="현대모비스, 상하이모터쇼에 신기술 10종 공개…“中 수주 2억달러 목표”"
-            hs_score={85}
-            fs_score={78}
-            rating={4.3}
-            axis="row"
-            titleSize={16}
-          />
-        </RankingNewsContainer>
-        <RankingNewsContainer>
-          <h4>2</h4>
-          <News
-            src="2"
-            image_url="https://img.etnews.com/news/article/2025/04/16/news-p.v1.20250416.38f8366f95fc4d0284464bc1703123e4_P1.jpg"
-            title="현대모비스, 상하이모터쇼에 신기술 10종 공개…“中 수주 2억달러 목표”"
-            hs_score={85}
-            fs_score={78}
-            rating={4.3}
-            axis="row"
-            titleSize={16}
-          />
-        </RankingNewsContainer>
-        <RankingNewsContainer>
-          <h4>3</h4>
-          <News
-            src="3"
-            image_url="https://img.etnews.com/news/article/2025/04/16/news-p.v1.20250416.38f8366f95fc4d0284464bc1703123e4_P1.jpg"
-            title="현대모비스, 상하이모터쇼에 신기술 10종 공개…“中 수주 2억달러 목표”"
-            hs_score={85}
-            fs_score={78}
-            rating={4.3}
-            axis="row"
-            titleSize={16}
-          />
-        </RankingNewsContainer>
-        <RankingNewsContainer>
-          <h4>4</h4>
-          <News
-            src="3"
-            image_url="https://img.etnews.com/news/article/2025/04/16/news-p.v1.20250416.38f8366f95fc4d0284464bc1703123e4_P1.jpg"
-            title="현대모비스, 상하이모터쇼에 신기술 10종 공개…“中 수주 2억달러 목표”"
-            hs_score={85}
-            fs_score={78}
-            rating={4.3}
-            axis="row"
-            titleSize={16}
-          />
-        </RankingNewsContainer>
-        <RankingNewsContainer>
-          <h4>5</h4>
-          <News
-            src="3"
-            image_url="https://img.etnews.com/news/article/2025/04/16/news-p.v1.20250416.38f8366f95fc4d0284464bc1703123e4_P1.jpg"
-            title="현대모비스, 상하이모터쇼에 신기술 10종 공개…“中 수주 2억달러 목표”"
-            hs_score={85}
-            fs_score={78}
-            rating={4.3}
-            axis="row"
-            titleSize={16}
-          />
-        </RankingNewsContainer>
+        {content.map((news, index) => (
+          <RankingNewsContainer key={index}>
+            <News
+              src={news.newsId}
+              image_url={news.imageUrl}
+              title={news.title}
+              content={news.summary}
+              hs_score={news.headlineScore}
+              fs_score={news.factScore}
+              rating={news.rating}
+              axis="row"
+              titleSize={16}
+              time={news.collectedAt}
+            />
+          </RankingNewsContainer>
+        ))}
       </RankingBodyWrapper>
     </RankingWrapper>
   );

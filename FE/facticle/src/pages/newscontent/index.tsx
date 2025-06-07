@@ -1,185 +1,395 @@
 import { useEffect, useState } from "react";
-import { InfoLine, NewsContentBody, NewsContentBodySubText, NewsContentBodyText, NewsContentBodyTextWrapper, Comment, CommentsWrapper, CommentTextWrapper, CommentTItleNumber, CommentTitleWrapper, CommentWrapper, ConfiremButton, NewsContentDate, NewsContentHeader, NewsContentImg, NewsContentInfo, NewsContentLine, ReviewWrapper, StarWrapper, NewsContentTitle, UserCommentWrapper, NewsContentWrapper, ScoreContainer, ScoreText, ScoreWrapper, SideWrapper, StarContainer, StarText, Wrapper, CommentTextTitleWrapper, CommentTextTitle, CommentTextDate, CommentThumbsDownButton, CommentThumbsUpButton, CommentText, CommentReplyButton, CommentContainer, ReplyWrapper, ReplyContainer, ReplyInputWrapper } from "./newscontent.styles";
+import { 
+  InfoLine, NewsContentBody, NewsContentBodySubText, NewsContentBodyText, 
+  NewsContentBodyTextWrapper, ConfiremButton, NewsContentDate, NewsContentHeader, 
+  NewsContentImg, NewsContentInfo, NewsContentLine, ReviewWrapper, StarWrapper, 
+  NewsContentTitle, NewsContentWrapper, ScoreContainer, ScoreText, ScoreWrapper, 
+  SideWrapper, StarContainer, StarText, Wrapper, OriginalButton, ReasonContainer, 
+  ReasonWrapper, ReasonTitle, ReasonText, ReviewTitle, DeleteRatingButton,
+  StarClickArea, StarHalfClickArea, RatingButtonWrapper, LoginWarningText
+} from "./newscontent.styles";
 import Progress from "../../components/progress";
 import PopularNews from "./popularnews";
 import { FaStar, FaRegStarHalfStroke, FaRegStar } from "react-icons/fa6";
 import { GiCheckMark } from "react-icons/gi";
-import { IoMdSend } from "react-icons/io";
-import Input from "../../components/input";
-import Avatar from "../../components/avatar";
 import Ranking from "./ranking";
+import { useParams, useNavigate } from "react-router-dom";
+import newsService from "../../services/news/news.service";
+import { useAuth } from "../../hooks/useAuth";
+import NewsComment from "./comment";
+import Dialog from "../../components/dialog";
+
+interface NewsContentType {
+  category: string;
+  collectedAt: string;
+  commentCount: number;
+  factScore: number;
+  factScoreReason: string;
+  hateCount: number;
+  headlineScore: number;
+  headlineScoreReason: string;
+  imageUrl: string;
+  likeCount: number;
+  mediaName: string;
+  naverUrl: string;
+  newsId: number;
+  rating: number;
+  ratingCount: number;
+  summary: string;
+  title: string;
+  url: string;
+  viewCount: number;
+}
+
+interface NewsInteraction {
+  newsInteractionId: number;
+  userId: number;
+  newsId: number;
+  reaction: string | null;
+  rating: number | null;
+  reactionAt: string | null;
+  ratedAt: string | null;
+  viewedAt: string;
+}
+
+interface NewsApiResponse {
+  success: boolean;
+  data: {
+    news: NewsContentType;
+    code: number;
+    isUser: boolean;
+    newsInteraction: NewsInteraction | null;
+  };
+  message: string;
+}
 
 function NewsContent() {
-  const [rating, setRating] = useState(0);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [content, setContent] = useState<NewsContentType | null>(null);
+  const [userRating, setUserRating] = useState(0);
+  const [hasUserRated, setHasUserRated] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showRatingSuccessDialog, setShowRatingSuccessDialog] = useState(false);
+  const [showDeleteRatingDialog, setShowDeleteRatingDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleClick = (value: number) => {
-    setRating(value);
+  const handleStarClick = (value: number) => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+      return;
+    }
+    setUserRating(value);
   };
 
   const renderStar = (index: number) => {
-    if (rating >= index) return <FaStar size={60} color="#524DD6" />;
-    if (rating >= index - 0.5) return <FaRegStarHalfStroke size={60} color="#524DD6" />;
+    if (userRating >= index) return <FaStar size={60} color="#524DD6" />;
+    if (userRating >= index - 0.5) return <FaRegStarHalfStroke size={60} color="#524DD6" />;
     return <FaRegStar size={60} color="#ccc" />;
   };
 
-  const handleCommentSubmit = () => {
-    // 댓글 제출 로직
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  }
+
+  const fetchNewsContent = async (newsId: string) => {
+    try {
+      const response = await newsService.getNews(newsId) as NewsApiResponse;
+      if (response.data.code === 200) {
+        setContent(response.data.news);
+        
+        // newsInteraction에서 사용자 평점 정보 추출
+        if (response.data.newsInteraction && response.data.newsInteraction.rating) {
+          setUserRating(response.data.newsInteraction.rating);
+          setHasUserRated(true);
+        } else {
+          // 평점이 없는 경우 초기화
+          setUserRating(0);
+          setHasUserRated(false);
+        }
+      }
+    } catch (error) {
+      // 에러 처리
+      setContent(null);
+      setUserRating(0);
+      setHasUserRated(false);
+    }
+  }
+
+  // 평점 제출/수정
+  const handleSubmitRating = async () => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+      return;
+    }
+
+    if (userRating === 0) {
+      alert('별점을 선택해주세요.');
+      return;
+    }
+
+    // 만약 수정일때 평점이 이전과 같다면 아무것도 하지 않음
+    if (hasUserRated && userRating === content?.rating) {
+      return;
+    }
+
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      await newsService.postAndUpdateNewsRating(id, userRating);
+      setHasUserRated(true);
+      setShowRatingSuccessDialog(true);
+      // 현재 뉴스 정보 다시 가져와서 평균 평점 업데이트
+      await fetchNewsContent(id);
+    } catch (error) {
+      alert('평점 등록에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // 평점 삭제 다이얼로그 열기
+  const openDeleteRatingDialog = () => {
+    setShowDeleteRatingDialog(true);
+  };
 
+  // 평점 삭제 다이얼로그 닫기
+  const closeDeleteRatingDialog = () => {
+    setShowDeleteRatingDialog(false);
+  };
 
+  // 평점 삭제 실행
+  const confirmDeleteRating = async () => {
+    if (!id) return;
 
-  useEffect(() => { // 들어오자마자 요청 후 페이지 내용 렌더링
-  }, [])
+    try {
+      setLoading(true);
+      await newsService.deleteNewsRating(id);
+      setUserRating(0);
+      setHasUserRated(false);
+      closeDeleteRatingDialog();
+      // 현재 뉴스 정보 다시 가져와서 평균 평점 업데이트
+      await fetchNewsContent(id);
+    } catch (error) {
+      alert('평점 삭제에 실패했습니다. 다시 시도해주세요.');
+      closeDeleteRatingDialog();
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleLoginConfirm = () => {
+    setShowLoginDialog(false);
+    navigate('/login');
+  };
+
+  const handleLoginDialogClose = () => {
+    setShowLoginDialog(false);
+  };
+
+  const handleRatingSuccessClose = () => {
+    setShowRatingSuccessDialog(false);
+  };
+
+  // 뉴스 ID가 변경될 때마다 해당 뉴스의 정보와 평점을 가져옴
+  useEffect(() => {
+    if (id) {
+      // 이전 뉴스의 평점 상태 초기화
+      setUserRating(0);
+      setHasUserRated(false);
+      setShowLoginDialog(false);
+      setShowRatingSuccessDialog(false);
+      setShowDeleteRatingDialog(false);
+      
+      // 새로운 뉴스 정보 가져오기
+      fetchNewsContent(id);
+    }
+  }, [id]); // id가 변경될 때마다 실행
 
   return (
     <Wrapper>
       <NewsContentWrapper>
         <NewsContentHeader>
-          <NewsContentTitle>테슬라, 中 전기차들 제기한 'EU 관세 소송' 동참</NewsContentTitle>
+          <NewsContentTitle>{content?.title}</NewsContentTitle>
           <NewsContentInfo>
-            <NewsContentDate>2025-01-25 16:50</NewsContentDate>
+            <NewsContentDate>{formatDate(content?.collectedAt ?? '')}</NewsContentDate>
 
             <InfoLine />
 
             <ScoreWrapper>
               <ScoreContainer>
                 <ScoreText>유사도</ScoreText>
-                <Progress progress={80} color="black" />
-                <ScoreText>80%</ScoreText>
+                <Progress progress={Math.round(content?.headlineScore ?? 0) ?? 0} color="black" />
+                <ScoreText>{Math.round(content?.headlineScore ?? 0)}%</ScoreText>
               </ScoreContainer>
               <InfoLine />
               <ScoreContainer>
                 <ScoreText>신뢰도</ScoreText>
-                <Progress progress={90} color="black" />
-                <ScoreText>90%</ScoreText>
+                <Progress progress={Math.round(content?.factScore ?? 0) ?? 0} color="black" />
+                <ScoreText>{Math.round(content?.factScore ?? 0)}%</ScoreText>
               </ScoreContainer>
             </ScoreWrapper>
           </NewsContentInfo>
-          <StarContainer>
-            <FaStar style={{ color: "#524DD6" }} />
-            <StarText>4.5</StarText>
-          </StarContainer>
+          <NewsContentInfo>
+            <StarContainer>
+              <FaStar style={{ color: "#524DD6" }} />
+              <StarText>
+                {content?.rating ? content.rating.toFixed(1) : '0.0'} 
+                ({content?.ratingCount || 0}명 평가)
+              </StarText>
+            </StarContainer>
+            <OriginalButton
+              to={content?.url ?? ''}
+              target="_blank">
+              원문 보기
+            </OriginalButton>
+          </NewsContentInfo>
         </NewsContentHeader>
 
         <NewsContentBody>
-          <NewsContentImg src="https://img.etnews.com/news/article/2024/07/19/news-p.v1.20240719.a82bdabb58a54758bed0997cd30cb2d3_P1.jpg" alt="news" />
+          <NewsContentImg src={content?.imageUrl} alt="news" />
           <NewsContentBodyTextWrapper>
             <h2>🤖 핵심 요약</h2>
             <NewsContentBodySubText>(AI가 기사 본문을 분석해 핵심 내용을 추출하여 요약해드립니다.)</NewsContentBodySubText>
           </NewsContentBodyTextWrapper>
-          <NewsContentBodyText> 이에 지난해 10월부터 중국산 전기차 관세율이 최소 17.8%에서 최고 45.3%까지 증가했다. 중국 상하이공장에서 제조하는 테슬라가
-            가장 낮은 17.8％를 부과받았고 BYD와 지리는 각각 27.0％, 28.8％, SAIC은 가장 높은 45.3％ 관세를 각각 책정받았다.</NewsContentBodyText>
+          <NewsContentBodyText>{content?.summary}</NewsContentBodyText>
+
+          <ReasonWrapper>
+            <ReasonContainer>
+              <ReasonTitle>📝 유사도 분석 근거 ({Math.round(content?.headlineScore ?? 0)}%)</ReasonTitle>
+              <ReasonText>{content?.headlineScoreReason}</ReasonText>
+            </ReasonContainer>
+            <ReasonContainer>
+              <ReasonTitle>📝 신뢰도 분석 근거 ({Math.round(content?.factScore ?? 0)}%)</ReasonTitle>
+              <ReasonText>{content?.factScoreReason}</ReasonText>
+            </ReasonContainer>
+          </ReasonWrapper>
 
           <NewsContentLine />
 
           <ReviewWrapper>
-            <h3>이 기사의 별점을 매기세요!</h3>
+            <ReviewTitle>
+              {hasUserRated 
+                ? `내 평점: ${userRating}점` 
+                : '이 기사의 별점을 매기세요!'
+              }
+              {hasUserRated && isAuthenticated && (
+                <DeleteRatingButton
+                  onClick={openDeleteRatingDialog}
+                  disabled={loading}
+                  $loading={loading}
+                >
+                  ✕ 평점 삭제
+                </DeleteRatingButton>
+              )}
+            </ReviewTitle>
+            
             <StarWrapper>
               {[1, 2, 3, 4, 5].map((star) => (
-                <div key={star} style={{ position: "relative", width: 60, height: 60 }}>
+                <StarClickArea key={star} $isAuthenticated={isAuthenticated}>
                   {/* 왼쪽 반 클릭: 0.5점 */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      width: "50%",
-                      height: "100%",
-                      left: 0,
-                      top: 0,
-                      zIndex: 1,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleClick(star - 0.5)}
+                  <StarHalfClickArea 
+                    $isAuthenticated={isAuthenticated} 
+                    $isLeft={true}
+                    onClick={() => handleStarClick(star - 0.5)}
                   />
                   {/* 오른쪽 반 클릭: 1점 */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      width: "50%",
-                      height: "100%",
-                      right: 0,
-                      top: 0,
-                      zIndex: 1,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleClick(star)}
+                  <StarHalfClickArea 
+                    $isAuthenticated={isAuthenticated} 
+                    $isLeft={false}
+                    onClick={() => handleStarClick(star)}
                   />
                   {renderStar(star)}
-                </div>
+                </StarClickArea>
               ))}
-
             </StarWrapper>
-            <ConfiremButton>확인 <GiCheckMark style={{ color: '#009045' }} size={16} /></ConfiremButton>
+            
+            <RatingButtonWrapper>
+              <ConfiremButton 
+                onClick={handleSubmitRating}
+                disabled={loading || userRating === 0 || !isAuthenticated}
+                $disabled={loading || userRating === 0 || !isAuthenticated}
+              >
+                {loading ? '처리중...' : hasUserRated ? '평점 수정' : '평점 등록'} 
+                <GiCheckMark style={{ color: '#009045' }} size={16} />
+              </ConfiremButton>
+            </RatingButtonWrapper>
+            
+            {!isAuthenticated && (
+              <LoginWarningText>
+                ⚠️ 평점을 매기려면 로그인이 필요합니다.
+              </LoginWarningText>
+            )}
           </ReviewWrapper>
 
           <NewsContentLine />
-
-          <CommentWrapper>
-            <CommentTitleWrapper>
-              <h3>댓글</h3>
-              <CommentTItleNumber>{3}</CommentTItleNumber>
-            </CommentTitleWrapper>
-            {/* <Input placeholder="댓글을 입력하세요" /> */}
-          </CommentWrapper>
         </NewsContentBody>
-        <UserCommentWrapper>
-          <Input
-            type="text"
-            value=""
-            onChange={() => { }}
-            placeholder="댓글을 입력하세요"
-            icon={<IoMdSend size={30} color="#ccc" onClick={handleCommentSubmit} />}
-          />
-        </UserCommentWrapper>
-        <CommentsWrapper>
-          <Comment>
-            <Avatar size={40} src="https://avatars.githubusercontent.com/u/12345678?v=4" alt="User Avatar" />
-            <CommentContainer>
-              <CommentTextWrapper>
-                <CommentTextTitleWrapper>
-                  <CommentTextTitle>양신희</CommentTextTitle>
-                  <CommentTextDate>01/25 16:50</CommentTextDate>
-                  <CommentThumbsUpButton size={20} />
-                  <CommentTextDate>0</CommentTextDate>
-                  <CommentThumbsDownButton size={20} />
-                  <CommentTextDate>0</CommentTextDate>
-                </CommentTextTitleWrapper>
-                <CommentText>이 기사는 정말 흥미롭네요! 테슬라의 전략이 궁금합니다.</CommentText>
-              </CommentTextWrapper>
-              <CommentReplyButton>답글 쓰기</CommentReplyButton>
-
-              <ReplyWrapper>
-                <Avatar size={32} src="https://avatars.githubusercontent.com/u/98765432?v=4" alt="User Avatar" />
-                <ReplyContainer>
-                  <CommentTextTitleWrapper>
-                    <CommentTextTitle>홍길동</CommentTextTitle>
-                    <CommentTextDate>01/25 17:05</CommentTextDate>
-                  </CommentTextTitleWrapper>
-                  <CommentText>정말 흥미롭네요. BYD도 대단하죠.</CommentText>
-                </ReplyContainer>
-              </ReplyWrapper>
-              <ReplyInputWrapper>
-                <Input
-                  type="text"
-                  value=""
-                  onChange={() => { }}
-                  placeholder="답글을 입력하세요"
-                  icon={<IoMdSend size={24} color="#ccc" onClick={() => { /* 답글 전송 로직 */ }} />}
-                />
-              </ReplyInputWrapper>
-            </CommentContainer>
-          </Comment>
-        </CommentsWrapper>
+        
+        <NewsComment 
+          newsId={id || ''}
+        />
       </NewsContentWrapper>
 
       <SideWrapper>
         <PopularNews />
         <Ranking />
       </SideWrapper>
-    </Wrapper >
+
+      {/* 로그인 필요 다이얼로그 */}
+      <Dialog
+        open={showLoginDialog}
+        title="로그인 필요"
+        content={
+          <div>
+            <p>평점을 매기려면 로그인이 필요합니다.</p>
+            <p>로그인 페이지로 이동하시겠습니까?</p>
+          </div>
+        }
+        onClose={handleLoginDialogClose}
+        onConfirm={handleLoginConfirm}
+        confirmText="로그인하러 가기"
+        cancelText="취소"
+      />
+
+      {/* 평점 등록 성공 다이얼로그 */}
+      <Dialog
+        open={showRatingSuccessDialog}
+        title="평점 등록 완료"
+        content={
+          <div>
+            <p>평점이 성공적으로 등록되었습니다!</p>
+            <p>소중한 의견 감사합니다. 🌟</p>
+          </div>
+        }
+        onClose={handleRatingSuccessClose}
+        confirmText="확인"
+      />
+
+      {/* 평점 삭제 확인 다이얼로그 */}
+      <Dialog
+        open={showDeleteRatingDialog}
+        title="평점 삭제"
+        content={
+          <div>
+            <p>정말로 평점을 삭제하시겠습니까?</p>
+            <p style={{ color: '#666', fontSize: '14px' }}>삭제된 평점은 복구할 수 없습니다.</p>
+          </div>
+        }
+        onClose={closeDeleteRatingDialog}
+        onConfirm={confirmDeleteRating}
+        confirmText="삭제"
+        cancelText="취소"
+      />
+    </Wrapper>
   )
 }
-
 
 export default NewsContent;
