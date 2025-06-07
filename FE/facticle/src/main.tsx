@@ -3,13 +3,12 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App.tsx'
 import { AuthProvider } from './context/index.tsx'
 import { createGlobalStyle } from 'styled-components'
-import NanumGothic from './assets/fonts/NanumBarunGothic.ttf'
 import ScrollToTop from './hooks/scrollToTop.tsx'
 
 const GlobalStyles = createGlobalStyle`
   @font-face {
-      font-family: 'Nanum';
-      src: url(${NanumGothic}) format('truetype');
+      font-family: 'NanumGothic', 
+      src: url('https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css') format('truetype');
   }
 
   body {
@@ -18,7 +17,7 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0 ;
     text-align: center;
-    font-family: 'Nanum';
+    font-family: 'NanumGothic';
   }
 
   button {
@@ -59,9 +58,9 @@ const GlobalStyles = createGlobalStyle`
 createRoot(document.getElementById('root')!).render(
   //<StrictMode>
   <Router>
+    <GlobalStyles />
     <ScrollToTop />
     <AuthProvider>
-      <GlobalStyles />
       <App />
     </AuthProvider>
   </Router>
