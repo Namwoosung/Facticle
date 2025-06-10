@@ -35,7 +35,7 @@ function Redirection() {
                     }
                 }
             })
-            .catch((error: any) => {
+            .catch(() => {
                 // 에러 처리
                 navigate("/login", { replace: true });
             });

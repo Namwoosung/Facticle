@@ -7,7 +7,7 @@ export default defineConfig({
   assetsInclude: ['**/*.ttf'],
   server: {
     host: '0.0.0.0',
-    port: 3000,
+    port: 80,
     // https: {
     //   key: fs.readFileSync('./certs/localhost-key.pem'),
     //   cert: fs.readFileSync('./certs/localhost.pem'),

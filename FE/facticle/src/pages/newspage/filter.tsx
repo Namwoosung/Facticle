@@ -42,20 +42,20 @@ function Filter( {onFilterChange}: { onFilterChange: (filters: any) => void }) {
   
   const [sortFilters, setSortFilters] = useState<string>("");
 
-  // 범위 필터 핸들러들
-  const handleTimeChange = (minLabel: string, maxLabel: string, minValue: number, maxValue: number) => {
+  // 범위 필터 핸들러들 - 사용하지 않는 매개변수 제거
+  const handleTimeChange = (_minLabel: string, _maxLabel: string, minValue: number, maxValue: number) => {
     setTimeFilters({min: minValue, max: maxValue});
   };
 
-  const handleSimilarityChange = (minLabel: string, maxLabel: string, minValue: number, maxValue: number) => {
+  const handleSimilarityChange = (_minLabel: string, _maxLabel: string, minValue: number, maxValue: number) => {
     setSimilarityFilters({min: minValue, max: maxValue});
   };
 
-  const handleFactScoreChange = (minLabel: string, maxLabel: string, minValue: number, maxValue: number) => {
+  const handleFactScoreChange = (_minLabel: string, _maxLabel: string, minValue: number, maxValue: number) => {
     setFactScoreFilters({min: minValue, max: maxValue});
   };
 
-  const handleStarChange = (minLabel: string, maxLabel: string, minValue: number, maxValue: number) => {
+  const handleStarChange = (_minLabel: string, _maxLabel: string, minValue: number, maxValue: number) => {
     setStarFilters({min: minValue, max: maxValue});
   };
 
@@ -266,7 +266,6 @@ function Filter( {onFilterChange}: { onFilterChange: (filters: any) => void }) {
         </FilterButton>
         <FilterDialog open={filtersDialog.star} onClose={() => handleFilters("star")} hasSlider={true}>
           <div style={{fontSize: '16px', fontWeight: '600', marginBottom: '10px'}}>별점 범위 설정</div>
-          
           <DualSlider 
             type='star' 
             defaultMinValue={starFilters.min} 

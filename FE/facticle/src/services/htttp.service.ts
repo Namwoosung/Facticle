@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 Axios.defaults.baseURL = API_URL;
 Axios.defaults.withCredentials = true;
 
