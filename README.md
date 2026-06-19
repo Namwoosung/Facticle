@@ -25,12 +25,24 @@ Facticle은 생성형 AI를 활용해 뉴스의 요약, 제목-본문 정합성,
 
 ## 주요 기능
 
+<p align="center">
+  <img src="./assets/main_page.png" width="760" alt="Facticle 메인 화면" />
+  <br/>
+  <b>메인 화면</b>
+</p>
+
 - **AI 뉴스 요약**: 기사 본문을 기반으로 핵심 내용을 요약합니다.
 - **유사도 분석**: 기사 제목과 본문 간 정합성을 `headlineScore`로 제공합니다.
 - **신뢰도 분석**: 기사 내용의 사실 기반 신뢰도를 `factScore`로 제공합니다.
 - **분석 근거 제공**: `headlineScoreReason`, `factScoreReason`을 통해 점수 산출 근거를 함께 보여줍니다.
 - **뉴스 수집 자동화**: 네이버 뉴스, 엔터 뉴스, 스포츠 뉴스를 주기적으로 수집합니다.
 - **사용자 인증**: 자체 로그인/회원가입과 카카오·네이버·구글 OAuth 로그인을 지원합니다.
+
+<p align="center">
+  <img src="./assets/page_1.png" width="420" alt="Facticle 뉴스 상세 화면" />
+  <br/>
+  <b>뉴스 상세 화면</b>
+</p>
 
 ---
 
@@ -79,6 +91,7 @@ Facticle은 생성형 AI를 활용해 뉴스의 요약, 제목-본문 정합성,
 
 ```text
 Facticle
+├── assets/                      # README 화면 이미지
 ├── BE/facticle/                 # Spring Boot 백엔드
 │   ├── src/main/java/com/example/facticle/
 │   │   ├── common/              # 공통 설정, 인증, 예외, DTO
